@@ -54,12 +54,13 @@ for item in items:
 					desc.text = text
 					open(cached, 'w').write(text)
 				except ValueError:
-					log('error')
+					log('xml error')
 			else:
 				log("no match")
 		
 		except urllib2.HTTPError, error:
-			log("error")
+			log(error)
+			log("http error")
 
 if len(sys.argv) == 2:
 	print etree.tostring(rss)
