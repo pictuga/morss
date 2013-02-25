@@ -9,6 +9,6 @@ To use this script, you have to enable "postprocessing filter" in liferea feed s
 
 	morss "RULE"
 
-And you have to replace **RULE** with a proper rule, which has to be a proper xpath instruction, matching the main content of the website. Some rules example are given in the "rules" file. You have to keep the " " aroung the rule. If the parameter is omitted, "//h1/.." is used instead. This default ruled works on a lot of websites, since it's a common practice for search engine optimization.
+And you have to replace **RULE** with a proper rule, which has to be a proper xpath instruction, matching the main content of the website. Some rules example are given in the "rules" file. You have to keep the " " aroung the rule. If the parameter is omitted, `//h1/..` is used instead. This default ruled works on a lot of websites, since it's a common practice for search engine optimization.
 
 Using this, rss refresh tends to be a bit slower, but caching helps a lot for frequent updates.
