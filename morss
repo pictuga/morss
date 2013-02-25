@@ -21,7 +21,7 @@ items =	rss.xpath('//item')
 
 cache = expanduser("~") + "/.cache/morss"
 if not os.path.exists(cache):
-    os.makedirs(cache)
+	os.makedirs(cache)
 
 for item in items:
 	title =	item.findtext('title')
@@ -32,6 +32,7 @@ for item in items:
 	log(link)
 	
 	cached = cache + "/" + str(hash(link))
+	log(cached)
 	
 	if os.path.exists(cached):
 		log("cached")
@@ -43,15 +44,22 @@ for item in items:
 			match =	html.xpath(node)
 		
 			if len(match):
-				text =	etree.tostring(match[0])
-				log("ok txt")
-				desc.text = text
-				open(cached, 'w').write(text)
+				try:
+					text =	etree.tostring(match[0])
+					log("ok txt")
+				except etree.SerialisationError:
+					log('serialisation')
+					continue
+				try:
+					desc.text = text
+					open(cached, 'w').write(text)
+				except ValueError:
+					log('error')
 			else:
 				log("no match")
 		
 		except urllib2.HTTPError, error:
-	    		log("error")
+			log("error")
 
 if len(sys.argv) == 2:
 	print etree.tostring(rss)
