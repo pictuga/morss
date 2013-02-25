@@ -1,13 +1,17 @@
 #! /usr/bin/env python2.7
 import sys
+import os
 from lxml import etree
 import urllib2
+from os.path import expanduser
+
+def log(str):
+	if (len(sys.argv) == 3):
+		print str
 
 if len(sys.argv) < 2:
 	print "argument please"
 	sys.exit(1)
-
-debug = (len(sys.argv) == 3)
 
 node =	sys.argv[1]
 
@@ -15,37 +19,39 @@ xml =	sys.stdin.read()
 rss =	etree.fromstring(xml)
 items =	rss.xpath('//item')
 
-#comment below to keep too-long feeds (like BBC)
-del items[30:]
+cache = expanduser("~") + "/.cache/morss"
+if not os.path.exists(cache):
+    os.makedirs(cache)
 
 for item in items:
 	title =	item.findtext('title')
 	link = 	item.findtext('link')
 	desc =	item.xpath('description')[0]
 	
-	if debug:
-		print title
-		print link
+	log(title)
+	log(link)
 	
-	try:
-		data =	urllib2.urlopen(link).read()
-		html =	etree.HTML(data)
-		match =	html.xpath(node)
+	cached = cache + "/" + str(hash(link))
+	
+	if os.path.exists(cached):
+		log("cached")
+		desc.text = open(cached, 'r').read()
+	else:
+		try:
+			data =	urllib2.urlopen(link).read()
+			html =	etree.HTML(data)
+			match =	html.xpath(node)
 		
-		if len(match):
-			text =	etree.tostring(match[0])
+			if len(match):
+				text =	etree.tostring(match[0])
+				log("ok txt")
+				desc.text = text
+				open(cached, 'w').write(text)
+			else:
+				log("no match")
 		
-			if debug:
-				print text
-			
-			desc.text = text
-		else:
-			if debug:
-				print "no match"
-		
-	except urllib2.HTTPError, error:
-    		if debug:
-    			print "error"
+		except urllib2.HTTPError, error:
+	    		log("error")
 
 if len(sys.argv) == 2:
 	print etree.tostring(rss)
