@@ -1,22 +1,10 @@
-LeMonde
-http://www.lemonde.fr/rss/une.xml
-//*[contains(@class,'article') or contains(@id,'content')]
-
 TehranTimes
 http://www.tehrantimes.com/component/ninjarsssyndicator/?feed_id=1&format=raw
 //div[@class='article-indent']
 
-BBC
-http://feeds.bbci.co.uk/news/rss.xml
-//h1/..
-
 FranceInfo
 http://www.franceinfo.fr/rss.xml
 //h2[@class='chapo']/..
-
-Courrier International
-http://www.courrierinternational.com/rss/all/rss.xml
-//div[@class='story-content']
 
 Spiegel
 http://www.spiegel.de/schlagzeilen/tops/index.rss
