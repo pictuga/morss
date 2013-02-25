@@ -1,9 +1,11 @@
 #! /usr/bin/env python2.7
 import sys
 import os
+from os.path import expanduser
 from lxml import etree
 import urllib2
-from os.path import expanduser
+import urllib
+from cookielib import CookieJar
 
 def log(str):
 	if (len(sys.argv) == 3):
@@ -39,7 +41,9 @@ for item in items:
 		desc.text = open(cached, 'r').read()
 	else:
 		try:
-			data =	urllib2.urlopen(link).read()
+			cj = CookieJar()
+			opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+			data =	opener.open(link).read()
 			html =	etree.HTML(data)
 			match =	html.xpath(node)
 		
