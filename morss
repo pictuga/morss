@@ -1,0 +1,51 @@
+#! /usr/bin/env python2.7
+import sys
+from lxml import etree
+import urllib2
+
+if len(sys.argv) < 2:
+	print "argument please"
+	sys.exit(1)
+
+debug = (len(sys.argv) == 3)
+
+node =	sys.argv[1]
+
+xml =	sys.stdin.read()
+rss =	etree.fromstring(xml)
+items =	rss.xpath('//item')
+
+#comment below to keep too-long feeds (like BBC)
+del items[30:]
+
+for item in items:
+	title =	item.findtext('title')
+	link = 	item.findtext('link')
+	desc =	item.xpath('description')[0]
+	
+	if debug:
+		print title
+		print link
+	
+	try:
+		data =	urllib2.urlopen(link).read()
+		html =	etree.HTML(data)
+		match =	html.xpath(node)
+		
+		if len(match):
+			text =	etree.tostring(match[0])
+		
+			if debug:
+				print text
+			
+			desc.text = text
+		else:
+			if debug:
+				print "no match"
+		
+	except urllib2.HTTPError, error:
+    		if debug:
+    			print "error"
+
+if len(sys.argv) == 2:
+	print etree.tostring(rss)

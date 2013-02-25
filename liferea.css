@@ -1,0 +1,20 @@
+img
+{
+	max-width: 80%;
+	height: auto;
+}
+
+.bbx_container, /*TT*/
+.share-help, /*BBC*/
+div.video_container iframe, /*LM*/
+.story-info, .story-share.bluelinks, .story-content img:last-child, .pager /*CI*/
+{
+	display: none;
+}
+
+h2.txt15_140, /*LM*/
+h2.chapo /*FranceInfo*/
+{
+	font-size: 1em;
+	font-weight: normal;
+}

@@ -1,0 +1,14 @@
+LeMonde
+//*[contains(@class,'article') or contains(@id,'content')]
+
+TehranTimes
+//div[@class='article-indent']
+
+BBC
+//h1/..
+
+FranceInfo
+//h2[@class='chapo']/..
+
+Courrier International
+//div[@class='story-content']
