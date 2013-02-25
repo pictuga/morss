@@ -6,5 +6,4 @@ To use it, the rss reader "Liferea" is required (unless other rss readers provid
 To use this script, you have to enable "postprocessing filter" in liferea feed settings, and to add the following line as command to run:
 	morss "RULE"
 And you have to replace RULE with a proper rule, which has to be a proper xpath instruction, matching the main content of the website. Some rules example are given in the "rules" file. You have to keep the " " aroung the rule.
-Using this, rss refresh tends to be *much* slower, since it has to download every article during the sync process.
-It might be possible to make it faster by caching the website page, so as not to download the same page over and over again when refreshing.
+Using this, rss refresh tends to be a bit slower, but caching helps a lot for frequent updates.
