@@ -11,10 +11,17 @@ def log(txt):
 	if os.getenv('DEBUG', False):
 		print txt
 
+def xmlclean(xml):
+	xml = list(xml)
+	for pos in range(0,len(xml)):
+		if ord(xml[pos]) < 32:
+			xml[pos] = None
+	return ''.join([c for c in xml if c])
+
 node =	sys.argv[1] if len(sys.argv) > 1 else "//h1/.."
 
-xml =	sys.stdin.read()
-rss =	etree.fromstring(xml)
+xml =	xmlclean(sys.stdin.read())
+rss =	etree.XML(xml)
 items =	rss.xpath('//item')
 
 cache = expanduser("~") + "/.cache/morss"
@@ -22,11 +29,9 @@ if not os.path.exists(cache):
 	os.makedirs(cache)
 
 for item in items:
-	title =	item.findtext('title')
-	link = 	item.findtext('link')
+	link = 	item.findtext('link').encode('utf-8')
 	desc =	item.xpath('description')[0]
 	
-	log(title)
 	log(link)
 	
 	cached = cache + "/" + str(hash(link))
