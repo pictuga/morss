@@ -3,6 +3,7 @@ import sys
 import os
 from os.path import expanduser
 from lxml import etree
+import string
 import urllib2
 import urllib
 from cookielib import CookieJar
@@ -12,11 +13,8 @@ def log(txt):
 		print txt
 
 def xmlclean(xml):
-	xml = list(xml)
-	for pos in range(0,len(xml)):
-		if ord(xml[pos]) < 32:
-			xml[pos] = None
-	return ''.join([c for c in xml if c])
+	table = string.maketrans('', '')
+	return xml.translate(table, table[:32])
 
 node =	sys.argv[1] if len(sys.argv) > 1 else "//h1/.."
 
