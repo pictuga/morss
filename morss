@@ -61,7 +61,7 @@ for item in items:
 			else:
 				log("no match")
 		
-		except urllib2.HTTPError, error:
+		except (urllib2.HTTPError, urllib2.URLError) as error:
 			log(error)
 			log("http error")
 
