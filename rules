@@ -9,3 +9,7 @@ http://www.franceinfo.fr/rss.xml
 Spiegel
 http://www.spiegel.de/schlagzeilen/tops/index.rss
 //div[@id='spArticleSection']
+
+Le Soir
+http://www.lesoir.be/feed/La%20Une/destination_une_block/
+//div[@class='article-content']
