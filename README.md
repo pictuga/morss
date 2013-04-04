@@ -1,18 +1,49 @@
 #Morss
 
-This tool's goal is to get full-text rss feeds out of striped rss feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the rss feed rather useless. So this tool intends to fix that problem.
+This tool's goal is to get full-text RSS feeds out of striped RSS feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the RSS feed rather useless. So this tool intends to fix that problem.
 This tool opens the links from the rss feed, then downloads the full article from the newspaper website and puts it back in the rss feed.
 
-To use it, the rss reader *Liferea* is required (unless other rss readers provide the same kind of feature), since custom scripts can be run on top of the rss feed, using its output as an rss feed. (more: <http://lzone.de/liferea/scraping.htm>)
+##(xpath) Rules
 
-To use this script, you have to enable "postprocessing filter" in liferea feed settings, and to add the following line as command to run:
+To find the article content on the newspaper's website, morss need to know where to look at. The default target is the first `<h1>` element, since it's a common practice, or a `<article>` element, for HTML5 compliant websites.
 
-	morss "RULE"
+However in some cases, these global rules are not working. Therefore custom xpath rules are needed. The proper way to input them to morss is detailed in the different use cases.
 
-And you have to replace **RULE** with a proper rule, which has to be a proper xpath instruction, matching the main content of the website. Some rules example are given in the "rules" file. You have to keep the " " aroung the rule. If the parameter is omitted, `//h1/..` is used instead. This default rule works on a lot of websites, since it's a common practice for search engine optimization.
+##Use cases
+###Running on a server
 
-Using this, rss refresh tends to be a bit slower, but caching helps a lot for frequent updates.
+For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server.
+This will require you to set `SERVER` to `True` at the top of the script.
+
+Here, xpath rules stored in the `rules` file. (The name of the file can be changed in the script, in `class Feed`→`self.rulePath`. The file structure can be seen in the provided file. More details:
+
+	Fancy name (description)(useless but not optional)
+	http://example.com/path/to/the/rss/feed.xml
+	//super/accurate[@xpath='expression']/..
+
+Works like a charm with Tiny TinyRSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
+
+###As a newsreader hook
+
+To use it, the newsreader *Liferea* is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its output as an RSS feed. (more: <http://lzone.de/liferea/scraping.htm>)
+
+To use this script, you have to enable "postprocessing filter" in liferea feed settings, and to add `PATH/TO/MORSS/morss` as command to run.
+
+For custom xpath rules, you have to add them in the command this way:
+
+	PATH/TO/MORSS/morss "//custom[@xpath]/rule"
+
+Quotes around the xpath rule are mandatory.
+
+##Cache information
+
+morss uses a small cache directory to make the loading faster. Given the way it's designed, the cache doesn't need to be purged each while and then, unless you stop following a big amount of feeds. Only in the case of mass un-subscribing, you might want to delete the cache files corresponding to the bygone feeds. If morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`, and in `$HOME/.cache/morss` otherwise.
+
+##Extra configuration
+
+When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the `self.max` value in `class Feed`. That value is the maximum number of items to parse. `0` means parse all items.
 
 ---
 
 GPL3 licence.
+Python **2.6** required (not 3).
