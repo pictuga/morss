@@ -3,6 +3,7 @@ import sys
 import os
 from os.path import expanduser
 from lxml import etree
+import re
 import string
 import urllib2
 from cookielib import CookieJar
@@ -37,11 +38,20 @@ class Info:
 		self.opener = False
 		self.enc = False
 
-		self.link = self.item.findtext('link')
+		self.link = self.item.xpath('link')[0]
 		self.desc = self.item.xpath('description')[0]
 
+	def checkURL(self):
+		if self.link.text.startswith("http://rss.feedsportal.com"):
+			log('feedsportal')
+			url = re.search('/([0-9a-zA-Z]+)/[a-zA-Z0-9\.]+$', self.link.text).groups()[0].split('0')
+			t = {'A':'0', 'B':'.', 'C':'/', 'D':'?', 'E':'-', 'L':'ww', 'S':'w.'}
+			self.link.text = 'http://' + "".join([(t[s[0]] if s[0] in t else "=") + s[1:] for s in url[1:]])
+			log(self.link.text)
+
 	def fetch(self):
-		log(self.link)
+		log(self.link.text)
+		self.checkURL()
 		if not self.findCache():
 			self.download()
 			self.chardet()
@@ -64,7 +74,7 @@ class Info:
 
 	def findCache(self):
 		if self.feed.cache is not False:
-			xpath = "//link[text()='" + self.link + "']/../description/text()"
+			xpath = "//link[text()='" + self.link.text + "']/../description/text()"
 			match = self.feed.cache.xpath(xpath)
 			if len(match):
 				log('cached')
@@ -87,7 +97,7 @@ class Info:
 		try:
 			cj = CookieJar()
 			self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-			self.con = self.opener.open(self.link.encode('utf-8'))
+			self.con = self.opener.open(self.link.text.encode('utf-8'))
 			self.data = self.con.read()
 		except (urllib2.HTTPError, urllib2.URLError) as error:
 			log(error)
