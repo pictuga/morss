@@ -40,8 +40,13 @@ Quotes around the xpath rule are mandatory.
 morss uses a small cache directory to make the loading faster. Given the way it's designed, the cache doesn't need to be purged each while and then, unless you stop following a big amount of feeds. Only in the case of mass un-subscribing, you might want to delete the cache files corresponding to the bygone feeds. If morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`, and in `$HOME/.cache/morss` otherwise.
 
 ##Extra configuration
+###Length limitation
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the `self.max` value in `class Feed`. That value is the maximum number of items to parse. `0` means parse all items.
+
+###Remove useless HTML elements
+
+Unwanted HTML elements are also stripped from the article. By default, elements such as `<script>` and `<object>` are removed. Other elements can be specified, by adding them in the `self.trash` array in `class Feed`.
 
 ---
 
