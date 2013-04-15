@@ -3,6 +3,8 @@
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the RSS feed rather useless. So this tool intends to fix that problem.
 This tool opens the links from the rss feed, then downloads the full article from the newspaper website and puts it back in the rss feed.
 
+morss also has experimental support for Atom feeds.
+
 ##(xpath) Rules
 
 To find the article content on the newspaper's website, morss need to know where to look at. The default target is the first `<h1>` element, since it's a common practice, or a `<article>` element, for HTML5 compliant websites.
@@ -19,9 +21,12 @@ Here, xpath rules stored in the `rules` file. (The name of the file can be chang
 
 	Fancy name (description)(useless but not optional)
 	http://example.com/path/to/the/rss/feed.xml
+	http://example.co.uk/other/*/path/with/wildcard/*.xml
 	//super/accurate[@xpath='expression']/..
 
-Works like a charm with Tiny TinyRSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
+As shown in the example, multiple urls can be specified for a single rule, so as to be able to match feeds from different locations of the website server (for example with or without "www."). Moreover feeds urls can be *NIX glob-style patterns, so as to match any feed from a website.
+
+Works like a charm with Tiny Tiny RSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
 
 ###As a newsreader hook
 
@@ -51,4 +56,4 @@ Unwanted HTML elements are also stripped from the article. By default, elements 
 ---
 
 GPL3 licence.
-Python **2.6** required (not 3).
+Python **2.6**+ required (not 3).
