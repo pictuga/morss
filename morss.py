@@ -50,7 +50,7 @@ def log(txt):
 		print txt
 	if SERVER:
 		with open('morss.log', 'a') as file:
-			file.write(str(txt).encode('utf-8') + "\n")
+			file.write(repr(txt).encode('utf-8') + "\n")
 
 def cleanXML(xml):
 	table = string.maketrans('', '')
