@@ -1,2 +1,4 @@
 AddHandler cgi-script .py
 Options +ExecCGI
+
+ErrorDocument 404 /morss.py

@@ -349,9 +349,17 @@ def Gather(data, cachePath):
 
 if __name__ == "__main__":
 	if SERVER:
+		print 'Status: 200'
 		print 'Content-Type: text/html\n'
-		url = os.environ['REQUEST_URI'][len(os.environ['SCRIPT_NAME'])+1:]
-		url = 'http://' + url.replace(' ', '%20')
+
+		if 'REDIRECT_URL' in os.environ:
+			url = os.environ['REQUEST_URI'][1:]
+		else:
+			url = os.environ['REQUEST_URI'][len(os.environ['SCRIPT_NAME'])+1:]
+		if not url.startswith('http://') and not url.startswith('https://'):
+			url = "http://" + url
+		url = url.replace(' ', '%20')
+
 		cache = os.getcwd() + '/cache'
 		log(url)
 		RSS = Gather(url, cache)
