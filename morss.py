@@ -277,6 +277,7 @@ def Fill(rss, rule, cache):
 	if cached is not None:
 		log('cached')
 		item.content = cached
+		cache.save(item.link, cached)
 		return item
 
 	# download
