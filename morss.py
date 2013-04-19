@@ -251,7 +251,10 @@ def Fill(rss, cache):
 
 	# content already provided?
 	if 'content' in item:
-		if len(item.content) > 4*len(item.desc):
+		content_len = len(lxml.html.fromstring(item.content).text_content())
+		log('content: %s vs %s' % (content_len, len(item.desc)))
+		if content_len > 5*len(item.desc):
+			log('provided')
 			return item
 
 	# check link
