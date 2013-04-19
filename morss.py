@@ -265,13 +265,15 @@ def Fill(rss, cache):
 			log('provided')
 			return item
 
-	# check link
-	if fnmatch(item.link, "http://*.feedsportal.com/*"):
-		url = re.search('/([0-9a-zA-Z]+)/[^/]+$', item.link).groups()[0].split('0')
-		t = {'A':'0', 'B':'.', 'C':'/', 'D':'?', 'E':'-', 'L':'ww', 'S':'w.', 'O':'.co.uk'}
+	match = re.search('/([0-9a-zA-Z]{20,})/story01.htm$', item.link)
+	if match:
+		url = match.groups()[0].split('0')
+		t = {'A':'0', 'B':'.', 'C':'/', 'D':'?', 'E':'-', 'I':'_', 'L':'ww', 'S':'w.', 'N':'.com', 'O':'.co.uk'}
 		item.link = 'http://' + "".join([(t[s[0]] if s[0] in t else "=") + s[1:] for s in url[1:]])
+		log(item.link)
 	if '{http://rssnamespace.org/feedburner/ext/1.0}origLink' in item:
 		item.link = item['{http://rssnamespace.org/feedburner/ext/1.0}origLink']
+		log(item.link)
 
 	# check cache
 	cached = cache.get(item.link)
