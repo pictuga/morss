@@ -70,20 +70,22 @@ class Cache:
 
 		log(str(hash(self._key)))
 
+	def __del__(self):
+		self.save()
+
 	def get(self, key):
 		if key in self._cached:
 			return b64decode(self._cached[key])
 		else:
 			return None
 
-	def save(self, key, content):
-		# Maybe, appending to file when adding new elements could be
-		# a good idea, but that'd require to check a couple of things,
-		# like whether it has aleardy been over-written (ie. whether
-		# it no longer contains self._cached)
-
+	def set(self, key, content):
 		self._cache[key] = b64encode(content)
 
+		if not os.path.exists(self._file):
+			self.save()
+
+	def save(self):
 		txt = ""
 		for (key, bdata) in self._cache.iteritems():
 			txt += "\n" + str(key) + "\t" + bdata
