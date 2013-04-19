@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
-import copy
 from base64 import b64encode, b64decode
-from fnmatch import fnmatch
 import os.path
 import lxml.etree
 import lxml.objectify
@@ -16,11 +14,10 @@ import urllib2
 from cookielib import CookieJar
 import chardet
 
-# DISCLAIMER: feedparser is pure shit if you intend to *edit* the feed.
+from readability import readability
 
 SERVER = True
 MAX = 70
-TRASH = ['//h1', '//header']
 E = lxml.objectify.E
 
 ITEM_MAP = {
@@ -244,18 +241,9 @@ def EncDownload(url):
 			log('chardet')
 			enc = chardet.detect(data)['encoding']
 
-	return (data, enc)
+	return (data, enc, con.geturl())
 
-def parseRules(rulePath, url):
-	rules = open(rulePath, "r").read().strip().split("\n\n")
-	rules = [r.split('\n') for r in rules]
-	for rule in rules:
-		for domain in rule[1:-1]:
-			if fnmatch(url, domain):
-				return rule[-1]
-	return '//article|//h1/..'
-
-def Fill(rss, rule, cache):
+def Fill(rss, cache):
 	item = XMLMap(rss, ITEM_MAP, True)
 	log(item.link)
 
@@ -286,30 +274,11 @@ def Fill(rss, rule, cache):
 	if ddl is False:
 		return item
 
-	data, enc = ddl
+	data, enc, url = ddl
 	log(enc)
 
-	# parse
-	parser = lxml.html.HTMLParser(encoding=enc)
-	page = lxml.etree.fromstring(data, parser)
+	out = readability.Document(data.decode(enc, 'ignore'), url=url).summary(True)
 
-	# filter
-	match =	page.xpath(rule)
-	if len(match):
-		art = match[0]
-		log('ok txt')
-	else:
-		log('no match')
-		return item
-
-	# clean
-	for tag in TRASH:
-		for elem in art.xpath(tag):
-			elem.getparent().remove(elem)
-
-	art.tag = 'div' # solves crash in lxml.html.clean
-	art = lxml.html.clean.clean_html(art)
-	out = lxml.etree.tostring(art, pretty_print=True).decode(enc, 'ignore')
 	item.content = out
 	cache.save(item.link, out)
 
@@ -329,22 +298,12 @@ def Gather(data, cachePath):
 
 	cache = Cache(cachePath, unicode(root.title))
 
-	# rules
-	if data.startswith("http"):
-		rule = parseRules('rules', url)
-	else:
-		if len(sys.argv) > 1:
-			rule = sys.argv[1]
-		else:
-			rule = '//article|//h1/..'
-
 	# set
-	log(rule)
 	if MAX:
 		for item in root.item[MAX:]:
 			item.getparent().remove(item)
 	for item in root.item:
-		Fill(item, rule, cache)
+		Fill(item, cache)
 
 	return root.tostring(xml_declaration=True, encoding='UTF-8')
 

@@ -5,26 +5,11 @@ This tool opens the links from the rss feed, then downloads the full article fro
 
 morss also has experimental support for Atom feeds.
 
-##(xpath) Rules
-
-To find the article content on the newspaper's website, morss need to know where to look at. The default target is the first `<h1>` element, since it's a common practice, or a `<article>` element, for HTML5 compliant websites.
-
-However in some cases, these global rules are not working. Therefore custom xpath rules are needed. The proper way to input them to morss is detailed in the different use cases.
-
 ##Use cases
 ###Running on a server
 
 For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server. With the `.htaccess` file provided, it's also possible, on APACHE servers, to access the filled feed at `http://DOMAIN/MORSS/feeds.bbci.co.uk/news/rss.xml` (without the `morss.py`).
 This will require you to set `SERVER` to `True` at the top of the script.
-
-Here, xpath rules stored in the `rules` file. (The name of the file can be changed in the script, in `class Feed`→`self.rulePath`. The file structure can be seen in the provided file. More details:
-
-	Fancy name (description)(useless but not optional)
-	http://example.com/path/to/the/rss/feed.xml
-	http://example.co.uk/other/*/path/with/wildcard/*.xml
-	//super/accurate[@xpath='expression']/..
-
-As shown in the example, multiple urls can be specified for a single rule, so as to be able to match feeds from different locations of the website server (for example with or without "www."). Moreover feeds urls can be *NIX glob-style patterns, so as to match any feed from a website.
 
 Works like a charm with Tiny Tiny RSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
 
@@ -34,12 +19,6 @@ To use it, the newsreader *Liferea* is required (unless other newsreaders provid
 
 To use this script, you have to enable "postprocessing filter" in liferea feed settings, and to add `PATH/TO/MORSS/morss` as command to run.
 
-For custom xpath rules, you have to add them in the command this way:
-
-	PATH/TO/MORSS/morss "//custom[@xpath]/rule"
-
-Quotes around the xpath rule are mandatory.
-
 ##Cache information
 
 morss uses a small cache directory to make the loading faster. Given the way it's designed, the cache doesn't need to be purged each while and then, unless you stop following a big amount of feeds. Only in the case of mass un-subscribing, you might want to delete the cache files corresponding to the bygone feeds. If morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`, and in `$HOME/.cache/morss` otherwise.
@@ -47,11 +26,15 @@ morss uses a small cache directory to make the loading faster. Given the way it'
 ##Extra configuration
 ###Length limitation
 
-When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the `self.max` value in `class Feed`. That value is the maximum number of items to parse. `0` means parse all items.
+When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the `MAX` value at the top of the script. That value is the maximum number of items to parse. `0` means parse all items.
 
-###Remove useless HTML elements
+###Content matching
 
-Unwanted HTML elements are also stripped from the article. By default, elements such as `<script>` and `<object>` are removed. Other elements can be specified, by adding them in the `self.trash` array in `class Feed`.
+The content of articles is grabbed with a **readability** fork (see <https://github.com/buriy/python-readability>). This means that most of the time the right content is matched. However sometimes it fails, therefore some tweaking is required. Most of the time, what has to be done is to add some "rules" in the main script file in *readability* (not in morss).
+
+Most of the time when hardly nothing is matched, it means that the main content of the article is made of images, videos, pictures, etc., which readability doesn't detect. Also, readability has some trouble to match content of very small articles.
+
+morss will also try to figure out whether the full content is already in place (for those websites which understood the whole point of RSS feeds). However this detection is very simple, and only works if the actual content is put in the "content" section in the feed and not in the "summary" section.
 
 ---
 
