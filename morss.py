@@ -231,6 +231,14 @@ def EncDownload(url):
 		log('http error')
 		return False
 
+	# meta-redirect
+	match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
+	if match:
+		new_url = match.groups()[0]
+		log('redirect: %s' % new_url)
+		return EncDownload(new_url)
+
+	# encoding
 	if con.headers.getparam('charset'):
 		log('header')
 		enc = con.headers.getparam('charset')
