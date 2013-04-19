@@ -14,7 +14,7 @@ However in some cases, these global rules are not working. Therefore custom xpat
 ##Use cases
 ###Running on a server
 
-For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server.
+For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server. With the `.htaccess` file provided, it's also possible, on APACHE servers, to access the filled feed at `http://DOMAIN/MORSS/feeds.bbci.co.uk/news/rss.xml` (without the `morss.py`).
 This will require you to set `SERVER` to `True` at the top of the script.
 
 Here, xpath rules stored in the `rules` file. (The name of the file can be changed in the script, in `class Feed`→`self.rulePath`. The file structure can be seen in the provided file. More details:
