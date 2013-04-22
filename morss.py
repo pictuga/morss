@@ -85,6 +85,9 @@ class Cache:
 			self.save()
 
 	def save(self):
+		if len(self._cache) == 0:
+			return
+
 		txt = ""
 		for (key, bdata) in self._cache.iteritems():
 			txt += "\n" + str(key) + "\t" + bdata
@@ -279,7 +282,7 @@ def Fill(rss, cache):
 	if cached is not None:
 		log('cached')
 		item.content = cached
-		cache.save(item.link, cached)
+		cache.set(item.link, cached)
 		return item
 
 	# download
@@ -294,7 +297,7 @@ def Fill(rss, cache):
 	out = readability.Document(data.decode(enc, 'ignore'), url=url).summary(True)
 
 	item.content = out
-	cache.save(item.link, out)
+	cache.set(item.link, out)
 
 def Gather(data, cachePath):
 	# fetch feed
