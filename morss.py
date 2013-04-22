@@ -18,7 +18,6 @@ from readability import readability
 
 SERVER = True
 MAX = 70
-E = lxml.objectify.E
 
 ITEM_MAP = {
 	'link':		(('{http://www.w3.org/2005/Atom}link', 'href'),	'{}link'),
