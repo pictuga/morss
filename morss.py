@@ -64,10 +64,11 @@ class Cache:
 		self._key = key
 		self._dir = folder
 		self._file = self._dir + "/" + str(hash(self._key))
+		self._new = not os.path.exists(self._file)
 		self._cached = {} # what *was* cached
 		self._cache = {} # new things to put in cache
 
-		if os.path.exists(self._file):
+		if not self._new:
 			data = open(self._file).read().strip().split("\n")
 			for line in data:
 				key, bdata = line.split("\t")
@@ -91,7 +92,7 @@ class Cache:
 	def set(self, key, content):
 		self._cache[key] = b64encode(content)
 
-		if not os.path.exists(self._file):
+		if self._new:
 			self.save()
 
 	def save(self):
@@ -274,13 +275,17 @@ def Fill(rss, cache):
 	item = XMLMap(rss, ITEM_MAP, True)
 	log(item.link)
 
+	if 'link' not in item:
+		log('no link')
+		return
+
 	# content already provided?
-	if 'content' in item:
+	if 'content' in item and 'desc' in item:
 		content_len = len(lxml.html.fromstring(item.content).text_content())
 		log('content: %s vs %s' % (content_len, len(item.desc)))
 		if content_len > 5*len(item.desc):
 			log('provided')
-			return item
+			return
 
 	match = re.search('/([0-9a-zA-Z]{20,})/story01.htm$', item.link)
 	if match:
@@ -296,7 +301,7 @@ def Fill(rss, cache):
 	if item.link in cache:
 		log('cached')
 		item.content = cache.get(item.link)
-		return item
+		return
 
 	# download
 	ddl = EncDownload(item.link)
