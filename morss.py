@@ -130,7 +130,6 @@ class XMLMap(object):
 		self._str = string
 
 		self._guessKey()
-		self._E = E #lxml.objectify.ElementMaker(annotate=False)
 
 	def _guessKey(self):
 		for tag in self._map:
