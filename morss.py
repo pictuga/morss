@@ -1,16 +1,19 @@
 #!/usr/bin/env python
 import sys
 import os
-from base64 import b64encode, b64decode
 import os.path
 import time
+
+from base64 import b64encode, b64decode
+import re
+import string
+
 import lxml.etree
 import lxml.objectify
 import lxml.html
 import lxml.html.clean
 import lxml.builder
-import re
-import string
+
 import urllib2
 from cookielib import CookieJar
 import chardet
