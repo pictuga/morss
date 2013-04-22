@@ -3,6 +3,7 @@ import sys
 import os
 from base64 import b64encode, b64decode
 import os.path
+import time
 import lxml.etree
 import lxml.objectify
 import lxml.html
@@ -18,6 +19,7 @@ from readability import readability
 
 SERVER = True
 MAX = 70
+DELAY=10
 
 ITEM_MAP = {
 	'link':		(('{http://www.w3.org/2005/Atom}link', 'href'),	'{}link'),
@@ -34,7 +36,7 @@ RSS_MAP = {
 	'entry':	('{http://www.w3.org/2005/Atom}entry',		'{}item')
 	}
 
-if SERVER:
+if 'REQUEST_URI' in os.environ:
 	import httplib
 	httplib.HTTPConnection.debuglevel = 1
 
@@ -42,9 +44,10 @@ if SERVER:
 	cgitb.enable()
 
 def log(txt):
-	if not SERVER and os.getenv('DEBUG', False):
-		print txt
-	if SERVER:
+	if not 'REQUEST_URI' in os.environ:
+		if os.getenv('DEBUG', False):
+			print txt
+	else:
 		with open('morss.log', 'a') as file:
 			file.write(repr(txt).encode('utf-8') + "\n")
 
@@ -72,8 +75,12 @@ class Cache:
 	def __del__(self):
 		self.save()
 
+	def __contains__(self, key):
+		return key in self._cached
+
 	def get(self, key):
 		if key in self._cached:
+			self._cache[key] = self._cached[key]
 			return b64decode(self._cached[key])
 		else:
 			return None
@@ -97,6 +104,12 @@ class Cache:
 			os.makedirs(self._dir)
 
 		open(self._file, 'w').write(txt)
+
+	def isYoungerThan(self, sec):
+		if not os.path.exists(self._file):
+			return False
+
+		return os.path.getmtime(self._file) > time.time()-sec
 
 class XMLMap(object):
 	"""
@@ -277,11 +290,9 @@ def Fill(rss, cache):
 		log(item.link)
 
 	# check cache
-	cached = cache.get(item.link)
-	if cached is not None:
+	if item.link in cache:
 		log('cached')
-		item.content = cached
-		cache.set(item.link, cached)
+		item.content = cache.get(item.link)
 		return item
 
 	# download
@@ -298,21 +309,27 @@ def Fill(rss, cache):
 	item.content = out
 	cache.set(item.link, out)
 
-def Gather(data, cachePath):
+def Gather(url, cachePath):
+	cache = Cache(cachePath, url)
+
 	# fetch feed
-	if data.startswith("http"):
-		req = urllib2.Request(data)
-		req.add_unredirected_header('User-Agent', '')
-		xml = urllib2.urlopen(req).read()
+	if cache.isYoungerThan(DELAY*60) and url in cache:
+		log('xml cached')
+		xml = cache.get(url)
 	else:
-		xml = data
+		try:
+			req = urllib2.Request(url)
+			req.add_unredirected_header('User-Agent', 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)')
+			xml = urllib2.urlopen(req).read()
+			cache.set(url, xml)
+		except (urllib2.HTTPError, urllib2.URLError):
+			print "Error, couldn't fetch RSS feed (the server might be banned from the given website)."
+			return False
 
 	xml = cleanXML(xml)
 	rss = lxml.objectify.fromstring(xml)
 	root = rss.channel if hasattr(rss, 'channel') else rss
 	root = XMLMap(root, RSS_MAP)
-
-	cache = Cache(cachePath, unicode(root.title))
 
 	# set
 	if MAX:
@@ -324,7 +341,7 @@ def Gather(data, cachePath):
 	return root.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == "__main__":
-	if SERVER:
+	if 'REQUEST_URI' in os.environ:
 		print 'Status: 200'
 		print 'Content-Type: text/html\n'
 
@@ -340,11 +357,15 @@ if __name__ == "__main__":
 		log(url)
 		RSS = Gather(url, cache)
 	else:
-		xml = sys.stdin.read()
-		cache =	os.path.expanduser('~') + '/.cache/morss'
-		RSS = Gather(xml, cache)
+		if len(sys.argv) > 1 and sys.argv[1].startswith('http'):
+			url = sys.argv[1]
+			cache =	os.path.expanduser('~') + '/.cache/morss'
+			RSS = Gather(url, cache)
+		else:
+			print "Please provide url."
+			sys.exit(1)
 
-	if SERVER or not os.getenv('DEBUG', False):
+	if 'REQUEST_URI' in os.environ or not os.getenv('DEBUG', False) and RSS is not False:
 		print RSS
 
 	log('done')
