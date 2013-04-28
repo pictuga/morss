@@ -6,10 +6,12 @@ This tool opens the links from the rss feed, then downloads the full article fro
 morss also has experimental support for Atom feeds.
 
 ##Use cases
+
+morss will auto-detect what "mode" to use.
+
 ###Running on a server
 
 For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server. With the `.htaccess` file provided, it's also possible, on APACHE servers, to access the filled feed at `http://DOMAIN/MORSS/feeds.bbci.co.uk/news/rss.xml` (without the `morss.py`).
-This will require you to set `SERVER` to `True` at the top of the script.
 
 Works like a charm with Tiny Tiny RSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
 
