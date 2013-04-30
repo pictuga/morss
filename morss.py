@@ -261,10 +261,10 @@ def EncDownload(url):
 		log('header')
 		enc = con.headers.getparam('charset')
 	else:
-		match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data).groups()
-		if len(match):
+		match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data)
+		if match:
 			log('meta.re')
-			enc = match[0]
+			enc = match.groups()[0]
 		else:
 			log('chardet')
 			enc = chardet.detect(data)['encoding']
