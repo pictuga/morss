@@ -23,6 +23,7 @@ from readability import readability
 SERVER = True
 MAX = 70
 DELAY=10
+TIMEOUT = 2
 
 ITEM_MAP = {
 	'link':		(('{http://www.w3.org/2005/Atom}link', 'href'),	'{}link'),
@@ -242,7 +243,7 @@ def EncDownload(url):
 	try:
 		cj = CookieJar()
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-		con = opener.open(url)
+		con = opener.open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (urllib2.HTTPError, urllib2.URLError) as error:
 		log(error)
