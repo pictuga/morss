@@ -20,7 +20,6 @@ import chardet
 
 from readability import readability
 
-SERVER = True
 MAX = 70
 DELAY=10
 TIMEOUT = 2
