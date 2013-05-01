@@ -62,6 +62,36 @@ def cleanXML(xml):
 	table = string.maketrans('', '')
 	return xml.translate(table, table[:32]).lstrip()
 
+def parseOptions(available):
+	options = None
+	if 'REQUEST_URI' in os.environ:
+		if 'REDIRECT_URL' in os.environ:
+			url = os.environ['REQUEST_URI'][1:]
+		else:
+			url = os.environ['REQUEST_URI'][len(os.environ['SCRIPT_NAME'])+1:]
+
+		if not url.startswith('http://') and not url.startswith('https://'):
+			split = url.split('/', 1)
+			if len(split) and split[0] in available:
+				options = split[0]
+				url = split[1]
+			url = "http://" + url
+
+	else:
+		if len(sys.argv) == 3:
+			if sys.argv[1] in available:
+				options = sys.argv[1]
+			url = sys.argv[2]
+		elif len(sys.argv) == 2:
+			url = sys.argv[1]
+		else:
+			return (None, None)
+
+		if not url.startswith('http://') and not url.startswith('https://'):
+			url = "http://" + url
+
+	return (url, options)
+
 class Cache:
 	"""Light, error-prone caching system."""
 	def __init__(self, folder, key):
@@ -335,7 +365,7 @@ def Fill(rss, cache):
 	item.content = out
 	cache.set(item.link, out)
 
-def Gather(url, cachePath):
+def Gather(url, cachePath, mode='feed'):
 	cache = Cache(cachePath, url)
 
 	# fetch feed
@@ -349,7 +379,6 @@ def Gather(url, cachePath):
 			xml = urllib2.urlopen(req).read()
 			cache.set(url, xml)
 		except (urllib2.HTTPError, urllib2.URLError):
-			print "Error, couldn't fetch RSS feed (the server might be banned from the given website)."
 			return False
 
 	xml = cleanXML(xml)
@@ -361,37 +390,40 @@ def Gather(url, cachePath):
 	if MAX:
 		for item in root.item[MAX:]:
 			item.getparent().remove(item)
-	for item in root.item:
+	for i,item in enumerate(root.item):
+		if mode == 'progress':
+			print "%s/%s" % (i+1, len(root.item))
+			sys.stdout.flush()
 		Fill(item, cache)
 
 	return root.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == "__main__":
 	if 'REQUEST_URI' in os.environ:
+		url, options = parseOptions(['progress'])
+
 		print 'Status: 200'
 		print 'Content-Type: text/html\n'
 
-		if 'REDIRECT_URL' in os.environ:
-			url = os.environ['REQUEST_URI'][1:]
-		else:
-			url = os.environ['REQUEST_URI'][len(os.environ['SCRIPT_NAME'])+1:]
-		if not url.startswith('http://') and not url.startswith('https://'):
-			url = "http://" + url
-		url = url.replace(' ', '%20')
-
 		cache = os.getcwd() + '/cache'
 		log(url)
-		RSS = Gather(url, cache)
+		RSS = Gather(url, cache, options)
 	else:
-		if len(sys.argv) > 1 and sys.argv[1].startswith('http'):
-			url = sys.argv[1]
-			cache =	os.path.expanduser('~') + '/.cache/morss'
-			RSS = Gather(url, cache)
-		else:
+		url, options = parseOptions(['progress'])
+		print url, options
+
+		if url is None:
 			print "Please provide url."
 			sys.exit(1)
 
-	if 'REQUEST_URI' in os.environ or not os.getenv('DEBUG', False) and RSS is not False:
-		print RSS
+		cache =	os.path.expanduser('~') + '/.cache/morss'
+		RSS = Gather(url, cache, options)
+
+	if RSS is not False and options != 'progress':
+		if 'REQUEST_URI' in os.environ or not os.getenv('DEBUG', False):
+			print RSS
+
+	if RSS is False and options != 'progress':
+		print "Error fetching feed."
 
 	log('done')
