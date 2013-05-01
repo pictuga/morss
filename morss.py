@@ -199,7 +199,10 @@ class XMLMap(object):
 		return unicode(out) if self._str else out
 
 	def __getitem__(self, tag):
-		return self.__getattr__(tag)
+		if self.__contains__(tag):
+			return self.__getattr__(tag)
+		else:
+			return None
 
 	def __setattr__(self, tag, value):
 		if tag.startswith('_'):
@@ -251,7 +254,6 @@ def EncDownload(url):
 		data = con.read()
 	except (urllib2.HTTPError, urllib2.URLError) as error:
 		log(error)
-		log('http error')
 		return False
 
 	# meta-redirect
@@ -303,17 +305,27 @@ def Fill(rss, cache):
 		item.link = "".join([(t[s[0]] if s[0] in t else "=") + s[1:] for s in url[1:]])
 		log(item.link)
 
-	# check cache
+	# check cache and previous errors
 	if item.link in cache:
-		log('cached')
-		item.content = cache.get(item.link)
-		return
+		content = cache.get(item.link)
+		if content == 'httperr':
+			if cache.isYoungerThan(DELAY*60):
+				log('cached http err')
+				return
+			else:
+				log('old http error')
+		else:
+			log('cached')
+			item.content = cache.get(item.link)
+			return
 
 	# download
 	ddl = EncDownload(item.link)
 
 	if ddl is False:
-		return item
+		log('http error')
+		cache.set(item.link, 'httperr')
+		return
 
 	data, enc, url = ddl
 	log(enc)
