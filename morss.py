@@ -25,6 +25,9 @@ MAX = 70
 DELAY=10
 TIMEOUT = 2
 
+UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
+UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
+
 ITEM_MAP = {
 	'link':		(('{http://www.w3.org/2005/Atom}link', 'href'),	'{}link'),
 	'desc':		('{http://www.w3.org/2005/Atom}summary',	'{}description'),
@@ -243,6 +246,7 @@ def EncDownload(url):
 	try:
 		cj = CookieJar()
 		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+		opener.addheaders = [('User-Agent', UA_HML)]
 		con = opener.open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (urllib2.HTTPError, urllib2.URLError) as error:
@@ -329,7 +333,7 @@ def Gather(url, cachePath):
 	else:
 		try:
 			req = urllib2.Request(url)
-			req.add_unredirected_header('User-Agent', 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)')
+			req.add_unredirected_header('User-Agent', UA_RSS)
 			xml = urllib2.urlopen(req).read()
 			cache.set(url, xml)
 		except (urllib2.HTTPError, urllib2.URLError):
