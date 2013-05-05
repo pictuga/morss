@@ -55,7 +55,7 @@ if 'REQUEST_URI' in os.environ:
 def log(txt):
 	if not 'REQUEST_URI' in os.environ:
 		if os.getenv('DEBUG', False):
-			print txt
+			print repr(txt)
 	else:
 		with open('morss.log', 'a') as file:
 			file.write(repr(txt).encode('utf-8') + "\n")
