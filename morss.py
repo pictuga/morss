@@ -409,7 +409,6 @@ if __name__ == "__main__":
 		RSS = Gather(url, cache, options)
 	else:
 		url, options = parseOptions(['progress'])
-		print url, options
 
 		if url is None:
 			print "Please provide url."
