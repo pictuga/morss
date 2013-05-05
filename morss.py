@@ -105,9 +105,9 @@ class Cache:
 		self._cache = {} # new things to put in cache
 
 		if not self._new:
-			data = open(self._file).read().strip().split("\n")
+			data = open(self._file).read().split("\n")[1:]
 			for line in data:
-				key, bdata = line.split("\t")
+				key, bdata = line.split("\t", 1)
 				self._cached[key] = bdata
 
 		log(str(hash(self._key)))
