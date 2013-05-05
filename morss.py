@@ -15,6 +15,7 @@ import lxml.html.clean
 import lxml.builder
 
 import urllib2
+import socket
 from cookielib import CookieJar
 import chardet
 
@@ -283,7 +284,7 @@ def EncDownload(url):
 		opener.addheaders = [('User-Agent', UA_HML)]
 		con = opener.open(url, timeout=TIMEOUT)
 		data = con.read()
-	except (urllib2.HTTPError, urllib2.URLError) as error:
+	except (urllib2.HTTPError, urllib2.URLError, socket.timeout) as error:
 		log(error)
 		return False
 
