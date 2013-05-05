@@ -24,6 +24,8 @@ MAX = 70
 DELAY=10
 TIMEOUT = 2
 
+OPTIONS = ['progress', 'cache']
+
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
 
@@ -307,7 +309,7 @@ def EncDownload(url):
 
 	return (data, enc, con.geturl())
 
-def Fill(rss, cache):
+def Fill(rss, cache, mode='feed'):
 	item = XMLMap(rss, ITEM_MAP, True)
 	log(item.link)
 
@@ -347,6 +349,10 @@ def Fill(rss, cache):
 			log('cached')
 			item.content = cache.get(item.link)
 			return
+
+	# super-fast mode
+	if mode == 'cache':
+		return
 
 	# download
 	ddl = EncDownload(item.link)
@@ -393,22 +399,26 @@ def Gather(url, cachePath, mode='feed'):
 		if mode == 'progress':
 			print "%s/%s" % (i+1, len(root.item))
 			sys.stdout.flush()
-		Fill(item, cache)
+		Fill(item, cache, mode)
 
 	return root.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == "__main__":
 	if 'REQUEST_URI' in os.environ:
-		url, options = parseOptions(['progress'])
+		url, options = parseOptions(OPTIONS)
 
 		print 'Status: 200'
-		print 'Content-Type: text/html\n'
+
+		if options == 'progress':
+			print 'Content-Type: application/octet-stream\n'
+		else:
+			print 'Content-Type: text/html\n'
 
 		cache = os.getcwd() + '/cache'
 		log(url)
 		RSS = Gather(url, cache, options)
 	else:
-		url, options = parseOptions(['progress'])
+		url, options = parseOptions(OPTIONS)
 
 		if url is None:
 			print "Please provide url."
