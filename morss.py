@@ -228,7 +228,7 @@ class XMLMap(object):
 		else:
 			out = self._xml.__getattr__(tag)
 
-		return out.text.encode('utf-8') if self._str else out
+		return unicode(out).encode('utf-8') if self._str else out
 
 	def __getitem__(self, tag):
 		if self.__contains__(tag):
