@@ -340,6 +340,10 @@ def Fill(rss, cache, mode='feed'):
 		item.link = "".join([(t[s[0]] if s[0] in t else "=") + s[1:] for s in url[1:]])
 		log(item.link)
 
+	# check relative urls
+	if urlparse.urlparse(item.link).netloc is '':
+		item.link = urlparse.urljoin(feedurl, item.link)
+
 	# check cache and previous errors
 	if item.link in cache:
 		content = cache.get(item.link)
