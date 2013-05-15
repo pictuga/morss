@@ -104,19 +104,22 @@ class Cache:
 	"""Light, error-prone caching system."""
 	def __init__(self, folder, key):
 		self._key = key
+		self._hash = str(hash(self._key))
+
 		self._dir = folder
-		self._file = self._dir + "/" + str(hash(self._key))
-		self._new = not os.path.exists(self._file)
+		self._file = self._dir + "/" + self._hash
+
 		self._cached = {} # what *was* cached
 		self._cache = {} # new things to put in cache
 
-		if not self._new:
-			data = open(self._file).read().split("\n")[1:]
+		if os.path.exists(self._file):
+			data = open(self._file).read().split("\n")
 			for line in data:
-				key, bdata = line.split("\t", 1)
-				self._cached[key] = bdata
+				if "\t" in line:
+					key, bdata = line.split("\t", 1)
+					self._cached[key] = bdata
 
-		log(str(hash(self._key)))
+		log(self._hash)
 
 	def __del__(self):
 		self.save()
@@ -134,28 +137,26 @@ class Cache:
 	def set(self, key, content):
 		self._cache[key] = b64encode(content)
 
-		if self._new:
-			self.save()
-
 	def save(self):
 		if len(self._cache) == 0:
 			return
 
-		txt = ""
+		out = []
 		for (key, bdata) in self._cache.iteritems():
-			txt += "\n" + str(key) + "\t" + bdata
-		txt.strip()
+			out.append(str(key) + "\t" + bdata)
+		txt = "\n".join(out)
 
 		if not os.path.exists(self._dir):
 			os.makedirs(self._dir)
 
-		open(self._file, 'w').write(txt)
+		with open(self._file, 'w') as file:
+			file.write(txt)
 
 	def isYoungerThan(self, sec):
 		if not os.path.exists(self._file):
 			return False
 
-		return os.path.getmtime(self._file) > time.time()-sec
+		return time.time() - os.path.getmtime(self._file) < sec
 
 class XMLMap(object):
 	"""
