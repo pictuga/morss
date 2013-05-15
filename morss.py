@@ -324,14 +324,7 @@ def Fill(rss, cache, mode='feed'):
 		log('no link')
 		return
 
-	# content already provided?
-	if 'content' in item and 'desc' in item:
-		content_len = len(lxml.html.fromstring(item.content).text_content())
-		log('content: %s vs %s' % (content_len, len(item.desc)))
-		if content_len > 5*len(item.desc):
-			log('provided')
-			return
-
+	# feedburner and others
 	if '{http://rssnamespace.org/feedburner/ext/1.0}origLink' in item:
 		item.link = item['{http://rssnamespace.org/feedburner/ext/1.0}origLink']
 		log(item.link)
@@ -346,6 +339,15 @@ def Fill(rss, cache, mode='feed'):
 	# check relative urls
 	if urlparse.urlparse(item.link).netloc is '':
 		item.link = urlparse.urljoin(feedurl, item.link)
+
+	# content already provided?
+	if 'content' in item and 'desc' in item:
+		len_content = lenHTML(item.content)
+		len_desc = lenHTML(item.desc)
+		log('content: %s vs %s' % (len_content, len_desc))
+		if len_content > 5*len_desc:
+			log('provided')
+			return
 
 	# check cache and previous errors
 	if item.link in cache:
