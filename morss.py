@@ -22,9 +22,11 @@ import urlparse
 
 from readability import readability
 
-MAX = 70
-DELAY=10
-TIMEOUT = 2
+LIM_ITEM = 100	# deletes what's beyond
+MAX_ITEM = 50	# cache-only beyond
+MAX_TIME = 7	# cache-only after
+DELAY = 10	# xml cache
+TIMEOUT = 2	# http timeout
 
 OPTIONS = ['progress', 'cache']
 
@@ -317,7 +319,7 @@ def EncDownload(url):
 
 	return (data, enc, con.geturl())
 
-def Fill(rss, cache, feedurl="/", mode='feed'):
+def Fill(rss, cache, feedurl="/", fast=False):
 	""" Returns True when it has done its best """
 
 	item = XMLMap(rss, ITEM_MAP, True)
@@ -368,7 +370,8 @@ def Fill(rss, cache, feedurl="/", mode='feed'):
 			return True
 
 	# super-fast mode
-	if mode == 'cache':
+	if fast:
+		log('skipped')
 		return False
 
 	# download
@@ -413,16 +416,27 @@ def Gather(url, cachePath, mode='feed'):
 	rss = lxml.objectify.fromstring(xml)
 	root = rss.channel if hasattr(rss, 'channel') else rss
 	root = XMLMap(root, RSS_MAP)
+	size = len(root.item)
 
 	# set
-	if MAX:
-		for item in root.item[MAX:]:
-			item.getparent().remove(item)
-	for i,item in enumerate(root.item):
+	startTime = time.time()
+	for i, item in enumerate(root.item):
 		if mode == 'progress':
-			print "%s/%s" % (i+1, len(root.item))
+			if MAX_ITEM == 0:
+				print "%s/%s" % (i+1, size)
+			else:
+				print "%s/%s" % (i+1, min(MAX_ITEM, size))
 			sys.stdout.flush()
-		Fill(item, cache, mode)
+
+		if i+1 > LIM_ITEM > 0:
+			item.getparent().remove(item)
+		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM > 0:
+			if Fill(item, cache, url, True) is False:
+				item.getparent().remove(item)
+		else:
+			Fill(item, cache, url)
+
+	log(len(root.item))
 
 	return root.tostring(xml_declaration=True, encoding='UTF-8')
 
@@ -439,7 +453,6 @@ if __name__ == "__main__":
 
 		cache = os.getcwd() + '/cache'
 		log(url)
-		RSS = Gather(url, cache, options)
 	else:
 		url, options = parseOptions(OPTIONS)
 
@@ -448,7 +461,13 @@ if __name__ == "__main__":
 			sys.exit(1)
 
 		cache =	os.path.expanduser('~') + '/.cache/morss'
-		RSS = Gather(url, cache, options)
+
+	if options == 'progress':
+		MAX_TIME = -1
+	if options == 'cache':
+		MAX_TIME = 0
+
+	RSS = Gather(url, cache, options)
 
 	if RSS is not False and options != 'progress':
 		if 'REQUEST_URI' in os.environ or not os.getenv('DEBUG', False):
