@@ -67,6 +67,9 @@ def cleanXML(xml):
 	table = string.maketrans('', '')
 	return xml.translate(table, table[:32]).lstrip()
 
+def lenHTML(txt):
+	return len(lxml.html.fromstring(txt).text_content())
+
 def parseOptions(available):
 	options = None
 	if 'REQUEST_URI' in os.environ:
@@ -347,12 +350,13 @@ def Fill(rss, cache, mode='feed'):
 	# check cache and previous errors
 	if item.link in cache:
 		content = cache.get(item.link)
-		if content == 'httperr':
+		match = re.search(r'^error-([a-z]{2,10})$', content)
+		if match:
 			if cache.isYoungerThan(DELAY*60):
-				log('cached http err')
+				log('cached error: %s' % match.groups()[0])
 				return
 			else:
-				log('old http error')
+				log('old error')
 		else:
 			log('cached')
 			item.content = cache.get(item.link)
@@ -367,16 +371,21 @@ def Fill(rss, cache, mode='feed'):
 
 	if ddl is False:
 		log('http error')
-		cache.set(item.link, 'httperr')
+		cache.set(item.link, 'error-http')
 		return
 
 	data, enc, url = ddl
 	log(enc)
 
 	out = readability.Document(data.decode(enc, 'ignore'), url=url).summary(True)
+	if 'desc' not in item or lenHTML(out) > lenHTML(item.desc):
+		item.content = out
+		cache.set(item.link, out)
+	else:
+		log('not bigger enough')
+		cache.set(item.link, 'error-length')
+		return
 
-	item.content = out
-	cache.set(item.link, out)
 
 def Gather(url, cachePath, mode='feed'):
 	cache = Cache(cachePath, url)
