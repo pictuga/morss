@@ -18,6 +18,7 @@ import urllib2
 import socket
 from cookielib import CookieJar
 import chardet
+import urlparse
 
 from readability import readability
 
@@ -29,6 +30,8 @@ OPTIONS = ['progress', 'cache']
 
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
+
+PROTOCOL = ['http', 'https', 'ftp']
 
 ITEM_MAP = {
 	'link':		(('{http://www.w3.org/2005/Atom}link', 'href'),	'{}link'),
@@ -72,7 +75,7 @@ def parseOptions(available):
 		else:
 			url = os.environ['REQUEST_URI'][len(os.environ['SCRIPT_NAME'])+1:]
 
-		if not url.startswith('http://') and not url.startswith('https://'):
+		if urlparse.urlparse(url).scheme not in PROTOCOL:
 			split = url.split('/', 1)
 			if len(split) and split[0] in available:
 				options = split[0]
@@ -89,7 +92,7 @@ def parseOptions(available):
 		else:
 			return (None, None)
 
-		if not url.startswith('http://') and not url.startswith('https://'):
+		if urlparse.urlparse(url).scheme not in PROTOCOL:
 			url = "http://" + url
 
 	return (url, options)
