@@ -316,7 +316,7 @@ def EncDownload(url):
 
 	return (data, enc, con.geturl())
 
-def Fill(rss, cache, mode='feed'):
+def Fill(rss, cache, feedurl="/", mode='feed'):
 	item = XMLMap(rss, ITEM_MAP, True)
 	log(item.link)
 
