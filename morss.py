@@ -317,12 +317,14 @@ def EncDownload(url):
 	return (data, enc, con.geturl())
 
 def Fill(rss, cache, feedurl="/", mode='feed'):
+	""" Returns True when it has done its best """
+
 	item = XMLMap(rss, ITEM_MAP, True)
 	log(item.link)
 
 	if 'link' not in item:
 		log('no link')
-		return
+		return True
 
 	# feedburner and others
 	if '{http://rssnamespace.org/feedburner/ext/1.0}origLink' in item:
@@ -347,7 +349,7 @@ def Fill(rss, cache, feedurl="/", mode='feed'):
 		log('content: %s vs %s' % (len_content, len_desc))
 		if len_content > 5*len_desc:
 			log('provided')
-			return
+			return True
 
 	# check cache and previous errors
 	if item.link in cache:
@@ -356,17 +358,17 @@ def Fill(rss, cache, feedurl="/", mode='feed'):
 		if match:
 			if cache.isYoungerThan(DELAY*60):
 				log('cached error: %s' % match.groups()[0])
-				return
+				return True
 			else:
 				log('old error')
 		else:
 			log('cached')
 			item.content = cache.get(item.link)
-			return
+			return True
 
 	# super-fast mode
 	if mode == 'cache':
-		return
+		return False
 
 	# download
 	ddl = EncDownload(item.link)
@@ -374,7 +376,7 @@ def Fill(rss, cache, feedurl="/", mode='feed'):
 	if ddl is False:
 		log('http error')
 		cache.set(item.link, 'error-http')
-		return
+		return True
 
 	data, enc, url = ddl
 	log(enc)
@@ -386,8 +388,9 @@ def Fill(rss, cache, feedurl="/", mode='feed'):
 	else:
 		log('not bigger enough')
 		cache.set(item.link, 'error-length')
-		return
+		return True
 
+	return True
 
 def Gather(url, cachePath, mode='feed'):
 	cache = Cache(cachePath, url)
