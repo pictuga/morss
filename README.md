@@ -13,6 +13,8 @@ morss will auto-detect what "mode" to use.
 
 For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server. With the `.htaccess` file provided, it's also possible, on APACHE servers, to access the filled feed at `http://DOMAIN/MORSS/feeds.bbci.co.uk/news/rss.xml` (without the `morss.py`).
 
+**NB.** Morss **DOESN'T** provide any HTTP server itself. This must be done with Apache or nginx with python support!
+
 Works like a charm with Tiny Tiny RSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
 
 ###As a newsreader hook
