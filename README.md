@@ -28,7 +28,11 @@ morss uses a small cache directory to make the loading faster. Given the way it'
 ##Extra configuration
 ###Length limitation
 
-When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the `MAX` value at the top of the script. That value is the maximum number of items to parse. `0` means parse all items.
+When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the different values at the top of the script.
+
+- `MAX_TIME` sets the maximum amount of time spent *fetching* articles, more time might be spent taking older articles from cache. `-1` for unlimited.
+- `MAX_ITEM` sets the maximum number of articles to fetch. `0` for unlimited. More articles will be taken from cache following the next setting.
+- `LIM_ITEM` sets the maximum number of article checked, limiting both the number of articles fetched and taken from cache. Articles beyond that limit will be dropped from the feed, even if they're cached. `0` for unlimited.
 
 ###Content matching
 
