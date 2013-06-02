@@ -345,6 +345,11 @@ def Fill(rss, cache, feedurl="/", fast=False):
 	if urlparse.urlparse(item.link).netloc is '':
 		item.link = urlparse.urljoin(feedurl, item.link)
 
+	# check unwanted uppercase title
+	if 'title' in item:
+		if len(item.title) > 20 and item.title.isupper():
+			item.title = item.title.title()
+
 	# content already provided?
 	if 'content' in item and 'desc' in item:
 		len_content = lenHTML(item.content)
