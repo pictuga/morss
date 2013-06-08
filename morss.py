@@ -70,7 +70,10 @@ def cleanXML(xml):
 	return xml.translate(table, table[:32]).lstrip()
 
 def lenHTML(txt):
-	return len(lxml.html.fromstring(txt).text_content())
+	if len(txt):
+		return len(lxml.html.fromstring(txt).text_content())
+	else:
+		return 0
 
 def parseOptions(available):
 	options = None
