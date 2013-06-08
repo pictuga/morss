@@ -240,7 +240,7 @@ class XMLMap(object):
 		else:
 			out = self._xml.__getattr__(tag)
 
-		return unicode(out).encode('utf-8') if self._str else out
+		return unicode(out) if self._str else out
 
 	def __getitem__(self, tag):
 		if self.__contains__(tag):
@@ -320,7 +320,8 @@ def EncDownload(url):
 			log('chardet')
 			enc = chardet.detect(data)['encoding']
 
-	return (data, enc, con.geturl())
+	log(enc)
+	return (data.decode(enc, 'replace'), con.geturl())
 
 def Fill(rss, cache, feedurl="/", fast=False):
 	""" Returns True when it has done its best """
@@ -383,17 +384,16 @@ def Fill(rss, cache, feedurl="/", fast=False):
 		return False
 
 	# download
-	ddl = EncDownload(item.link)
+	ddl = EncDownload(item.link.encode('utf-8'))
 
 	if ddl is False:
 		log('http error')
 		cache.set(item.link, 'error-http')
 		return True
 
-	data, enc, url = ddl
-	log(enc)
+	data, url = ddl
 
-	out = readability.Document(data.decode(enc, 'ignore'), url=url).summary(True)
+	out = readability.Document(data, url=url).summary(True)
 	if 'desc' not in item or lenHTML(out) > lenHTML(item.desc):
 		item.content = out
 		cache.set(item.link, out)
