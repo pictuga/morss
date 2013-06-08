@@ -117,8 +117,8 @@ class Cache:
 		self._cached = {} # what *was* cached
 		self._cache = {} # new things to put in cache
 
-		if os.path.exists(self._file):
-			data = open(self._file).read().split("\n")
+		if os.path.isfile(self._file):
+			data = open(self._file).readlines()
 			for line in data:
 				if "\t" in line:
 					key, bdata = line.split("\t", 1)
