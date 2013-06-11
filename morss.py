@@ -346,6 +346,13 @@ def Fill(rss, cache, feedurl="/", fast=False):
 		item.link = "".join([(t[s[0]] if s[0] in t else "=") + s[1:] for s in url[1:]])
 		log(item.link)
 
+	# reddit
+	if urlparse.urlparse(item.link).netloc == 'www.reddit.com':
+		match = lxml.html.fromstring(item.desc).xpath('//a[text()="[link]"]/@href')
+		if len(match):
+			item.link = match[0]
+			log(item.link)
+
 	# check relative urls
 	if urlparse.urlparse(item.link).netloc is '':
 		item.link = urlparse.urljoin(feedurl, item.link)
