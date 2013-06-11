@@ -15,11 +15,11 @@ For this, you need to make sure your host allows python script execution. This m
 
 **NB.** Morss **DOESN'T** provide any HTTP server itself. This must be done with Apache or nginx with python support!
 
-Works like a charm with Tiny Tiny RSS (<http://tt-rss.org/redmine/projects/tt-rss/wiki>).
+Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki).
 
 ###As a newsreader hook
 
-To use it, the newsreader *Liferea* is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its output as an RSS feed. (more: <http://lzone.de/liferea/scraping.htm>)
+To use it, the newsreader *Liferea* is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
 To use this script, you have to enable "postprocessing filter" in liferea feed settings, and to add `PATH/TO/MORSS/morss` as command to run.
 
@@ -38,7 +38,7 @@ When parsing long feeds, with a lot of items (100+), morss might take a lot of t
 
 ###Content matching
 
-The content of articles is grabbed with a **readability** fork (see <https://github.com/buriy/python-readability>). This means that most of the time the right content is matched. However sometimes it fails, therefore some tweaking is required. Most of the time, what has to be done is to add some "rules" in the main script file in *readability* (not in morss).
+The content of articles is grabbed with a [**readability** fork](https://github.com/buriy/python-readability). This means that most of the time the right content is matched. However sometimes it fails, therefore some tweaking is required. Most of the time, what has to be done is to add some "rules" in the main script file in *readability* (not in morss).
 
 Most of the time when hardly nothing is matched, it means that the main content of the article is made of images, videos, pictures, etc., which readability doesn't detect. Also, readability has some trouble to match content of very small articles.
 
