@@ -333,11 +333,12 @@ def Fill(rss, cache, feedurl="/", fast=False):
 		log('no link')
 		return True
 
-	# feedburner and others
+	# feedburner
 	if '{http://rssnamespace.org/feedburner/ext/1.0}origLink' in item:
 		item.link = item['{http://rssnamespace.org/feedburner/ext/1.0}origLink']
 		log(item.link)
 
+	# feedsportal
 	match = re.search('/([0-9a-zA-Z]{20,})/story01.htm$', item.link)
 	if match:
 		url = match.groups()[0].split('0')
