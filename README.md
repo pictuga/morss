@@ -1,4 +1,4 @@
-#Morss - Get ful text RSS feeds
+#Morss - Get full text RSS feeds
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the RSS feed rather useless. So this tool intends to fix that problem.
 This tool opens the links from the rss feed, then downloads the full article from the newspaper website and puts it back in the rss feed.
@@ -8,7 +8,7 @@ You can use this program online for free at **<http://morss.it/>**.
 ##Dependencies
 
 You do need:
-- [python](http://www.python.org/) >= 2.6
+- [python](http://www.python.org/) >= 2.6 < 3
 - [lxml](http://lxml.de/) for xml parsing
 - this [readability](https://github.com/buriy/python-readability) fork
 
@@ -16,7 +16,9 @@ You may also need:
 - Apache, with python-cgi support, to run on a server
 - a fast internet connection
 
-##Usecases
+GPL3 code.
+
+##Use cases
 
 morss will auto-detect what "mode" to use.
 
@@ -55,14 +57,11 @@ Most of the time when hardly nothing is matched, it means that the main content 
 
 morss will also try to figure out whether the full content is already in place (for those websites which understood the whole point of RSS feeds). However this detection is very simple, and only works if the actual content is put in the "content" section in the feed and not in the "summary" section.
 
+***
+
 ##Todo
 
 You can contribute to this projet. If you're not sure what to do, you can pick from this list:
 
 - Add ability to run HTTP server within morss.py
 - Add ability to run morss.py as an update daemon
-
----
-
-GPL3 licence.
-Python **2.6**+ required (not 3).
