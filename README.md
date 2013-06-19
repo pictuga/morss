@@ -1,11 +1,22 @@
-#Morss
+#Morss - Get ful text RSS feeds
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the RSS feed rather useless. So this tool intends to fix that problem.
 This tool opens the links from the rss feed, then downloads the full article from the newspaper website and puts it back in the rss feed.
 
-morss also has experimental support for Atom feeds.
+You can use this program online for free at **<http://morss.it/>**.
 
-##Use cases
+##Dependencies
+
+You do need:
+- [python](http://www.python.org/) >= 2.6
+- [lxml](http://lxml.de/) for xml parsing
+- this [readability](https://github.com/buriy/python-readability) fork
+
+You may also need:
+- Apache, with python-cgi support, to run on a server
+- a fast internet connection
+
+##Usecases
 
 morss will auto-detect what "mode" to use.
 
@@ -19,9 +30,9 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 ###As a newsreader hook
 
-To use it, the newsreader *Liferea* is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
+To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
-To use this script, you have to enable "postprocessing filter" in liferea feed settings, and to add `PATH/TO/MORSS/morss` as command to run.
+To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command `PATH/TO/MORSS/morss.py http://path/to/feed.xml`.
 
 ##Cache information
 
@@ -43,6 +54,13 @@ The content of articles is grabbed with a [**readability** fork](https://github.
 Most of the time when hardly nothing is matched, it means that the main content of the article is made of images, videos, pictures, etc., which readability doesn't detect. Also, readability has some trouble to match content of very small articles.
 
 morss will also try to figure out whether the full content is already in place (for those websites which understood the whole point of RSS feeds). However this detection is very simple, and only works if the actual content is put in the "content" section in the feed and not in the "summary" section.
+
+##Todo
+
+You can contribute to this projet. If you're not sure what to do, you can pick from this list:
+
+- Add ability to run HTTP server within morss.py
+- Add ability to run morss.py as an update daemon
 
 ---
 
