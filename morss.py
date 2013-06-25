@@ -457,26 +457,25 @@ def Gather(url, cachePath, mode='feed'):
 	return root.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == "__main__":
-	if 'REQUEST_URI' in os.environ:
-		url, options = parseOptions(OPTIONS)
+	url, options = parseOptions(OPTIONS)
 
+	if 'REQUEST_URI' in os.environ:
 		print 'Status: 200'
 
 		if options == 'progress':
-			print 'Content-Type: application/octet-stream\n'
+			print 'Content-Type: application/octet-stream'
 		else:
-			print 'Content-Type: text/html\n'
+			print 'Content-Type: text/html'
+		print
 
 		cache = os.getcwd() + '/cache'
 		log(url)
 	else:
-		url, options = parseOptions(OPTIONS)
-
-		if url is None:
-			print "Please provide url."
-			sys.exit(1)
-
 		cache =	os.path.expanduser('~') + '/.cache/morss'
+
+	if url is None:
+		print "Please provide url."
+		sys.exit(1)
 
 	if options == 'progress':
 		MAX_TIME = -1
