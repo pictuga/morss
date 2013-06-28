@@ -465,7 +465,7 @@ if __name__ == "__main__":
 		if options == 'progress':
 			print 'Content-Type: application/octet-stream'
 		else:
-			print 'Content-Type: text/html'
+			print 'Content-Type: text/xml'
 		print
 
 		cache = os.getcwd() + '/cache'
