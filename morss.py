@@ -8,11 +8,11 @@ from base64 import b64encode, b64decode
 import re
 import string
 
-import lxml.etree
-import lxml.objectify
 import lxml.html
 import lxml.html.clean
 import lxml.builder
+
+import feeds
 
 import urllib2
 import socket
@@ -163,132 +163,6 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-class XMLMap(object):
-	"""
-	Sort of wrapper around lxml.objectify.StringElement (from which this
-	class *DOESN'T* inherit) which makes "links" between different children
-	of an element. For example, this allows cheap, efficient, transparent
-	RSS 2.0/Atom seamless use, which can be way faster than feedparser, and
-	has the advantage to edit the corresponding mapped fields. On top of
-	that, XML output with "classic" lxml API calls (such as
-	lxml.etree.tostring) is still possible. Element attributes are also
-	supported (as in <entry attr='value'/>).
-
-	However, keep in mind that this feature's support is only partial. For
-	example if you want to alias an element to both <el>value</el> and <el
-	href='value'/>, and put them as ('el', ('el', 'value')) in the _map
-	definition, then only 'el' will be whatched, even if ('el', 'value')
-	makes more sens in that specific case, because that would require to
-	also check the others, in case of "better" match, which is not done now.
-
-	Also, this class assumes there's some consistency in the _map
-	definition. Which means that it expects matches to be always found in
-	the same "column" in _map. This is useful when setting values which are
-	not yet in the XML tree. Indeed the class will try to use the alias from
-	the same column. With the RSS/Atom example, the default _map will always
-	create elements for the same kind of feed.
-	"""
-	def __init__(self, obj, alias=ITEM_MAP, string=False):
-		self._xml = obj
-		self._key = None
-		self._map = alias
-		self._str = string
-
-		self._guessKey()
-
-	def _guessKey(self):
-		for tag in self._map:
-			self._key = 0
-			for choice in self._map[tag]:
-				if not isinstance(choice, tuple):
-					choice = (choice, None)
-				el, attr = choice
-				if hasattr(self._xml, el):
-					if attr is None:
-						return
-					else:
-						if attr in self._xml[el].attrib:
-							return
-				self._key+=1
-		self._key = 0
-
-	def _getElement(self, tag):
-		"""Returns a tuple whatsoever."""
-		if tag in self._map:
-			for choice in self._map[tag]:
-				if not isinstance(choice, tuple):
-					choice = (choice, None)
-				el, attr = choice
-				if hasattr(self._xml, el):
-					if attr is None:
-						return (self._xml[el], attr)
-					else:
-						if attr in self._xml[el].attrib:
-							return (self._xml[el], attr)
-			return (None, None)
-		if hasattr(self._xml, tag):
-			return (self._xml[tag], None)
-		return (None, None)
-
-	def __getattr__(self, tag):
-		el, attr = self._getElement(tag)
-		if el is not None:
-			if attr is None:
-				out = el
-			else:
-				out = el.get(attr)
-		else:
-			out = self._xml.__getattr__(tag)
-
-		return unicode(out) if self._str else out
-
-	def __getitem__(self, tag):
-		if self.__contains__(tag):
-			return self.__getattr__(tag)
-		else:
-			return None
-
-	def __setattr__(self, tag, value):
-		if tag.startswith('_'):
-			return object.__setattr__(self, tag, value)
-
-		el, attr = self._getElement(tag)
-		if el is not None:
-			if attr is None:
-				if (isinstance(value, lxml.objectify.StringElement)
-					or isinstance(value, str)
-					or isinstance(value, unicode)):
-					el._setText(value)
-				else:
-					el = value
-				return
-			else:
-				el.set(attr, value)
-				return
-		choice = self._map[tag][self._key]
-		if not isinstance(choice, tuple):
-			child = lxml.objectify.Element(choice)
-			self._xml.append(child)
-			self._xml[choice] = value
-			return
-		else:
-			el, attr = choice
-			child = lxml.objectify.Element(choice, attrib={attr:value})
-			self._xml.append(child)
-			return
-
-	def __contains__(self, tag):
-		el, attr = self._getElement(tag)
-		return el is not None
-
-	def remove(self):
-		self._xml.getparent().remove(self._xml)
-
-	def tostring(self, **k):
-		"""Returns string using lxml. Arguments passed to tostring."""
-		out = self._xml if self._xml.getparent() is None else self._xml.getparent()
-		return lxml.etree.tostring(out, pretty_print=True, **k)
-
 def EncDownload(url):
 	try:
 		cj = CookieJar()
@@ -323,19 +197,20 @@ def EncDownload(url):
 	log(enc)
 	return (data.decode(enc, 'replace'), con.geturl())
 
-def Fill(rss, cache, feedurl="/", fast=False):
+def Fill(item, cache, feedurl="/", fast=False):
 	""" Returns True when it has done its best """
 
-	item = XMLMap(rss, ITEM_MAP, True)
-	log(item.link)
-
-	if 'link' not in item:
+	if not item.link:
 		log('no link')
 		return True
 
+	log(item.link)
+
 	# feedburner
-	if '{http://rssnamespace.org/feedburner/ext/1.0}origLink' in item:
-		item.link = item['{http://rssnamespace.org/feedburner/ext/1.0}origLink']
+	feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
+	match = item.xval('feedburner:origLink')
+	if match:
+		item.link = match
 		log(item.link)
 
 	# feedsportal
@@ -358,12 +233,11 @@ def Fill(rss, cache, feedurl="/", fast=False):
 		item.link = urlparse.urljoin(feedurl, item.link)
 
 	# check unwanted uppercase title
-	if 'title' in item:
-		if len(item.title) > 20 and item.title.isupper():
-			item.title = item.title.title()
+	if len(item.title) > 20 and item.title.isupper():
+		item.title = item.title.title()
 
 	# content already provided?
-	if 'content' in item and 'desc' in item:
+	if item.content and item.desc:
 		len_content = lenHTML(item.content)
 		len_desc = lenHTML(item.desc)
 		log('content: %s vs %s' % (len_content, len_desc))
@@ -402,7 +276,7 @@ def Fill(rss, cache, feedurl="/", fast=False):
 	data, url = ddl
 
 	out = readability.Document(data, url=url).summary(True)
-	if 'desc' not in item or lenHTML(out) > lenHTML(item.desc):
+	if not item.desc or lenHTML(out) > lenHTML(item.desc):
 		item.content = out
 		cache.set(item.link, out)
 	else:
@@ -429,14 +303,12 @@ def Gather(url, cachePath, mode='feed'):
 			return False
 
 	xml = cleanXML(xml)
-	rss = lxml.objectify.fromstring(xml)
-	root = rss.channel if hasattr(rss, 'channel') else rss
-	root = XMLMap(root, RSS_MAP)
-	size = len(root.item)
+	rss = feeds.parse(xml)
+	size = len(rss)
 
 	# set
 	startTime = time.time()
-	for i, item in enumerate(root.item):
+	for i, item in enumerate(rss.items):
 		if mode == 'progress':
 			if MAX_ITEM == 0:
 				print "%s/%s" % (i+1, size)
@@ -445,16 +317,16 @@ def Gather(url, cachePath, mode='feed'):
 			sys.stdout.flush()
 
 		if i+1 > LIM_ITEM > 0:
-			item.getparent().remove(item)
+			item.remove()
 		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM > 0:
 			if Fill(item, cache, url, True) is False:
-				item.getparent().remove(item)
+				item.remove()
 		else:
 			Fill(item, cache, url)
 
-	log(len(root.item))
+	log(len(rss))
 
-	return root.tostring(xml_declaration=True, encoding='UTF-8')
+	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == "__main__":
 	url, options = parseOptions(OPTIONS)
