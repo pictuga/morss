@@ -75,6 +75,12 @@ def lenHTML(txt):
 	else:
 		return 0
 
+def countWord(txt):
+	if len(txt):
+		return len(lxml.html.fromstring(txt).text_content().split())
+	else:
+		return 0
+
 def parseOptions(available):
 	options = None
 	if 'REQUEST_URI' in os.environ:
@@ -237,13 +243,18 @@ def Fill(item, cache, feedurl="/", fast=False):
 		item.title = item.title.title()
 
 	# content already provided?
-	if item.content and item.desc:
-		len_content = lenHTML(item.content)
-		len_desc = lenHTML(item.desc)
-		log('content: %s vs %s' % (len_content, len_desc))
-		if len_content > 5*len_desc:
-			log('provided')
-			return True
+	count_content = countWord(item.content)
+	count_desc = countWord(item.desc)
+
+	log('desc: %s words, content: %s words' % (count_content, count_desc))
+
+	if max(count_content, count_desc) > 500:
+		log('long enough')
+		return True
+
+	if count_content > 5*count_desc > 0 and count_content > 50:
+		log('content bigger enough')
+		return True
 
 	# check cache and previous errors
 	if item.link in cache:
@@ -276,7 +287,7 @@ def Fill(item, cache, feedurl="/", fast=False):
 	data, url = ddl
 
 	out = readability.Document(data, url=url).summary(True)
-	if not item.desc or lenHTML(out) > lenHTML(item.desc):
+	if countWord(out) > max(count_content, count_desc) > 0:
 		item.content = out
 		cache.set(item.link, out)
 	else:
