@@ -81,6 +81,22 @@ def countWord(txt):
 	else:
 		return 0
 
+def makeDesc(txt, length, suffix='...'):
+	' '.join(txt.split()[:length]) + suffix
+
+def setContent(item, txt):
+	if not item.desc:
+		if item.content:
+			log('content alone')
+			item.desc = item.content
+			item.content = txt
+		else:
+			log('empty')
+			item.desc = makeDesc(txt, 30)
+			item.content = txt
+	else:
+		item.content = txt
+
 def parseOptions(available):
 	options = None
 	if 'REQUEST_URI' in os.environ:
@@ -268,7 +284,7 @@ def Fill(item, cache, feedurl="/", fast=False):
 				log('old error')
 		else:
 			log('cached')
-			item.content = cache.get(item.link)
+			setContent(item, cache.get(item.link))
 			return True
 
 	# super-fast mode
@@ -288,7 +304,7 @@ def Fill(item, cache, feedurl="/", fast=False):
 
 	out = readability.Document(data, url=url).summary(True)
 	if countWord(out) > max(count_content, count_desc) > 0:
-		item.content = out
+		setContent(item, out)
 		cache.set(item.link, out)
 	else:
 		log('not bigger enough')
