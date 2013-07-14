@@ -110,7 +110,7 @@ def parseOptions(available):
 			if len(split) and split[0] in available:
 				options = split[0]
 				url = split[1]
-			url = "http://" + url
+			url = 'http://' + url
 
 	else:
 		if len(sys.argv) == 3:
@@ -123,7 +123,7 @@ def parseOptions(available):
 			return (None, None)
 
 		if urlparse.urlparse(url).scheme not in PROTOCOL:
-			url = "http://" + url
+			url = 'http://' + url
 
 	return (url, options)
 
@@ -134,7 +134,7 @@ class Cache:
 		self._hash = str(hash(self._key))
 
 		self._dir = folder
-		self._file = self._dir + "/" + self._hash
+		self._file = self._dir + '/' + self._hash
 
 		self._cached = {} # what *was* cached
 		self._cache = {} # new things to put in cache
@@ -219,7 +219,7 @@ def EncDownload(url):
 	log(enc)
 	return (data.decode(enc, 'replace'), con.geturl())
 
-def Fill(item, cache, feedurl="/", fast=False):
+def Fill(item, cache, feedurl='/', fast=False):
 	""" Returns True when it has done its best """
 
 	if not item.link:
@@ -240,7 +240,7 @@ def Fill(item, cache, feedurl="/", fast=False):
 	if match:
 		url = match.groups()[0].split('0')
 		t = {'A':'0', 'B':'.', 'C':'/', 'D':'?', 'E':'-', 'I':'_', 'L':'http://', 'S':'www.', 'N':'.com', 'O':'.co.uk'}
-		item.link = "".join([(t[s[0]] if s[0] in t else "=") + s[1:] for s in url[1:]])
+		item.link = ''.join([(t[s[0]] if s[0] in t else '=') + s[1:] for s in url[1:]])
 		log(item.link)
 
 	# reddit
@@ -338,9 +338,9 @@ def Gather(url, cachePath, mode='feed'):
 	for i, item in enumerate(rss.items):
 		if mode == 'progress':
 			if MAX_ITEM == 0:
-				print "%s/%s" % (i+1, size)
+				print '%s/%s' % (i+1, size)
 			else:
-				print "%s/%s" % (i+1, min(MAX_ITEM, size))
+				print '%s/%s' % (i+1, min(MAX_ITEM, size))
 			sys.stdout.flush()
 
 		if i+1 > LIM_ITEM > 0:
@@ -355,7 +355,7 @@ def Gather(url, cachePath, mode='feed'):
 
 	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	url, options = parseOptions(OPTIONS)
 
 	if 'REQUEST_URI' in os.environ:
@@ -373,7 +373,7 @@ if __name__ == "__main__":
 		cache =	os.path.expanduser('~') + '/.cache/morss'
 
 	if url is None:
-		print "Please provide url."
+		print 'Please provide url.'
 		sys.exit(1)
 
 	if options == 'progress':
@@ -388,6 +388,6 @@ if __name__ == "__main__":
 			print RSS
 
 	if RSS is False and options != 'progress':
-		print "Error fetching feed."
+		print 'Error fetching feed.'
 
 	log('done')
