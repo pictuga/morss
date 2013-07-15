@@ -65,9 +65,6 @@ def log(txt):
 		with open('morss.log', 'a') as file:
 			file.write(repr(txt).encode('utf-8') + "\n")
 
-def cleanXML(xml):
-	table = string.maketrans('', '')
-	return xml.translate(table, table[:32]).lstrip()
 
 def lenHTML(txt):
 	if len(txt):
@@ -329,7 +326,6 @@ def Gather(url, cachePath, mode='feed'):
 		except (urllib2.HTTPError, urllib2.URLError):
 			return False
 
-	xml = cleanXML(xml)
 	rss = feeds.parse(xml)
 	size = len(rss)
 
