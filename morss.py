@@ -16,9 +16,11 @@ import feeds
 
 import urllib2
 import socket
-from cookielib import CookieJar
 import chardet
 import urlparse
+
+from gzip import GzipFile
+from StringIO import StringIO
 
 from readability import readability
 
@@ -182,25 +184,59 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-def EncDownload(url):
-	try:
-		cj = CookieJar()
-		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-		opener.addheaders = [('User-Agent', UA_HML)]
-		con = opener.open(url, timeout=TIMEOUT)
-		data = con.read()
-	except (urllib2.HTTPError, urllib2.URLError, socket.timeout) as error:
-		log(error)
-		return False
+class HTMLDownloader(urllib2.HTTPCookieProcessor):
+	"""
+	Custom urllib2 handler to download html pages, following <meta> redirects,
+	using a browser user-agent and storing cookies.
+	"""
+	def __init__(self, cookiejar=None):
+		urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
+		self.userAgent = UA_HML
 
-	# meta-redirect
-	match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
-	if match:
-		new_url = match.groups()[0]
-		log('redirect: %s' % new_url)
-		return EncDownload(new_url)
+	def http_request(self, req):
+		urllib2.HTTPCookieProcessor.http_request(self, req)
+		req.add_header('Accept-Encoding', 'gzip')
+		return req
 
-	# encoding
+	def http_response(self, req, resp):
+		urllib2.HTTPCookieProcessor.http_response(self, req, resp)
+
+		if 200 <= resp.code < 300 and resp.info().maintype == 'text':
+			data = resp.read()
+
+			# gzip
+			if resp.headers.get('Content-Encoding') == 'gzip':
+				log('un-gzip')
+				data = GzipFile(fileobj=StringIO(data), mode='r').read()
+
+			# <meta> redirect
+			match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
+			if match:
+				newurl = match.groups()[0]
+				log('redirect: %s' % newurl)
+
+				newheaders = dict((k,v) for k,v in req.headers.items()
+					if k.lower() not in ('content-length', 'content-type'))
+				new = urllib2.Request(newurl,
+					headers=newheaders,
+					origin_req_host=req.get_origin_req_host(),
+					unverifiable=True)
+
+				return self.parent.open(new, timeout=req.timeout)
+
+			# decode
+			data = decodeHTML(resp, data)
+
+			fp = StringIO(data)
+			old_resp = resp
+			resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+			resp.msg = old_resp.msg
+		return resp
+
+	https_response = http_response
+	https_request = http_request
+
+def decodeHTML(con, data):
 	if con.headers.getparam('charset'):
 		log('header')
 		enc = con.headers.getparam('charset')
@@ -214,7 +250,7 @@ def EncDownload(url):
 			enc = chardet.detect(data)['encoding']
 
 	log(enc)
-	return (data.decode(enc, 'replace'), con.geturl())
+	return data.decode(enc, 'replace')
 
 def Fill(item, cache, feedurl='/', fast=False):
 	""" Returns True when it has done its best """
@@ -290,16 +326,17 @@ def Fill(item, cache, feedurl='/', fast=False):
 		return False
 
 	# download
-	ddl = EncDownload(item.link.encode('utf-8'))
-
-	if ddl is False:
+	try:
+		url = item.link.encode('utf-8')
+		con = urllib2.build_opener(HTMLDownloader()).open(url, timeout=TIMEOUT)
+		data = con.read()
+	except (urllib2.HTTPError, urllib2.URLError, socket.timeout) as error:
 		log('http error')
 		cache.set(item.link, 'error-http')
 		return True
 
-	data, url = ddl
+	out = readability.Document(data, url=con.url).summary(True)
 
-	out = readability.Document(data, url=url).summary(True)
 	if countWord(out) > max(count_content, count_desc) > 0:
 		setContent(item, out)
 		cache.set(item.link, out)
