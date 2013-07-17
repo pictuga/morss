@@ -195,8 +195,8 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 
 	def http_request(self, req):
 		urllib2.HTTPCookieProcessor.http_request(self, req)
-		req.add_header('Accept-Encoding', 'gzip')
-		req.add_header('User-Agent', self.useragent)
+		req.add_unredirected_header('Accept-Encoding', 'gzip')
+		req.add_unredirected_header('User-Agent', self.useragent)
 		return req
 
 	def http_response(self, req, resp):
