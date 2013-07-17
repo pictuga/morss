@@ -189,13 +189,14 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 	Custom urllib2 handler to download html pages, following <meta> redirects,
 	using a browser user-agent and storing cookies.
 	"""
-	def __init__(self, cookiejar=None):
+	def __init__(self, useragent=UA_HML, cookiejar=None):
 		urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
-		self.userAgent = UA_HML
+		self.useragent = useragent
 
 	def http_request(self, req):
 		urllib2.HTTPCookieProcessor.http_request(self, req)
 		req.add_header('Accept-Encoding', 'gzip')
+		req.add_header('User-Agent', self.useragent)
 		return req
 
 	def http_response(self, req, resp):
