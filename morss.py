@@ -237,6 +237,33 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 	https_response = http_response
 	https_request = http_request
 
+class CacheDownload(urllib2.BaseHandler):
+	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_RSS):
+		self.cache = cache
+		self.etag = etag
+		self.lastmodified = lastmodified
+		self.useragent = useragent
+
+	def http_request(self, req):
+		req.add_unredirected_header('User-Agent', self.useragent)
+		if self.cache:
+			if self.etag:
+				req.add_unredirected_header('If-None-Match', self.etag)
+			if self.lastmodified:
+				req.add_unredirected_header('If-Modified-Since', self.lastmodified)
+		return req
+
+	def http_error_304(self, req, fp, code, msg, headers):
+		log('http cached')
+		if self.etag:
+			headers.addheader('etag', self.etag)
+		if self.lastmodified:
+			headers.addheader('last-modified', self.lastmodified)
+		resp = urllib2.addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
+		return resp
+
+	https_request = http_request
+
 def decodeHTML(con, data):
 	if con.headers.getparam('charset'):
 		log('header')
@@ -357,10 +384,12 @@ def Gather(url, cachePath, mode='feed'):
 		xml = cache.get(url)
 	else:
 		try:
-			req = urllib2.Request(url)
-			req.add_unredirected_header('User-Agent', UA_RSS)
-			xml = urllib2.urlopen(req).read()
+			opener = CacheDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'))
+			con = urllib2.build_opener(opener).open(url)
+			xml = con.read()
 			cache.set(url, xml)
+			cache.set('etag', con.headers.getheader('etag'))
+			cache.set('lastmodified', con.headers.getheader('last-modified'))
 		except (urllib2.HTTPError, urllib2.URLError):
 			return False
 
