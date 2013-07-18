@@ -238,6 +238,11 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 	https_request = http_request
 
 class CacheDownload(urllib2.BaseHandler):
+	"""
+	Custom urllib2 handler to download a page, using etag/last-modified headers,
+	to save bandwidth. The given headers are added back into the header on error
+	304 for easier use.
+	"""
 	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_RSS):
 		self.cache = cache
 		self.etag = etag
