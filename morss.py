@@ -323,8 +323,6 @@ def Fill(item, cache, feedurl='/', fast=False):
 	count_content = countWord(item.content)
 	count_desc = countWord(item.desc)
 
-	log('desc: %s words, content: %s words' % (count_content, count_desc))
-
 	if max(count_content, count_desc) > 500:
 		log('long enough')
 		return True
