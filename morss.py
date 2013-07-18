@@ -161,7 +161,7 @@ class Cache:
 			return None
 
 	def set(self, key, content):
-		self._cache[key] = b64encode(content)
+		self._cache[key] = b64encode(content or '')
 
 	def save(self):
 		if len(self._cache) == 0:
