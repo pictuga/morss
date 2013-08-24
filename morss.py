@@ -412,7 +412,16 @@ if __name__ == '__main__':
 	log(url)
 
 	if 'REQUEST_URI' in os.environ:
+		if 'HTTP_IF_NONE_MATCH' in os.environ:
+			log('etag sent')
+			if time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
+				log('etag good')
+				print 'Status: 304'
+				print
+				sys.exit(0)
+
 		print 'Status: 200'
+		print 'ETag: "%s"' % int(time.time())
 
 		if options == 'progress':
 			print 'Content-Type: application/octet-stream'
