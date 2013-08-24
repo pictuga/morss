@@ -37,21 +37,6 @@ UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Ge
 
 PROTOCOL = ['http', 'https', 'ftp']
 
-ITEM_MAP = {
-	'link':		(('{http://www.w3.org/2005/Atom}link', 'href'),	'{}link'),
-	'desc':		('{http://www.w3.org/2005/Atom}summary',	'{}description'),
-	'description':	('{http://www.w3.org/2005/Atom}summary',	'{}description'),
-	'summary':	('{http://www.w3.org/2005/Atom}summary',	'{}description'),
-	'content':	('{http://www.w3.org/2005/Atom}content',	'{http://purl.org/rss/1.0/modules/content/}encoded')
-	}
-RSS_MAP = {
-	'desc':		('{http://www.w3.org/2005/Atom}subtitle',	'{}description'),
-	'description':	('{http://www.w3.org/2005/Atom}subtitle',	'{}description'),
-	'subtitle':	('{http://www.w3.org/2005/Atom}subtitle',	'{}description'),
-	'item':		('{http://www.w3.org/2005/Atom}entry',		'{}item'),
-	'entry':	('{http://www.w3.org/2005/Atom}entry',		'{}item')
-	}
-
 if 'REQUEST_URI' in os.environ:
 	import httplib
 	httplib.HTTPConnection.debuglevel = 1
