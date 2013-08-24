@@ -26,9 +26,9 @@ from readability import readability
 
 LIM_ITEM = 100	# deletes what's beyond
 MAX_ITEM = 50	# cache-only beyond
-MAX_TIME = 7	# cache-only after
-DELAY = 10	# xml cache
-TIMEOUT = 2	# http timeout
+MAX_TIME = 7	# cache-only after (in sec)
+DELAY = 10*60	# xml cache (in sec)
+TIMEOUT = 2	# http timeout (in sec)
 
 OPTIONS = ['progress', 'cache']
 
@@ -326,7 +326,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 		content = cache.get(item.link)
 		match = re.search(r'^error-([a-z]{2,10})$', content)
 		if match:
-			if cache.isYoungerThan(DELAY*60):
+			if cache.isYoungerThan(DELAY):
 				log('cached error: %s' % match.groups()[0])
 				return True
 			else:
@@ -364,10 +364,11 @@ def Fill(item, cache, feedurl='/', fast=False):
 	return True
 
 def Gather(url, cachePath, mode='feed'):
+	url = url.replace(' ', '%20')
 	cache = Cache(cachePath, url)
 
 	# fetch feed
-	if cache.isYoungerThan(DELAY*60) and url in cache:
+	if cache.isYoungerThan(DELAY) and url in cache:
 		log('xml cached')
 		xml = cache.get(url)
 	else:
