@@ -409,6 +409,7 @@ def Gather(url, cachePath, mode='feed'):
 
 if __name__ == '__main__':
 	url, options = parseOptions(OPTIONS)
+	log(url)
 
 	if 'REQUEST_URI' in os.environ:
 		print 'Status: 200'
@@ -420,7 +421,6 @@ if __name__ == '__main__':
 		print
 
 		cache = os.getcwd() + '/cache'
-		log(url)
 	else:
 		cache =	os.path.expanduser('~') + '/.cache/morss'
 
