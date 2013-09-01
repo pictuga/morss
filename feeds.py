@@ -55,6 +55,10 @@ def parse(data):
 	raise FeedException('unknow feed type')
 
 class FeedBase(object):
+	"""
+	Base for xml-related classes, which provides simple wrappers around xpath
+	selection and item creation
+	"""
 	def xpath(self, path):
 		""" Test xpath rule on xml tree """
 		return self.root.xpath(path, namespaces=NSMAP)
@@ -91,6 +95,10 @@ class FeedBase(object):
 		return etree.tostring(self.xml, pretty_print=True, **k)
 
 class FeedDescriptor(object):
+	"""
+	Descriptor which gives off elements based on "self.getName" and
+	"self.setName" as getter/setters. Looks far better, and avoids duplicates
+	"""
 	def __init__(self, name):
 		self.name = name
 
@@ -103,6 +111,14 @@ class FeedDescriptor(object):
 		return setter(value)
 
 class FeedList(object):
+	"""
+	Class to map a list of xml elements against a list of matching objects,
+	while avoiding to recreate the same matching object over and over again. So
+	as to avoid extra confusion, list's elements are called "children" here, so
+	as not to use "items", which is already in use in RSS/Atom related code.
+
+	Comes with its very own descriptor.
+	"""
 	def __init__(self, getter, tag, childClass):
 		self.getter = getter
 		self.childClass = childClass
@@ -136,6 +152,9 @@ class FeedList(object):
 		return len(self.getter())
 
 class FeedListDescriptor(object):
+	"""
+	Descriptor for FeedList
+	"""
 	def __init__(self, name):
 		self.name = name
 		self.items = {} # id(instance) => FeedList
