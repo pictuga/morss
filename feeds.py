@@ -90,15 +90,73 @@ class FeedBase(object):
 		""" Returns string using lxml. Arguments passed to tostring """
 		return etree.tostring(self.xml, pretty_print=True, **k)
 
+class FeedDescriptor(object):
+	def __init__(self, name):
+		self.name = name
+
+	def __get__(self, instance, owner):
+		getter = getattr(instance, 'get%s' % self.name.title())
+		return getter()
+
+	def __set__(self, instance, value):
+		setter = getattr(instance, 'set%s' % self.name.title())
+		return setter(value)
+
+class FeedList(object):
+	def __init__(self, getter, tag, childClass):
+		self.getter = getter
+		self.childClass = childClass
+		self.tag = tag
+		self._children = {} # id(xml) => FeedItem
+
+	def getChildren(self):
+		children = self.getter()
+		out = []
+		for child in children:
+			if id(child) in self._children:
+				out.append(self._children[id(child)])
+			else:
+				new = self.childClass(child, self.tag)
+				self._children[id(child)] = new
+				out.append(new)
+		return out
+
+	def __getitem__(self, key):
+		return self.getChildren()[key]
+
+	def __delitem__(self, key):
+		child = self.getter()[key]
+		if id(child) in self._children:
+			self._children[id(child)].remove()
+			del self._children[id(child)]
+		else:
+			child.getparent().remove(child)
+
+	def __len__(self):
+		return len(self.getter())
+
+class FeedListDescriptor(object):
+	def __init__(self, name):
+		self.name = name
+		self.items = {} # id(instance) => FeedList
+
+	def __get__(self, instance, owner):
+		key = id(instance)
+		if key in self.items:
+			return self.items[key]
+		else:
+			getter = getattr(instance, 'get%s' % self.name.title())
+			self.items[key] = FeedList(getter, instance.tag, eval(instance.itemClass))
+			return self.items[key]
+
 class FeedParser(FeedBase):
-	FeedItem = 'FeedItem'
+	itemClass = 'FeedItem'
 	mimetype = 'application/xml'
 
 	def __init__(self, xml, tag):
 		self.xml = xml
 		self.root = self.xml.xpath("//atom03:feed|//atom:feed|//channel|//rssfake:channel", namespaces=NSMAP)[0]
 		self.tag = tag
-		self._items = {} # id(xml) => FeedItem
 
 	def getTitle(self):
 		return ""
@@ -120,47 +178,15 @@ class FeedParser(FeedBase):
 	def setItems(self, value):
 		pass
 
-	title = property(
-		fget=lambda self:	self.getTitle(),
-		fset=lambda self,v: self.setTitle(v))
-	description = desc = property(
-		fget=lambda self:	self.getDesc(),
-		fset=lambda self,v: self.setDesc(v))
-	items = property(
-		fget=lambda self:	self._getItems(),
-		fset=lambda self,v: self.setItems(v))
-
-	def _getItems(self):
-		items = self.getItems()
-		out = []
-		for item in items:
-			if id(item) in self._items:
-				out.append(self._items[id(item)])
-			else:
-				new = eval(self.FeedItem)(item, self.tag)
-				self._items[id(item)] = new
-				out.append(new)
-		return out
-
-	def __getitem__(self, key):
-		return self.items[key]
-
-	def __delitem__(self, key):
-		item = self.getItems()[key]
-		if id(item) in self._items:
-			self._items[id(item)].remove()
-			del self._items[id(item)]
-		else:
-			item.getparent().remove(item)
-
-	def __len__(self):
-		return len(self.getItems())
+	title = FeedDescriptor('title')
+	description = desc = FeedDescriptor('desc')
+	items = FeedListDescriptor('items')
 
 class FeedParserRSS(FeedParser):
 	"""
 	RSS Parser
 	"""
-	FeedItem = 'FeedItemRSS'
+	itemClass = 'FeedItemRSS'
 	mimetype = 'application/rss+xml'
 
 	def getTitle(self):
@@ -190,7 +216,7 @@ class FeedParserAtom(FeedParser):
 	"""
 	Atom Parser
 	"""
-	FeedItem = 'FeedItemAtom'
+	itemClass = 'FeedItemAtom'
 	mimetype = 'application/atom+xml'
 
 	def getTitle(self):
@@ -242,18 +268,10 @@ class FeedItem(FeedBase):
 		pass
 
 
-	title = property(
-		fget=lambda self:	self.getTitle(),
-		fset=lambda self,v: self.setTitle(v))
-	link = property(
-		fget=lambda self:	self.getLink(),
-		fset=lambda self,v: self.setLink(v))
-	description = desc = property(
-		fget=lambda self:	self.getDesc(),
-		fset=lambda self,v: self.setDesc(v))
-	content = property(
-		fget=lambda self:	self.getContent(),
-		fset=lambda self,v: self.setContent(v))
+	title = FeedDescriptor('title')
+	link = FeedDescriptor('link')
+	description = desc = FeedDescriptor('desc')
+	content = FeedDescriptor('content')
 
 	def remove(self):
 		self.xml.getparent().remove(self.xml)
