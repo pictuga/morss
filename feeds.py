@@ -42,7 +42,10 @@ class FeedException(Exception):
 	pass
 
 def parse(data):
-	doc = etree.fromstring(data)
+	data = data.decode('utf-8', 'replace').encode('utf-8')
+	parser = etree.XMLParser(recover=True)
+	doc = etree.fromstring(data, parser)
+
 	match = doc.xpath("//atom03:feed|//atom:feed|//channel|//rdf:rdf|//rdf:RDF", namespaces=NSMAP)
 	if len(match):
 		mtable = {	'rdf:rdf': FeedParserRSS, 'channel': FeedParserRSS,
