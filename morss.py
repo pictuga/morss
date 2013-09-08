@@ -383,7 +383,7 @@ def Gather(url, cachePath, mode='feed'):
 			return False
 
 	rss = feeds.parse(xml)
-	size = len(rss)
+	size = len(rss.items)
 
 	# set
 	startTime = time.time()
@@ -403,7 +403,7 @@ def Gather(url, cachePath, mode='feed'):
 		else:
 			Fill(item, cache, url)
 
-	log(len(rss))
+	log(len(rss.items))
 
 	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
