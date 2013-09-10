@@ -351,6 +351,11 @@ def Fill(item, cache, feedurl='/', fast=False):
 		cache.set(item.link, 'error-http')
 		return True
 
+	if con.info().maintype != 'text':
+		log('non-text page')
+		cache.set(item.link, 'error-type')
+		return True
+
 	out = readability.Document(data, url=con.url).summary(True)
 
 	if countWord(out) > max(count_content, count_desc) > 0:
