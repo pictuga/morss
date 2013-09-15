@@ -385,8 +385,7 @@ def Gather(url, cachePath, progress=False):
 		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
 			return False
 
-		if con.info().type in ['text/xml', 'application/xml', 'application/rss+xml',
-		'application/rdf+xml', 'application/atom+xml']:
+		if xml[:5] == '<?xml' or con.info().type in ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml']:
 			cache.set('xml', xml)
 			cache.set('etag', con.headers.getheader('etag'))
 			cache.set('lastmodified', con.headers.getheader('last-modified'))
