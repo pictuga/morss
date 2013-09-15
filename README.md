@@ -1,4 +1,4 @@
-#Morss - Get full text RSS feeds
+#Morss - Get full-text RSS feeds
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the RSS feed rather useless. So this tool intends to fix that problem.
 This tool opens the links from the rss feed, then downloads the full article from the newspaper website and puts it back in the rss feed.
