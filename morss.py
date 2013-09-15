@@ -27,7 +27,7 @@ from readability import readability
 LIM_ITEM = 100	# deletes what's beyond
 MAX_ITEM = 50	# cache-only beyond
 MAX_TIME = 7	# cache-only after (in sec)
-DELAY = 10*60	# xml cache (in sec)
+DELAY = 10*60	# xml cache & ETag cache (in sec)
 TIMEOUT = 2	# http timeout (in sec)
 
 DEBUG = False
