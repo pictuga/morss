@@ -297,8 +297,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 			log(item.link)
 
 	# check relative urls
-	if urlparse.urlparse(item.link).netloc is '':
-		item.link = urlparse.urljoin(feedurl, item.link)
+	item.link = urlparse.urljoin(feedurl, item.link)
 
 	# check unwanted uppercase title
 	if len(item.title) > 20 and item.title.isupper():
