@@ -196,19 +196,20 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 				data = GzipFile(fileobj=StringIO(data), mode='r').read()
 
 			# <meta> redirect
-			match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
-			if match:
-				newurl = match.groups()[0]
-				log('redirect: %s' % newurl)
+			if resp.info().type in ['text/html', 'application/xhtml+xml']:
+				match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
+				if match:
+					newurl = match.groups()[0]
+					log('redirect: %s' % newurl)
 
-				newheaders = dict((k,v) for k,v in req.headers.items()
-					if k.lower() not in ('content-length', 'content-type'))
-				new = urllib2.Request(newurl,
-					headers=newheaders,
-					origin_req_host=req.get_origin_req_host(),
-					unverifiable=True)
+					newheaders = dict((k,v) for k,v in req.headers.items()
+						if k.lower() not in ('content-length', 'content-type'))
+					new = urllib2.Request(newurl,
+						headers=newheaders,
+						origin_req_host=req.get_origin_req_host(),
+						unverifiable=True)
 
-				return self.parent.open(new, timeout=req.timeout)
+					return self.parent.open(new, timeout=req.timeout)
 
 			# decode
 			data = decodeHTML(resp, data)
