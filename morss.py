@@ -78,6 +78,9 @@ def setContent(item, txt):
 		item.content = txt
 
 def parseOptions():
+	url = ''
+	options = []
+
 	if 'REQUEST_URI' in os.environ:
 		url = os.environ['REQUEST_URI'][1:]
 
