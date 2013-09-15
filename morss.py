@@ -410,7 +410,7 @@ if __name__ == '__main__':
 	DEBUG = 'debug' in options
 
 	if 'REQUEST_URI' in os.environ:
-		if 'HTTP_IF_NONE_MATCH' in os.environ:
+		if 'HTTP_IF_NONE_MATCH' in os.environ and 'force' not in options:
 			if time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
 				print 'Status: 304'
 				print
