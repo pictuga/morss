@@ -401,6 +401,7 @@ def Gather(url, cachePath, progress=False):
 			Fill(item, cache, url)
 
 	log(len(rss.items))
+	log(time.time() - startTime)
 
 	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
