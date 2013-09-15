@@ -364,6 +364,8 @@ def Fill(item, cache, feedurl='/', fast=False):
 	return True
 
 def Gather(url, cachePath, progress=False):
+	log(url)
+
 	url = url.replace(' ', '%20')
 	cache = Cache(cachePath, url)
 
@@ -436,7 +438,6 @@ if __name__ == '__main__':
 	else:
 		cache =	os.path.expanduser('~') + '/.cache/morss'
 
-	log(url)
 	if url is None:
 		print 'Please provide url.'
 		sys.exit(1)
