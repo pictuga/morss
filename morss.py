@@ -369,18 +369,38 @@ def Gather(url, cachePath, progress=False):
 	cache = Cache(cachePath, url)
 
 	# fetch feed
-	if cache.isYoungerThan(DELAY) and url in cache:
-		log('xml cached')
-		xml = cache.get(url)
+	if cache.isYoungerThan(DELAY):
+		if 'xml' in cache:
+			log('xml cached')
+			xml = cache.get('xml')
+		if 'link' in cache:
+			log('link cached')
+			return Gather(cache.get('link'), cachePath, progress)
 	else:
 		try:
 			opener = CacheDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'))
 			con = urllib2.build_opener(opener).open(url)
 			xml = con.read()
-			cache.set(url, xml)
+		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
+			return False
+
+		if con.info().type in ['text/xml', 'application/xml', 'application/rss+xml',
+		'application/rdf+xml', 'application/atom+xml']:
+			cache.set('xml', xml)
 			cache.set('etag', con.headers.getheader('etag'))
 			cache.set('lastmodified', con.headers.getheader('last-modified'))
-		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
+		elif con.info().type in ['text/html', 'application/xhtml+xml']:
+			match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
+			if len(match):
+				link = urlparse.urljoin(url, match[0])
+				cache.set('link', link)
+				return Gather(link, cachePath, progress)
+			else:
+				log('no-link html')
+				return False
+		else:
+			log(con.info().type)
+			log('random page')
 			return False
 
 	rss = feeds.parse(xml)
