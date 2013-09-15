@@ -149,6 +149,7 @@ class Cache:
 		out = []
 		for (key, bdata) in self._cache.iteritems():
 			out.append(str(key) + "\t" + bdata)
+		out.append("_key\t" + self._key)
 		txt = "\n".join(out)
 
 		if not os.path.exists(self._dir):
