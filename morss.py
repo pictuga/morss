@@ -30,7 +30,7 @@ MAX_TIME = 7	# cache-only after (in sec)
 DELAY = 10*60	# xml cache (in sec)
 TIMEOUT = 2	# http timeout (in sec)
 
-OPTIONS = ['progress', 'cache']
+DEBUG = False
 
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
@@ -45,12 +45,8 @@ if 'REQUEST_URI' in os.environ:
 	cgitb.enable()
 
 def log(txt):
-	if not 'REQUEST_URI' in os.environ:
-		if os.getenv('DEBUG', False):
-			print repr(txt)
-	else:
-		with open('morss.log', 'a') as file:
-			file.write(repr(txt).encode('utf-8') + "\n")
+	if DEBUG:
+		print repr(txt)
 
 
 def lenHTML(txt):
@@ -81,30 +77,25 @@ def setContent(item, txt):
 	else:
 		item.content = txt
 
-def parseOptions(available):
-	options = None
+def parseOptions():
 	if 'REQUEST_URI' in os.environ:
-		if 'REDIRECT_URL' in os.environ:
-			url = os.environ['REQUEST_URI'][1:]
-		else:
-			url = os.environ['REQUEST_URI'][len(os.environ['SCRIPT_NAME'])+1:]
+		url = os.environ['REQUEST_URI'][1:]
+
+		if 'REDIRECT_URL' not in os.environ:
+			url = url[len(os.environ['SCRIPT_NAME']):]
+
+		if url.startswith(':'):
+			options = url.split('/')[0].split(':')[1:]
+			url = url.split('/', 1)[1]
 
 		if urlparse.urlparse(url).scheme not in PROTOCOL:
-			split = url.split('/', 1)
-			if len(split) and split[0] in available:
-				options = split[0]
-				url = split[1]
 			url = 'http://' + url
-
 	else:
-		if len(sys.argv) == 3:
-			if sys.argv[1] in available:
-				options = sys.argv[1]
-			url = sys.argv[2]
-		elif len(sys.argv) == 2:
-			url = sys.argv[1]
-		else:
-			return (None, None)
+		if len(sys.argv) <= 1:
+			return (None, [])
+
+		options = sys.argv[1:-1]
+		url = sys.argv[-1]
 
 		if urlparse.urlparse(url).scheme not in PROTOCOL:
 			url = 'http://' + url
@@ -369,7 +360,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 
 	return True
 
-def Gather(url, cachePath, mode='feed'):
+def Gather(url, cachePath, progress=False):
 	url = url.replace(' ', '%20')
 	cache = Cache(cachePath, url)
 
@@ -394,7 +385,7 @@ def Gather(url, cachePath, mode='feed'):
 	# set
 	startTime = time.time()
 	for i, item in enumerate(rss.items):
-		if mode == 'progress':
+		if progress:
 			if MAX_ITEM == 0:
 				print '%s/%s' % (i+1, size)
 			else:
@@ -414,22 +405,24 @@ def Gather(url, cachePath, mode='feed'):
 	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == '__main__':
-	url, options = parseOptions(OPTIONS)
-	log(url)
+	url, options = parseOptions()
+	DEBUG = 'debug' in options
 
 	if 'REQUEST_URI' in os.environ:
 		if 'HTTP_IF_NONE_MATCH' in os.environ:
-			log('etag sent')
 			if time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
-				log('etag good')
 				print 'Status: 304'
 				print
+				log(url)
+				log('etag good')
 				sys.exit(0)
 
 		print 'Status: 200'
 		print 'ETag: "%s"' % int(time.time())
 
-		if options == 'progress':
+		if 'debug' in options:
+			print 'Content-Type: text/plain'
+		elif 'progress' in options:
 			print 'Content-Type: application/octet-stream'
 		else:
 			print 'Content-Type: text/xml'
@@ -439,22 +432,22 @@ if __name__ == '__main__':
 	else:
 		cache =	os.path.expanduser('~') + '/.cache/morss'
 
+	log(url)
 	if url is None:
 		print 'Please provide url.'
 		sys.exit(1)
 
-	if options == 'progress':
+	if 'progress' in options:
 		MAX_TIME = -1
-	if options == 'cache':
+	if 'cache' in options:
 		MAX_TIME = 0
 
-	RSS = Gather(url, cache, options)
+	RSS = Gather(url, cache, 'progress' in options)
 
-	if RSS is not False and options != 'progress':
-		if 'REQUEST_URI' in os.environ or not os.getenv('DEBUG', False):
+	if RSS is not False and 'progress' not in options and not DEBUG:
 			print RSS
 
-	if RSS is False and options != 'progress':
+	if RSS is False and 'progress' not in options:
 		print 'Error fetching feed.'
 
 	log('done')
