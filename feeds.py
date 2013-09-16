@@ -317,6 +317,13 @@ class FeedItem(FeedBase):
 		pass
 
 
+	def getLink(self):
+		return ""
+
+	def setLink(self, value):
+		pass
+
+
 	def getDesc(self):
 		return ""
 
