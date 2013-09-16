@@ -3,6 +3,8 @@
 from lxml import etree
 import re
 
+Element = etree.Element
+
 NSMAP = {'atom':	'http://www.w3.org/2005/Atom',
 	'atom03':	'http://purl.org/atom/ns#',
 	'media':	'http://search.yahoo.com/mrss/',
@@ -129,7 +131,8 @@ class FeedList(object):
 
 	Comes with its very own descriptor.
 	"""
-	def __init__(self, getter, tag, childClass):
+	def __init__(self, parent, getter, tag, childClass):
+		self.parent = parent
 		self.getter = getter
 		self.childClass = childClass
 		self.tag = tag
@@ -146,6 +149,21 @@ class FeedList(object):
 				self._children[id(child)] = new
 				out.append(new)
 		return out
+
+	def append(self, cousin=None):
+		new = self.childClass(tag=self.tag)
+		self.parent.root.append(new.xml)
+		self._children[id(new.xml)] = new
+
+		for key in self.childClass.__dict__:
+			if key[:3] == 'set':
+				attr = key[3:].lower()
+				if hasattr(cousin, attr):
+					setattr(new, attr, getattr(cousin, attr))
+				elif attr in cousin:
+					setattr(new, attr, cousin[attr])
+
+		return new
 
 	def __getitem__(self, key):
 		return self.getChildren()[key]
@@ -169,20 +187,29 @@ class FeedListDescriptor(object):
 		self.name = name
 		self.items = {} # id(instance) => FeedList
 
-	def __get__(self, instance, owner):
+	def __get__(self, instance, owner=None):
 		key = id(instance)
 		if key in self.items:
 			return self.items[key]
 		else:
 			getter = getattr(instance, 'get%s' % self.name.title())
-			self.items[key] = FeedList(getter, instance.tag, eval(instance.itemClass))
+			className = globals()[getattr(instance, '%sClass' % self.name)]
+			self.items[key] = FeedList(instance, getter, instance.tag, className)
 			return self.items[key]
 
-class FeedParser(FeedBase):
-	itemClass = 'FeedItem'
-	mimetype = 'application/xml'
+	def __set__(self, instance, value):
+		feedlist = self.__get__(instance)
+		[x.remove() for x in [x for x in f.items]]
+		[feedlist.append(x) for x in value]
 
-	def __init__(self, xml, tag):
+class FeedParser(FeedBase):
+	itemsClass = 'FeedItem'
+	mimetype = 'application/xml'
+	base = '<?xml?>'
+
+	def __init__(self, xml=None, tag='atom:feed'):
+		if xml is None:
+			xml = etree.fromstring(self.base[tag])
 		self.xml = xml
 		self.root = self.xml.xpath("//atom03:feed|//atom:feed|//channel|//rssfake:channel", namespaces=NSMAP)[0]
 		self.tag = tag
@@ -215,8 +242,10 @@ class FeedParserRSS(FeedParser):
 	"""
 	RSS Parser
 	"""
-	itemClass = 'FeedItemRSS'
+	itemsClass = 'FeedItemRSS'
 	mimetype = 'application/rss+xml'
+	base = {	'rdf:rdf':	'<?xml version="1.0" encoding="utf-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/"><channel rdf:about="http://example.org/rss.rdf"></channel></rdf:RDF>',
+				'channel':	'<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel></channel></rss>'}
 
 	def getTitle(self):
 		return self.xval('rssfake:title|title')
@@ -245,8 +274,10 @@ class FeedParserAtom(FeedParser):
 	"""
 	Atom Parser
 	"""
-	itemClass = 'FeedItemAtom'
+	itemsClass = 'FeedItemAtom'
 	mimetype = 'application/atom+xml'
+	base = {	'atom:feed':	'<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>',
+				'atom03:feed':	'<?xml version="1.0" encoding="utf-8"?><feed version="0.3" xmlns="http://purl.org/atom/ns#"></feed>'}
 
 	def getTitle(self):
 		return self.xval('atom:title|atom03:title')
@@ -272,7 +303,10 @@ class FeedParserAtom(FeedParser):
 		return self.xpath('atom:entry|atom03:entry')
 
 class FeedItem(FeedBase):
-	def __init__(self, xml, tag):
+	def __init__(self, xml=None, tag='atom:feed'):
+		if xml is None:
+			xml = Element(tagNS(self.base[tag]))
+
 		self.root = self.xml = xml
 		self.tag = tag
 
@@ -306,6 +340,9 @@ class FeedItem(FeedBase):
 		self.xml.getparent().remove(self.xml)
 
 class FeedItemRSS(FeedItem):
+	base =  {	'rdf:rdf':	'rssfake:item',
+				'channel':	'item'}
+
 	def getTitle(self):
 		return self.xval('rssfake:title|title')
 
@@ -346,6 +383,9 @@ class FeedItemRSS(FeedItem):
 		element.text = value
 
 class FeedItemAtom(FeedItem):
+	base = {	'atom:feed':	'atom:entry',
+				'atom03:feed':	'atom03:entry'}
+
 	def getTitle(self):
 		return self.xval('atom:title|atom03:title')
 
