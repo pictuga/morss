@@ -343,6 +343,15 @@ class FeedItem(FeedBase):
 	description = desc = FeedDescriptor('desc')
 	content = FeedDescriptor('content')
 
+	def pushContent(self, value, clip=False):
+		if not self.desc and self.content:
+			self.desc = self.content
+
+		if self.desc and clip:
+			self.content = self.desc + "<br/><br/>* * *<br/><br/>" + value
+		else:
+			self.content = value
+
 	def remove(self):
 		self.xml.getparent().remove(self.xml)
 
