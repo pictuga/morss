@@ -34,7 +34,7 @@ TIMEOUT = 2	# http timeout (in sec)
 DEBUG = False
 
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
-UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
+UA_HTML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
 
 PROTOCOL = ['http', 'https', 'ftp']
 
@@ -169,7 +169,7 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 	Custom urllib2 handler to download html pages, following <meta> redirects,
 	using a browser user-agent and storing cookies.
 	"""
-	def __init__(self, useragent=UA_HML, cookiejar=None):
+	def __init__(self, useragent=UA_HTML, cookiejar=None):
 		urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
 		self.useragent = useragent
 
