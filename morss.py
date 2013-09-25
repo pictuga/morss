@@ -14,6 +14,7 @@ import lxml.builder
 
 import feeds
 
+import httplib
 import urllib2
 import socket
 import chardet
@@ -38,7 +39,6 @@ UA_HML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Ge
 PROTOCOL = ['http', 'https', 'ftp']
 
 if 'REQUEST_URI' in os.environ:
-	import httplib
 	httplib.HTTPConnection.debuglevel = 1
 
 	import cgitb
