@@ -445,7 +445,9 @@ if __name__ == '__main__':
 		print 'Status: 200'
 		print 'ETag: "%s"' % int(time.time())
 
-		if 'debug' in options:
+		if 'html' in options:
+			print 'Content-Type: text/html'
+		elif 'debug' in options:
 			print 'Content-Type: text/plain'
 		elif 'progress' in options:
 			print 'Content-Type: application/octet-stream'
