@@ -207,7 +207,7 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 					return self.parent.open(new, timeout=req.timeout)
 
 			# decode
-			data = decodeHTML(resp, data)
+			data = decodeHTML(data, resp)
 
 			fp = StringIO(data)
 			old_resp = resp
@@ -250,8 +250,8 @@ class CacheDownload(urllib2.BaseHandler):
 
 	https_request = http_request
 
-def decodeHTML(con, data):
-	if con.headers.getparam('charset'):
+def decodeHTML(data, con=None):
+	if con is not None and con.headers.getparam('charset'):
 		log('header')
 		enc = con.headers.getparam('charset')
 	else:
