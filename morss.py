@@ -304,6 +304,14 @@ def Fill(item, cache, feedurl='/', fast=False, clip=False):
 
 	link = item.link
 
+	# twitter
+	if urlparse.urlparse(item.link).netloc == 'twitter.com':
+		match = lxml.html.fromstring(item.content).xpath('//a/@data-expanded-url')
+		if len(match):
+			link = match[0]
+			clip = True
+			log(link)
+
 	# check cache and previous errors
 	if link in cache:
 		content = cache.get(link)
