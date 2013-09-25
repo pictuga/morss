@@ -124,8 +124,6 @@ class Cache:
 					key, bdata = line.split("\t", 1)
 					self._cached[key] = bdata
 
-		log(self._hash)
-
 	def __del__(self):
 		self.save()
 
@@ -368,6 +366,8 @@ def Gather(url, cachePath, progress=False):
 
 	url = url.replace(' ', '%20')
 	cache = Cache(cachePath, url)
+
+	log(cache._hash)
 
 	# fetch feed
 	if cache.isYoungerThan(DELAY):
