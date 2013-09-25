@@ -314,9 +314,11 @@ def Fill(item, cache, feedurl='/', fast=False):
 		log('content bigger enough')
 		return True
 
+	link = item.link
+
 	# check cache and previous errors
-	if item.link in cache:
-		content = cache.get(item.link)
+	if link in cache:
+		content = cache.get(link)
 		match = re.search(r'^error-([a-z]{2,10})$', content)
 		if match:
 			if cache.isYoungerThan(DELAY):
@@ -326,7 +328,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 				log('old error')
 		else:
 			log('cached')
-			setContent(item, cache.get(item.link))
+			setContent(item, cache.get(link))
 			return True
 
 	# super-fast mode
@@ -336,27 +338,27 @@ def Fill(item, cache, feedurl='/', fast=False):
 
 	# download
 	try:
-		url = item.link.encode('utf-8')
+		url = link.encode('utf-8')
 		con = urllib2.build_opener(HTMLDownloader()).open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (urllib2.URLError, httplib.HTTPException, socket.timeout):
 		log('http error')
-		cache.set(item.link, 'error-http')
+		cache.set(link, 'error-http')
 		return True
 
 	if con.info().maintype != 'text':
 		log('non-text page')
-		cache.set(item.link, 'error-type')
+		cache.set(link, 'error-type')
 		return True
 
 	out = readability.Document(data, url=con.url).summary(True)
 
 	if countWord(out) > max(count_content, count_desc) > 0:
 		setContent(item, out)
-		cache.set(item.link, out)
+		cache.set(link, out)
 	else:
 		log('not bigger enough')
-		cache.set(item.link, 'error-length')
+		cache.set(link, 'error-length')
 		return True
 
 	return True
