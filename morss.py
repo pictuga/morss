@@ -273,6 +273,9 @@ def Fill(item, cache, feedurl='/', fast=False):
 
 	log(item.link)
 
+	# check relative urls
+	item.link = urlparse.urljoin(feedurl, item.link)
+
 	# feedburner
 	feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
 	match = item.xval('feedburner:origLink')
@@ -294,9 +297,6 @@ def Fill(item, cache, feedurl='/', fast=False):
 		if len(match):
 			item.link = match[0]
 			log(item.link)
-
-	# check relative urls
-	item.link = urlparse.urljoin(feedurl, item.link)
 
 	# check unwanted uppercase title
 	if len(item.title) > 20 and item.title.isupper():
