@@ -341,7 +341,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 		url = item.link.encode('utf-8')
 		con = urllib2.build_opener(HTMLDownloader()).open(url, timeout=TIMEOUT)
 		data = con.read()
-	except (urllib2.URLError, httplib.HTTPException, socket.timeout) as error:
+	except (urllib2.URLError, httplib.HTTPException, socket.timeout):
 		log('http error')
 		cache.set(item.link, 'error-http')
 		return True
