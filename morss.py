@@ -13,6 +13,7 @@ import lxml.html.clean
 import lxml.builder
 
 import feeds
+import feedify
 
 import httplib
 import urllib2
@@ -377,6 +378,8 @@ def Gather(url, cachePath, progress=False):
 
 		if xml[:5] == '<?xml' or con.info().type in MIMETYPE['xml']:
 			style = 'normal'
+		elif feedify.supported(url):
+			style = 'feedify'
 		elif con.info().type in MIMETYPE['html']:
 			style = 'html'
 		else:
@@ -389,6 +392,8 @@ def Gather(url, cachePath, progress=False):
 
 	if style == 'normal':
 		rss = feeds.parse(xml)
+	elif style == 'feedify':
+		xml = decodeHTML(xml)
 		rss = feedify.build(url, xml)
 	elif style == 'html':
 		match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
