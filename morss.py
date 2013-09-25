@@ -36,6 +36,9 @@ DEBUG = False
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HTML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
 
+MIMETYPE = {	'xml':	['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
+				'html':	['text/html', 'application/xhtml+xml']}
+
 PROTOCOL = ['http', 'https', 'ftp']
 
 if 'REQUEST_URI' in os.environ:
@@ -173,7 +176,7 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 				data = GzipFile(fileobj=StringIO(data), mode='r').read()
 
 			# <meta> redirect
-			if resp.info().type in ['text/html', 'application/xhtml+xml']:
+			if resp.info().type in MIMETYPE['html']:
 				match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
 				if match:
 					newurl = match.groups()[0]
@@ -356,40 +359,49 @@ def Gather(url, cachePath, progress=False):
 	log(cache._hash)
 
 	# fetch feed
-	if cache.isYoungerThan(DELAY):
-		if 'xml' in cache:
-			log('xml cached')
-			xml = cache.get('xml')
-		if 'link' in cache:
-			log('link cached')
-			return Gather(cache.get('link'), cachePath, progress)
+	if cache.isYoungerThan(DELAY) and 'xml' in cache and 'style' in cache:
+		log('xml cached')
+		xml = cache.get('xml')
+		style = cache.get('style')
 	else:
 		try:
 			opener = CacheDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'))
-			con = urllib2.build_opener(opener).open(url)
+			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
 		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
 			return False
 
-		if xml[:5] == '<?xml' or con.info().type in ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml']:
-			cache.set('xml', xml)
-			cache.set('etag', con.headers.getheader('etag'))
-			cache.set('lastmodified', con.headers.getheader('last-modified'))
-		elif con.info().type in ['text/html', 'application/xhtml+xml']:
-			match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
-			if len(match):
-				link = urlparse.urljoin(url, match[0])
-				cache.set('link', link)
-				return Gather(link, cachePath, progress)
-			else:
-				log('no-link html')
-				return False
-		else:
-			log(con.info().type)
-			log('random page')
-			return False
+		cache.set('xml', xml)
+		cache.set('etag', con.headers.getheader('etag'))
+		cache.set('lastmodified', con.headers.getheader('last-modified'))
 
-	rss = feeds.parse(xml)
+		if xml[:5] == '<?xml' or con.info().type in MIMETYPE['xml']:
+			style = 'normal'
+		elif con.info().type in MIMETYPE['html']:
+			style = 'html'
+		else:
+			style = 'none'
+			log(con.info().type)
+
+		cache.set('style', style)
+
+	log(style)
+
+	if style == 'normal':
+		rss = feeds.parse(xml)
+		rss = feedify.build(url, xml)
+	elif style == 'html':
+		match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
+		if len(match):
+			link = urlparse.urljoin(url, match[0])
+			return Gather(link, cachePath, progress)
+		else:
+			log('no-link html')
+			return False
+	else:
+		log('random page')
+		return False
+
 	size = len(rss.items)
 
 	# set
