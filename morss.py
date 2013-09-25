@@ -311,6 +311,12 @@ def Fill(item, cache, feedurl='/', fast=False, clip=False):
 			link = match[0]
 			clip = True
 			log(link)
+		else:
+			link = None
+
+	if link is None:
+		log('no used link')
+		return True
 
 	# check cache and previous errors
 	if link in cache:
