@@ -365,7 +365,7 @@ def Fill(item, cache, feedurl='/', fast=False, clip=False):
 
 	return True
 
-def Gather(url, cachePath, progress=False):
+def Gather(url, cachePath, options):
 	log(url)
 
 	url = url.replace(' ', '%20')
@@ -413,7 +413,7 @@ def Gather(url, cachePath, progress=False):
 		match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
 		if len(match):
 			link = urlparse.urljoin(url, match[0])
-			return Gather(link, cachePath, progress)
+			return Gather(link, cachePath, options)
 		else:
 			log('no-link html')
 			return False
@@ -426,7 +426,7 @@ def Gather(url, cachePath, progress=False):
 	# set
 	startTime = time.time()
 	for i, item in enumerate(rss.items):
-		if progress:
+		if 'progress' in options:
 			if MAX_ITEM == 0:
 				print '%s/%s' % (i+1, size)
 			else:
@@ -439,7 +439,7 @@ def Gather(url, cachePath, progress=False):
 			if Fill(item, cache, url, True) is False:
 				item.remove()
 		else:
-			Fill(item, cache, url)
+			Fill(item, cache, url, clip='clip' in options)
 
 	log(len(rss.items))
 	log(time.time() - startTime)
@@ -485,7 +485,7 @@ if __name__ == '__main__':
 	if 'cache' in options:
 		MAX_TIME = 0
 
-	RSS = Gather(url, cache, 'progress' in options)
+	RSS = Gather(url, cache, options)
 
 	if RSS is not False and 'progress' not in options and not DEBUG:
 			print RSS
