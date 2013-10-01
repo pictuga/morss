@@ -252,7 +252,7 @@ def decodeHTML(data, con=None):
 	log(enc)
 	return data.decode(enc, 'replace')
 
-def Fill(item, cache, feedurl='/', fast=False, clip=False):
+def Fill(item, cache, feedurl='/', fast=False):
 	""" Returns True when it has done its best """
 
 	if not item.link:
@@ -309,7 +309,6 @@ def Fill(item, cache, feedurl='/', fast=False, clip=False):
 		match = lxml.html.fromstring(item.content).xpath('//a/@data-expanded-url')
 		if len(match):
 			link = match[0]
-			clip = True
 			log(link)
 		else:
 			link = None
@@ -330,7 +329,7 @@ def Fill(item, cache, feedurl='/', fast=False, clip=False):
 				log('old error')
 		else:
 			log('cached')
-			item.pushContent(cache.get(link), clip)
+			item.pushContent(cache.get(link))
 			return True
 
 	# super-fast mode
@@ -356,7 +355,7 @@ def Fill(item, cache, feedurl='/', fast=False, clip=False):
 	out = readability.Document(data, url=con.url).summary(True)
 
 	if countWord(out) > max(count_content, count_desc) > 0:
-		item.pushContent(out, clip)
+		item.pushContent(out)
 		cache.set(link, out)
 	else:
 		log('not bigger enough')
@@ -435,11 +434,20 @@ def Gather(url, cachePath, options):
 
 		if i+1 > LIM_ITEM > 0:
 			item.remove()
+			continue
 		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM > 0:
 			if Fill(item, cache, url, True) is False:
 				item.remove()
+				continue
 		else:
-			Fill(item, cache, url, clip='clip' in options)
+			Fill(item, cache, url)
+
+		if item.desc and item.content:
+			if 'clip' in options:
+				item.content = item.desc + "<br/><br/>* * *<br/><br/>" + item.content
+				del item.desc
+			if 'alone' in options:
+				del item.desc
 
 	log(len(rss.items))
 	log(time.time() - startTime)
