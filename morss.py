@@ -379,7 +379,7 @@ def Gather(url, cachePath, options):
 		style = cache.get('style')
 	else:
 		try:
-			opener = CacheDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'))
+			opener = CacheDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), useragent=UA_HTML)
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
 		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
