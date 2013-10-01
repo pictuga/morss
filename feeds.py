@@ -102,6 +102,11 @@ class FeedBase(object):
 			self.root.append(element)
 			return element
 
+	def xdel(self, path):
+		match = self.xget(path)
+		if match is not None:
+			return match.getparent().remove(match)
+
 	def tostring(self, **k):
 		""" Returns string using lxml. Arguments passed to tostring """
 		return etree.tostring(self.xml, pretty_print=True, **k)
@@ -121,6 +126,10 @@ class FeedDescriptor(object):
 	def __set__(self, instance, value):
 		setter = getattr(instance, 'set%s' % self.name.title())
 		return setter(value)
+
+	def __delete__(self, instance):
+		deleter = getattr(instance, 'del%s' % self.name.title())
+		return deleter()
 
 class FeedList(object):
 	"""
@@ -220,6 +229,9 @@ class FeedParser(FeedBase):
 	def setTitle(self, value):
 		pass
 
+	def delTitle(self):
+		self.title = ""
+
 
 	def getDesc(self):
 		pass
@@ -227,11 +239,17 @@ class FeedParser(FeedBase):
 	def setDesc(self, value):
 		pass
 
+	def delDesc(self):
+		self.desc = ""
+
 
 	def getItems(self):
 		return []
 
 	def setItems(self, value):
+		pass
+
+	def delItems(self):
 		pass
 
 	title = FeedDescriptor('title')
@@ -251,6 +269,9 @@ class FeedParserRSS(FeedParser):
 		return self.xval('rssfake:title|title')
 
 	def setTitle(self, value):
+		if not value:
+			return self.xdel('rssfake:title|title')
+
 		table = {	'rdf:rdf':	'rssfake:title',
 					'channel':	'title'}
 		element = self.xgetCreate(table)
@@ -258,9 +279,13 @@ class FeedParserRSS(FeedParser):
 
 
 	def getDesc(self):
+		print 'YEAH'
 		return self.xval('rssfake:description|description')
 
 	def setDesc(self, value):
+		if not value:
+			return self.xdel('rssfake:description|description')
+
 		table = {	'rdf:rdf':	'rssfake:description',
 					'channel':	'description'}
 		element = self.xgetCreate(table)
@@ -283,6 +308,9 @@ class FeedParserAtom(FeedParser):
 		return self.xval('atom:title|atom03:title')
 
 	def setTitle(self, value):
+		if not value:
+			return self.xval('atom:title|atom03:title')
+
 		table = {	'atom:feed':	'atom:title',
 					'atom03:feed':	'atom03:title'}
 		element = self.xgetCreate(table)
@@ -293,6 +321,9 @@ class FeedParserAtom(FeedParser):
 		return self.xval('atom:subtitle|atom03:subtitle')
 
 	def setDesc(self, value):
+		if not value:
+			return self.xdel('atom:subtitle|atom03:subtitle')
+
 		table = {	'atom:feed':	'atom:subtitle',
 					'atom03:feed':	'atom03:subtitle'}
 		element = self.xgetCreate(table)
@@ -316,11 +347,17 @@ class FeedItem(FeedBase):
 	def setTitle(self):
 		pass
 
+	def delTitle(self):
+		self.title = ""
+
 
 	def getLink(self):
 		return ""
 
 	def setLink(self, value):
+		pass
+
+	def delLink(self):
 		pass
 
 
@@ -330,12 +367,18 @@ class FeedItem(FeedBase):
 	def setDesc(self, value):
 		pass
 
+	def delDesc(self):
+		self.desc = ""
+
 
 	def getContent(self):
 		return ""
 
 	def setContent(self, value):
 		pass
+
+	def delContent(self):
+		self.content = ""
 
 
 	title = FeedDescriptor('title')
@@ -360,6 +403,9 @@ class FeedItemRSS(FeedItem):
 		return self.xval('rssfake:title|title')
 
 	def setTitle(self, value):
+		if not value:
+			return self.xdel('rssfake:title|title')
+
 		table = {	'rdf:rdf':	'rssfake:title',
 					'channel':	'title'}
 		element = self.xgetCreate(table)
@@ -380,6 +426,9 @@ class FeedItemRSS(FeedItem):
 		return self.xval('rssfake:description|description')
 
 	def setDesc(self, value):
+		if not value:
+			return self.xdel('rssfake:description|description')
+
 		table = {	'rdf:rdf':	'rssfake:description',
 					'channel':	'description'}
 		element = self.xgetCreate(table)
@@ -390,6 +439,9 @@ class FeedItemRSS(FeedItem):
 		return self.xval('content:encoded')
 
 	def setContent(self, value):
+		if not value:
+			return self.r('content:encoded')
+
 		table = {	'rdf:rdf':	'content:encoded',
 					'channel':	'content:encoded'}
 		element = self.xgetCreate(table)
@@ -403,6 +455,9 @@ class FeedItemAtom(FeedItem):
 		return self.xval('atom:title|atom03:title')
 
 	def setTitle(self, value):
+		if not value:
+			return self.xdel('atom:title|atom03:title')
+
 		table = {	'atom:feed':	'atom:title',
 					'atom03:feed':	'atom03:title'}
 		element = self.xgetCreate(table)
@@ -428,6 +483,9 @@ class FeedItemAtom(FeedItem):
 			return ""
 
 	def setDesc(self, value):
+		if not value:
+			return self.xdel('atom:summary|atom03:summary')
+
 		table = {	'atom:feed':	'atom:summary',
 					'atom03:feed':	'atom03:summary'}
 		element = self.xgetCreate(table)
@@ -445,6 +503,9 @@ class FeedItemAtom(FeedItem):
 			return ""
 
 	def setContent(self, value):
+		if not value:
+			return self.xdel('atom:content|atom03:content')
+
 		table = {	'atom:feed':	'atom:content',
 					'atom03:feed':	'atom03:content'}
 		element = self.xgetCreate(table)
