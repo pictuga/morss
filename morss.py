@@ -347,7 +347,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 		cache.set(link, 'error-http')
 		return True
 
-	if con.info().maintype != 'text':
+	if con.info().type not in MIMETYPE['html'] and con.info().type != 'text/plain':
 		log('non-text page')
 		cache.set(link, 'error-type')
 		return True
