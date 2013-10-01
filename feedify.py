@@ -14,7 +14,7 @@ def toclass(query):
 	repl = r'[@class and contains(concat(" ", normalize-space(@class), " "), " \1 ")]'
 	return re.sub(pattern, repl, query)
 
-def getRule(link=URL):
+def getRule(link):
 	config = ConfigParser()
 	config.read('feedify.ini')
 
@@ -29,10 +29,16 @@ def getRule(link=URL):
 def supported(link):
 	return getRule(link) is not False
 
-def getString(expr, html):
-	match = html.xpath(toclass(expr))
-	if len(match):
-		return match[0].text_content()
+def getString(html, expr):
+	matches = html.xpath(toclass(expr))
+	if len(matches):
+		out = ''
+		for match in matches:
+			if isinstance(match, basestring):
+				out += match
+			elif isinstance(match, lxml.html.HtmlElement):
+				out += lxml.html.tostring(match)
+		return out
 	else:
 		return ''
 
@@ -48,22 +54,22 @@ def build(link, data=None):
 	feed = feeds.FeedParserAtom()
 
 	if 'title' in rule:
-		feed.title = html.xpath(toclass(rule['title']))[0]
+		feed.title = getString(html, rule['title'])
 
 	if 'items' in rule:
 		for item in html.xpath(toclass(rule['items'])):
 			feedItem = {}
 
 			if 'item_title' in rule:
-				feedItem['title'] = item.xpath(toclass(rule['item_title']))[0]
+				feedItem['title'] = getString(item, rule['item_title'])
 			if 'item_link' in rule:
-				url = item.xpath(toclass(rule['item_link']))[0]
+				url = getString(item, rule['item_link'])
 				url = urlparse.urljoin(link, url)
 				feedItem['link'] = url
 			if 'item_desc' in rule:
-				feedItem['desc'] = lxml.html.tostring(item.xpath(toclass(rule['item_desc']))[0], encoding='unicode')
+				feedItem['desc'] = getString(item, rule['item_desc'])
 			if 'item_content' in rule:
-				feedItem['content'] = lxml.html.tostring(item.xpath(toclass(rule['item_content']))[0])
+				feedItem['content'] = getString(item, rule['item_content'])
 
 			feed.items.append(feedItem)
 	return feed
