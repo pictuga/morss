@@ -306,6 +306,10 @@ def Fill(item, cache, feedurl='/', fast=False):
 	count_desc = countWord(item.desc)
 
 	if max(count_content, count_desc) > 500:
+		if count_desc > count_content:
+			item.content = item.desc
+			del item.desc
+			log('reversed sizes')
 		log('long enough')
 		return True
 
