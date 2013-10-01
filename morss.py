@@ -4,6 +4,7 @@ import os
 import os.path
 import time
 
+from fnmatch import fnmatch
 from base64 import b64encode, b64decode
 import re
 import string
@@ -263,6 +264,16 @@ def Fill(item, cache, feedurl='/', fast=False):
 
 	# check relative urls
 	item.link = urlparse.urljoin(feedurl, item.link)
+
+	# google
+	if fnmatch(item.link, 'http://www.google.com/url?q=*'):
+		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['q'][0]
+		log(item.link)
+
+	# facebook
+	if fnmatch(item.link, 'https://www.facebook.com/l.php?u=*'):
+		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['u'][0]
+		log(item.link)
 
 	# feedburner
 	feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
