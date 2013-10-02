@@ -459,7 +459,7 @@ def Gather(url, cachePath, options):
 
 		if item.desc and item.content:
 			if 'clip' in options:
-				item.content = item.desc + "<br/><br/>* * *<br/><br/>" + item.content
+				item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
 				del item.desc
 			if 'alone' in options:
 				del item.desc
