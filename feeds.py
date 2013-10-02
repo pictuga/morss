@@ -440,7 +440,7 @@ class FeedItemRSS(FeedItem):
 
 	def setContent(self, value):
 		if not value:
-			return self.r('content:encoded')
+			return self.xdel('content:encoded')
 
 		table = {	'rdf:rdf':	'content:encoded',
 					'channel':	'content:encoded'}
