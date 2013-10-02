@@ -461,7 +461,7 @@ def Gather(url, cachePath, options):
 			if 'clip' in options:
 				item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
 				del item.desc
-			if 'alone' in options:
+			if 'keep' not in options:
 				del item.desc
 
 	log(len(rss.items))
