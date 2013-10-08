@@ -1,5 +1,5 @@
 AddHandler cgi-script .py
 Options +ExecCGI
-SetEnvIf Request_URI /progress/ no-gzip=1
+SetEnvIf Request_URI /:progress/ no-gzip=1
 
 ErrorDocument 404 /morss.py
