@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 from lxml import etree
+from datetime import datetime
+import dateutil.parser
+from dateutil import tz
 import re
 
 Element = etree.Element
@@ -130,6 +133,38 @@ class FeedDescriptor(object):
 	def __delete__(self, instance):
 		deleter = getattr(instance, 'del%s' % self.name.title())
 		return deleter()
+
+class FeedTime(FeedDescriptor):
+	def __get__(self, instance, owner):
+		getter = getattr(instance, 'get%s' % self.name.title())
+		raw = getter()
+		try:
+			time = parseTime(raw)
+			return time
+		except ValueError:
+			return None
+
+	def __set__(self, instance, value):
+		try:
+			time = parseTime(value)
+			raw = time.strftime(instance.timeFormat)
+			setter = getattr(instance, 'set%s' % self.name.title())
+			return setter(raw)
+		except ValueError:
+			pass
+
+def parseTime(value):
+	if isinstance(value, basestring):
+		if re.match(r'^[0-9]+$', value):
+			return datetime.fromtimestamp(int(value), tz.tzutc())
+		else:
+			return dateutil.parser.parse(value, tzinfos=tz.tzutc)
+	elif isinstance(value, int):
+		return datetime.fromtimestamp(value, tz.tzutc())
+	elif isinstance(value, datetime):
+		return value
+	else:
+		return False
 
 class FeedList(object):
 	"""
@@ -334,6 +369,8 @@ class FeedParserAtom(FeedParser):
 		return self.xpath('atom:entry|atom03:entry')
 
 class FeedItem(FeedBase):
+	timeFormat = ''
+
 	def __init__(self, xml=None, tag='atom:feed'):
 		if xml is None:
 			xml = Element(tagNS(self.base[tag]))
@@ -381,10 +418,31 @@ class FeedItem(FeedBase):
 		self.content = ""
 
 
+	def getTime(self):
+		return None
+
+	def setTime(self, value):
+		pass
+
+	def delTime(self):
+		self.time = None
+
+
+	def getUpdated(self):
+		return None
+
+	def setUpdated(self, value):
+		pass
+
+	def delUpdated(self):
+		self.updated = None
+
 	title = FeedDescriptor('title')
 	link = FeedDescriptor('link')
 	description = desc = FeedDescriptor('desc')
 	content = FeedDescriptor('content')
+	time = FeedTime('time')
+	updated = FeedTime('updated')
 
 	def pushContent(self, value):
 		if not self.desc and self.content:
@@ -396,6 +454,7 @@ class FeedItem(FeedBase):
 		self.xml.getparent().remove(self.xml)
 
 class FeedItemRSS(FeedItem):
+	timeFormat = '%a, %d %b %Y %H:%M:%S %Z'
 	base =  {	'rdf:rdf':	'rssfake:item',
 				'channel':	'item'}
 
@@ -447,7 +506,21 @@ class FeedItemRSS(FeedItem):
 		element = self.xgetCreate(table)
 		element.text = value
 
+
+	def getTime(self):
+		return self.xval('rssfake:pubDate|pubDate')
+
+	def setTime(self, value):
+		if not value:
+			return self.xdel('rssfake:pubDate|pubDate')
+
+		table = {	'rdf:rdf':	'rssfake:pubDate',
+					'channel':	'pubDate'}
+		element = self.xgetCreate(table)
+		element.text = value
+
 class FeedItemAtom(FeedItem):
+	timeFormat = '%Y-%m-%dT%H:%M:%SZ'
 	base = {	'atom:feed':	'atom:entry',
 				'atom03:feed':	'atom03:entry'}
 
@@ -512,4 +585,29 @@ class FeedItemAtom(FeedItem):
 		if element.attrib.get('type', '') == 'xhtml':
 			cleanNode(element)
 		element.attrib['type'] = 'html'
+		element.text = value
+
+	def getTime(self):
+		return self.xval('atom:published|atom03:published')
+
+	def setTime(self, value):
+		if not value:
+			return self.xdel('atom:published|atom03:published')
+
+		table = {	'atom:feed':	'atom:published',
+					'atom03:feed':	'atom03:published'}
+		element = self.xgetCreate(table)
+		element.text = value
+
+
+	def getUpdated(self):
+		return self.xval('atom:updated|atom03:updated')
+
+	def setUpdated(self, value):
+		if not value:
+			return self.xdel('atom:updated|atom03:updated')
+
+		table = {	'atom:feed':	'atom:updated',
+					'atom03:feed':	'atom03:updated'}
+		element = self.xgetCreate(table)
 		element.text = value
