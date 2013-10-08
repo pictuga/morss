@@ -70,6 +70,8 @@ def build(link, data=None):
 				feedItem['desc'] = getString(item, rule['item_desc'])
 			if 'item_content' in rule:
 				feedItem['content'] = getString(item, rule['item_content'])
+			if 'item_time' in rule:
+				feedItem['updated'] = getString(item, rule['item_time'])
 
 			feed.items.append(feedItem)
 	return feed
