@@ -469,7 +469,10 @@ def Gather(url, cachePath, options):
 
 	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
-if __name__ == '__main__':
+def application(environ, start_response):
+	os.environ = environ
+	os.environ['REQUEST_URI'] = environ['PATH_INFO']
+
 	url, options = parseOptions()
 	DEBUG = 'debug' in options
 
@@ -484,15 +487,20 @@ if __name__ == '__main__':
 
 		print 'Status: 200'
 		print 'ETag: "%s"' % int(time.time())
+		Etag = '"%s"' % int(time.time())
 
 		if 'html' in options:
 			print 'Content-Type: text/html'
+			contenttype = 'text/html'
 		elif 'debug' in options:
 			print 'Content-Type: text/plain'
+			contenttype = 'text/plain'
 		elif 'progress' in options:
 			print 'Content-Type: application/octet-stream'
+			contenttype = 'application/octet-stream'
 		else:
 			print 'Content-Type: text/xml'
+			contenttype = 'text/xml'
 		print
 
 		cache = os.getcwd() + '/cache'
@@ -511,9 +519,18 @@ if __name__ == '__main__':
 	RSS = Gather(url, cache, options)
 
 	if RSS is not False and 'progress' not in options and not DEBUG:
-			print RSS
+		print RSS
+		status = '200 OK'
+		response_headers = [('Content-type',contenttype), ('Etag', Etag)]
+		start_response(status, response_headers)
+		return(RSS)
 
 	if RSS is False and 'progress' not in options:
 		print 'Error fetching feed.'
 
 	log('done')
+
+if __name__ == '__main__':
+	from wsgiref.simple_server import make_server
+	httpd = make_server('', 8080, application)	
+	httpd.serve_forever()
