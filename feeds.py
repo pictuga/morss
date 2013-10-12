@@ -90,7 +90,7 @@ class FeedBase(object):
 		""" Returns the .text of the 1st match """
 		match = self.xget(path)
 		if match is not None:
-			return match.text
+			return match.text or ""
 		else:
 			return ""
 
@@ -198,6 +198,9 @@ class FeedList(object):
 		new = self.childClass(tag=self.tag)
 		self.parent.root.append(new.xml)
 		self._children[id(new.xml)] = new
+
+		if cousin is None:
+			return new
 
 		for key in self.childClass.__dict__:
 			if key[:3] == 'set':
