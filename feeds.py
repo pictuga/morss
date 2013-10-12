@@ -418,6 +418,16 @@ class FeedItem(FeedBase):
 		self.content = ""
 
 
+	def getId(self):
+		return ""
+
+	def setId(self, value):
+		pass
+
+	def delId(self):
+		self.id = ""
+
+
 	def getTime(self):
 		return None
 
@@ -441,6 +451,7 @@ class FeedItem(FeedBase):
 	link = FeedDescriptor('link')
 	description = desc = FeedDescriptor('desc')
 	content = FeedDescriptor('content')
+	id = FeedDescriptor('id')
 	time = FeedTime('time')
 	updated = FeedTime('updated')
 
@@ -503,6 +514,19 @@ class FeedItemRSS(FeedItem):
 
 		table = {	'rdf:rdf':	'content:encoded',
 					'channel':	'content:encoded'}
+		element = self.xgetCreate(table)
+		element.text = value
+
+
+	def getId(self):
+		return self.xval('rssfake:guid|guid')
+
+	def setId(self, value):
+		if not value:
+			return self.xdel('rssfake:guid|guid')
+
+		table = {	'rdf:rdf':	'rssfake:guid',
+					'channel':	'guid'}
 		element = self.xgetCreate(table)
 		element.text = value
 
@@ -586,6 +610,20 @@ class FeedItemAtom(FeedItem):
 			cleanNode(element)
 		element.attrib['type'] = 'html'
 		element.text = value
+
+
+	def getId(self):
+		return self.xval('atom:id|atom03:id')
+
+	def setId(self, value):
+		if not value:
+			return self.xdel('atom:id|atom03:id')
+
+		table = {	'atom:feed':	'atom:id',
+					'atom03:feed':	'atom03:id'}
+		element = self.xgetCreate(table)
+		element.text = value
+
 
 	def getTime(self):
 		return self.xval('atom:published|atom03:published')
