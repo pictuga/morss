@@ -11,6 +11,7 @@ You do need:
 - [python](http://www.python.org/) >= 2.6 < 3
 - [lxml](http://lxml.de/) for xml parsing
 - this [readability](https://github.com/buriy/python-readability) fork
+- [dateutil](http://labix.org/python-dateutil) to parse feed dates
 
 You may also need:
 - Apache, with python-cgi support, to run on a server
