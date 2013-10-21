@@ -344,7 +344,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 	# download
 	try:
 		url = link.encode('utf-8')
-		con = urllib2.build_opener(SimpleDownload()).open(url, timeout=TIMEOUT)
+		con = urllib2.build_opener(SimpleDownload(decode=True)).open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (urllib2.URLError, httplib.HTTPException, socket.timeout):
 		log('http error')
