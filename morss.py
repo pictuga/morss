@@ -316,6 +316,10 @@ def Fill(item, cache, feedurl='/', fast=False):
 		else:
 			link = None
 
+	# facebook, do nothing for now FIXME
+	if urlparse.urlparse(feedurl).netloc == 'graph.facebook.com':
+		link = None
+
 	if link is None:
 		log('no used link')
 		return True
