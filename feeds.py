@@ -284,12 +284,6 @@ class FeedParser(FeedBase):
 	def getItems(self):
 		return []
 
-	def setItems(self, value):
-		pass
-
-	def delItems(self):
-		pass
-
 	title = FeedDescriptor('title')
 	description = desc = FeedDescriptor('desc')
 	items = FeedListDescriptor('items')
