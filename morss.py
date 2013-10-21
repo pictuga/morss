@@ -151,20 +151,40 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-class HTMLDownloader(urllib2.HTTPCookieProcessor):
+class SimpleDownload(urllib2.HTTPCookieProcessor):
 	"""
-	Custom urllib2 handler to download html pages, following <meta> redirects,
-	using a browser user-agent and storing cookies.
+	Custom urllib2 handler to download a page, using etag/last-modified headers,
+	to save bandwidth. The given headers are added back into the header on error
+	304 for easier use.
 	"""
-	def __init__(self, useragent=UA_HTML, cookiejar=None):
+	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=False, cookiejar=None):
 		urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
+		self.cache = cache
+		self.etag = etag
+		self.lastmodified = lastmodified
 		self.useragent = useragent
+		self.decode = decode
 
 	def http_request(self, req):
 		urllib2.HTTPCookieProcessor.http_request(self, req)
 		req.add_unredirected_header('Accept-Encoding', 'gzip')
 		req.add_unredirected_header('User-Agent', self.useragent)
+		req.add_unredirected_header('Referer', 'http://%s' % req.get_host())
+		if self.cache:
+			if self.etag:
+				req.add_unredirected_header('If-None-Match', self.etag)
+			if self.lastmodified:
+				req.add_unredirected_header('If-Modified-Since', self.lastmodified)
 		return req
+
+	def http_error_304(self, req, fp, code, msg, headers):
+		log('http cached')
+		if self.etag:
+			headers.addheader('etag', self.etag)
+		if self.lastmodified:
+			headers.addheader('last-modified', self.lastmodified)
+		resp = urllib2.addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
+		return resp
 
 	def http_response(self, req, resp):
 		urllib2.HTTPCookieProcessor.http_response(self, req, resp)
@@ -194,7 +214,8 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 					return self.parent.open(new, timeout=req.timeout)
 
 			# decode
-			data = decodeHTML(data, resp)
+			if self.decode:
+				data = decodeHTML(data, resp)
 
 			fp = StringIO(data)
 			old_resp = resp
@@ -203,38 +224,6 @@ class HTMLDownloader(urllib2.HTTPCookieProcessor):
 		return resp
 
 	https_response = http_response
-	https_request = http_request
-
-class CacheDownload(urllib2.BaseHandler):
-	"""
-	Custom urllib2 handler to download a page, using etag/last-modified headers,
-	to save bandwidth. The given headers are added back into the header on error
-	304 for easier use.
-	"""
-	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_RSS):
-		self.cache = cache
-		self.etag = etag
-		self.lastmodified = lastmodified
-		self.useragent = useragent
-
-	def http_request(self, req):
-		req.add_unredirected_header('User-Agent', self.useragent)
-		if self.cache:
-			if self.etag:
-				req.add_unredirected_header('If-None-Match', self.etag)
-			if self.lastmodified:
-				req.add_unredirected_header('If-Modified-Since', self.lastmodified)
-		return req
-
-	def http_error_304(self, req, fp, code, msg, headers):
-		log('http cached')
-		if self.etag:
-			headers.addheader('etag', self.etag)
-		if self.lastmodified:
-			headers.addheader('last-modified', self.lastmodified)
-		resp = urllib2.addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
-		return resp
-
 	https_request = http_request
 
 def decodeHTML(data, con=None):
@@ -355,7 +344,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 	# download
 	try:
 		url = link.encode('utf-8')
-		con = urllib2.build_opener(HTMLDownloader()).open(url, timeout=TIMEOUT)
+		con = urllib2.build_opener(SimpleDownload()).open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (urllib2.URLError, httplib.HTTPException, socket.timeout):
 		log('http error')
@@ -394,7 +383,7 @@ def Gather(url, cachePath, options):
 		style = cache.get('style')
 	else:
 		try:
-			opener = CacheDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), useragent=UA_HTML)
+			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False)
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
 		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
