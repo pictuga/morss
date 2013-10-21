@@ -410,8 +410,9 @@ def Gather(url, cachePath, options):
 	if style == 'normal':
 		rss = feeds.parse(xml)
 	elif style == 'feedify':
-		xml = decodeHTML(xml)
-		rss = feedify.build(url, xml)
+		feed = feedify.Builder(url, xml)
+		feed.build()
+		rss = feed.feed
 	elif style == 'html':
 		match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
 		if len(match):
