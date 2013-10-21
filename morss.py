@@ -266,9 +266,8 @@ def Fill(item, cache, feedurl='/', fast=False):
 
 	# feedburner
 	feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
-	match = item.xval('feedburner:origLink')
-	if match:
-		item.link = match
+	if item.id:
+		item.link = item.id
 		log(item.link)
 
 	# feedsportal
@@ -309,7 +308,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 	link = item.link
 
 	# twitter
-	if urlparse.urlparse(item.link).netloc == 'twitter.com':
+	if urlparse.urlparse(feedurl).netloc == 'twitter.com':
 		match = lxml.html.fromstring(item.content).xpath('//a/@data-expanded-url')
 		if len(match):
 			link = match[0]
