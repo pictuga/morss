@@ -242,14 +242,17 @@ def decodeHTML(data, con=None):
 	log(enc)
 	return data.decode(enc, 'replace')
 
-def Fill(item, cache, feedurl='/', fast=False):
-	""" Returns True when it has done its best """
+def Fix(item, feedurl='/'):
+	""" Improves feed items (absolute links, resolve feedburner links, etc) """
 
+	# check unwanted uppercase title
+	if len(item.title) > 20 and item.title.isupper():
+		item.title = item.title.title()
+
+	# check if it includes link
 	if not item.link:
 		log('no link')
-		return True
-
-	log(item.link)
+		return item
 
 	# check relative urls
 	item.link = urlparse.urljoin(feedurl, item.link)
@@ -285,9 +288,16 @@ def Fill(item, cache, feedurl='/', fast=False):
 			item.link = match[0]
 			log(item.link)
 
-	# check unwanted uppercase title
-	if len(item.title) > 20 and item.title.isupper():
-		item.title = item.title.title()
+	return item
+
+def Fill(item, cache, feedurl='/', fast=False):
+	""" Returns True when it has done its best """
+
+	if not item.link:
+		log('no link')
+		return item
+
+	log(item.link)
 
 	# content already provided?
 	count_content = countWord(item.content)
@@ -433,6 +443,7 @@ def Gather(url, cachePath, options):
 	# set
 	startTime = time.time()
 	for i, item in enumerate(rss.items):
+		item = Fix(item, url)
 		if 'progress' in options:
 			if MAX_ITEM == 0:
 				print '%s/%s' % (i+1, size)
