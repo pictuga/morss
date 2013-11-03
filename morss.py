@@ -130,30 +130,33 @@ class Cache:
 			for line in data:
 				if "\t" in line:
 					key, bdata = line.split("\t", 1)
-					self._cached[key] = bdata
+					self._cached[key] = b64decode(bdata)
 
 	def __del__(self):
 		self.save()
 
 	def __contains__(self, key):
-		return key in self._cached
+		return key in self._cache or key in self._cached
 
-	def get(self, key):
-		if key in self._cached:
+	def get(self, key, kind=str):
+		if key in self._cache:
+			return kind(self._cache[key])
+		elif key in self._cached:
 			self._cache[key] = self._cached[key]
-			return b64decode(self._cached[key])
+			return kind(self._cached[key])
 		else:
 			return None
 
 	def set(self, key, content):
-		self._cache[key] = b64encode(str(content) or '')
+		self._cache[key] = str(content) or ''
 
 	def save(self):
 		if len(self._cache) == 0:
 			return
 
 		out = []
-		for (key, bdata) in self._cache.iteritems():
+		for (key, data) in self._cache.iteritems():
+			bdata = b64encode(data)
 			out.append(str(key) + "\t" + bdata)
 		txt = "\n".join(out)
 
