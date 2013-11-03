@@ -34,6 +34,7 @@ DELAY = 10*60	# xml cache & ETag cache (in sec)
 TIMEOUT = 2	# http timeout (in sec)
 
 DEBUG = False
+HOLD = False
 
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HTML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
@@ -51,7 +52,10 @@ if 'REQUEST_URI' in os.environ:
 
 def log(txt):
 	if DEBUG:
-		print repr(txt)
+		if HOLD:
+			open('morss.log', 'a').write("%s\n" % repr(txt))
+		else:
+			print repr(txt)
 
 
 def lenHTML(txt):
@@ -495,6 +499,8 @@ if __name__ == '__main__':
 	DEBUG = bool(options.debug)
 
 	if 'REQUEST_URI' in os.environ:
+		HOLD = True
+
 		if 'HTTP_IF_NONE_MATCH' in os.environ and not options.force:
 			if time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
 				print 'Status: 304'
@@ -515,6 +521,8 @@ if __name__ == '__main__':
 		else:
 			print 'Content-Type: text/xml'
 		print ''
+
+		HOLD = False
 
 		cache = os.getcwd() + '/cache'
 	else:
