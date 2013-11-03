@@ -559,7 +559,7 @@ class FeedItemAtom(FeedItem):
 
 
 	def getLink(self):
-		return self.xget('atom:link|atom03:link').get('href', '')
+		return self.xget('atom:link/@href|atom03:link/@href')
 
 	def setLink(self, value):
 		table = {	'atom:feed':	'atom:link',
