@@ -66,33 +66,48 @@ def countWord(txt):
 	else:
 		return 0
 
-def parseOptions():
-	url = ''
-	options = []
+class ParseOptions:
+	def __init__(self):
+		self.url = ''
+		self.options = {}
+		roptions = []
 
-	if 'REQUEST_URI' in os.environ:
-		url = os.environ['REQUEST_URI'][1:]
+		if 'REQUEST_URI' in os.environ:
+			self.url = os.environ['REQUEST_URI'][1:]
 
-		if 'REDIRECT_URL' not in os.environ:
-			url = url[len(os.environ['SCRIPT_NAME']):]
+			if 'REDIRECT_URL' not in os.environ:
+				self.url = self.url[len(os.environ['SCRIPT_NAME']):]
 
-		if url.startswith(':'):
-			options = url.split('/')[0].split(':')[1:]
-			url = url.split('/', 1)[1]
+			if self.url.startswith(':'):
+				roptions = self.url.split('/')[0].split(':')[1:]
+				self.url = self.url.split('/', 1)[1]
+		else:
+			if len(sys.argv) <= 1:
+				return (None, [])
 
-		if urlparse.urlparse(url).scheme not in PROTOCOL:
-			url = 'http://' + url
-	else:
-		if len(sys.argv) <= 1:
-			return (None, [])
+			roptions = sys.argv[1:-1]
+			self.url = sys.argv[-1]
 
-		options = sys.argv[1:-1]
-		url = sys.argv[-1]
+		if urlparse.urlparse(self.url).scheme not in PROTOCOL:
+			self.url = 'http://' + self.url
 
-		if urlparse.urlparse(url).scheme not in PROTOCOL:
-			url = 'http://' + url
+		for option in roptions:
+			split = option.split('=', 1)
+			if len(split) > 1:
+				if split[0].lower() == 'true':
+					self.options[split[0]] = True
+				if split[0].lower() == 'false':
+					self.options[split[0]] = False
 
-	return (url, options)
+				self.options[split[0]] = split[1]
+			else:
+				self.options[split[0]] = True
+
+	def __getattr__(self, key):
+		if key in self.options:
+			return self.options[key]
+		else:
+			return False
 
 class Cache:
 	"""Light, error-prone caching system."""
@@ -444,7 +459,7 @@ def Gather(url, cachePath, options):
 	startTime = time.time()
 	for i, item in enumerate(rss.items):
 		item = Fix(item, url)
-		if 'progress' in options:
+		if options.progress:
 			if MAX_ITEM == 0:
 				print '%s/%s' % (i+1, size)
 			else:
@@ -462,10 +477,10 @@ def Gather(url, cachePath, options):
 			Fill(item, cache, url)
 
 		if item.desc and item.content:
-			if 'clip' in options:
+			if options.clip:
 				item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
 				del item.desc
-			if 'keep' not in options:
+			if not options.keep:
 				del item.desc
 
 	log(len(rss.items))
@@ -474,11 +489,13 @@ def Gather(url, cachePath, options):
 	return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
 if __name__ == '__main__':
-	url, options = parseOptions()
-	DEBUG = 'debug' in options
+	options = ParseOptions()
+	url = options.url
+
+	DEBUG = bool(options.debug)
 
 	if 'REQUEST_URI' in os.environ:
-		if 'HTTP_IF_NONE_MATCH' in os.environ and 'force' not in options:
+		if 'HTTP_IF_NONE_MATCH' in os.environ and not options.force:
 			if time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
 				print 'Status: 304'
 				print
@@ -489,15 +506,15 @@ if __name__ == '__main__':
 		print 'Status: 200'
 		print 'ETag: "%s"' % int(time.time())
 
-		if 'html' in options:
+		if options.html:
 			print 'Content-Type: text/html'
-		elif 'debug' in options:
+		elif options.debug:
 			print 'Content-Type: text/plain'
-		elif 'progress' in options:
+		elif options.progress:
 			print 'Content-Type: application/octet-stream'
 		else:
 			print 'Content-Type: text/xml'
-		print
+		print ''
 
 		cache = os.getcwd() + '/cache'
 	else:
@@ -507,14 +524,14 @@ if __name__ == '__main__':
 		print 'Please provide url.'
 		sys.exit(1)
 
-	if 'progress' in options:
+	if options.progress:
 		MAX_TIME = -1
-	if 'cache' in options:
+	if options.cache:
 		MAX_TIME = 0
 
 	RSS = Gather(url, cache, options)
 
-	if RSS is not False and 'progress' not in options and not DEBUG:
+	if RSS is not False and not options.progress and not DEBUG:
 			print RSS
 
 	if RSS is False and 'progress' not in options:
