@@ -534,9 +534,9 @@ if __name__ == '__main__':
 
 		HOLD = False
 
-		cache = os.getcwd() + '/cache'
+		cachePath = os.getcwd() + '/cache'
 	else:
-		cache =	os.path.expanduser('~') + '/.cache/morss'
+		cachePath = os.path.expanduser('~') + '/.cache/morss'
 
 	if url is None:
 		print 'Please provide url.'
@@ -547,7 +547,7 @@ if __name__ == '__main__':
 	if options.cache:
 		MAX_TIME = 0
 
-	RSS = Gather(url, cache, options)
+	RSS = Gather(url, cachePath, options)
 
 	if RSS is not False and not options.progress and not DEBUG:
 			print RSS
