@@ -421,6 +421,10 @@ def Gather(url, cachePath, options):
 		style = cache.get('style')
 	else:
 		try:
+			if 'redirect' in cache:
+				url = cache.get('redirect')
+				log(url)
+
 			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False)
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
