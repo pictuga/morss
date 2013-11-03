@@ -415,7 +415,7 @@ def Gather(url, cachePath, options):
 	log(cache._hash)
 
 	# fetch feed
-	if cache.isYoungerThan(DELAY) and 'xml' in cache and 'style' in cache:
+	if cache.isYoungerThan(DELAY) and not options.theforce and 'xml' in cache and 'style' in cache:
 		log('xml cached')
 		xml = cache.get('xml')
 		style = cache.get('style')
