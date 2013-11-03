@@ -146,7 +146,7 @@ class Cache:
 			return None
 
 	def set(self, key, content):
-		self._cache[key] = b64encode(content or '')
+		self._cache[key] = b64encode(str(content) or '')
 
 	def save(self):
 		if len(self._cache) == 0:
@@ -155,7 +155,6 @@ class Cache:
 		out = []
 		for (key, bdata) in self._cache.iteritems():
 			out.append(str(key) + "\t" + bdata)
-		out.append("_key\t" + self._key)
 		txt = "\n".join(out)
 
 		if not os.path.exists(self._dir):
@@ -169,6 +168,13 @@ class Cache:
 			return False
 
 		return time.time() - os.path.getmtime(self._file) < sec
+
+	def new(self, key):
+		""" Returns a Cache object in the same directory """
+		if key != self._key:
+			return Cache(self._dir, key)
+		else:
+			return self
 
 class SimpleDownload(urllib2.HTTPCookieProcessor):
 	"""
