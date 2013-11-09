@@ -42,6 +42,10 @@ UA_HTML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) G
 MIMETYPE = {	'xml':	['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
 				'html':	['text/html', 'application/xhtml+xml']}
 
+FBAPPID = "<insert yours>"
+FBSECRET = "<insert yours>"
+FBAPPTOKEN = FBAPPID + '|' + FBSECRET
+
 PROTOCOL = ['http', 'https', 'ftp']
 
 if 'REQUEST_URI' in os.environ:
@@ -360,9 +364,14 @@ def Fill(item, cache, feedurl='/', fast=False):
 		else:
 			link = None
 
-	# facebook, do nothing for now FIXME
+	# facebook
 	if urlparse.urlparse(feedurl).netloc == 'graph.facebook.com':
-		link = None
+		match = lxml.html.fromstring(item.content).xpath('//a/@href')
+		if len(match) and urlparse.urlparse(match[0]).netloc != 'www.facebook.com':
+			link = match[0]
+			log(link)
+		else:
+			link = None
 
 	if link is None:
 		log('no used link')
@@ -423,6 +432,9 @@ def Gather(url, cachePath, options):
 
 	log(cache._hash)
 
+	# do some useful facebook work
+	feedify.PreWorker(url, cache)
+
 	if 'redirect' in cache:
 		url = cache.get('redirect')
 		log('url redirect')
@@ -466,7 +478,7 @@ def Gather(url, cachePath, options):
 	if style == 'normal':
 		rss = feeds.parse(xml)
 	elif style == 'feedify':
-		feed = feedify.Builder(url, xml)
+		feed = feedify.Builder(url, xml, cache)
 		feed.build()
 		rss = feed.feed
 	elif style == 'html':
@@ -526,7 +538,7 @@ if __name__ == '__main__':
 		HOLD = True
 
 		if 'HTTP_IF_NONE_MATCH' in os.environ:
-			if not options.force and time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
+			if not options.force and not options.facebook and time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
 				print 'Status: 304'
 				print
 				log(url)
@@ -537,6 +549,42 @@ if __name__ == '__main__':
 
 		else:
 			cachePath = os.path.expanduser('~') + '/.cache/morss'
+
+	if options.facebook:
+		facebook = Cache(cachePath, 'facebook', True)
+
+		# get real token from code
+		code = urlparse.parse_qs(urlparse.urlparse(url).query)['code'][0]
+		eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri="http://test.morss.it/:facebook/")
+		token = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())['access_token'][0]
+
+		# get long-lived access token
+		eurl = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}".format(app_id=FBAPPID, app_secret=FBSECRET, short_lived_token=token)
+		values = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())
+
+		ltoken = values['access_token'][0]
+		expires = int(time.time() + int(values['expires'][0]))
+
+		# get user id
+		iurl = "https://graph.facebook.com/me?fields=id&access_token={token}".format(ltoken)
+		user_id = json.loads(urllib2.urlopen(iurl).read())['id']
+
+		# do sth out of it
+		facebook.set('t'+ltoken, user_id)
+		facebook.set('e'+ltoken, expires)
+		facebook.set('u'+user_id, ltoken)
+
+		if 'o'+user_id not in token:
+			facebook.set('o'+user_id, ltoken)
+
+		if 'REQUEST_URI' in os.environ:
+			print 'Status: 200'
+			print 'Content-Type: text/plain'
+			print ''
+
+		print "token updated"
+
+		sys.exit(0)
 
 	if 'REQUEST_URI' in os.environ:
 		print 'Status: 200'

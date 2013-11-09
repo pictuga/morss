@@ -11,6 +11,8 @@ import lxml.html
 import json
 import urlparse
 
+import time
+
 def toclass(query):
 	pattern = r'\[class=([^\]]+)\]'
 	repl = r'[@class and contains(concat(" ", normalize-space(@class), " "), " \1 ")]'
@@ -59,7 +61,6 @@ def formatString(string, getter, error=False):
 	elif re.search(r'^([^{}<>" ]+)(?:<"([^>]+)">)?(.*)$', string):
 		match = re.search(r'^([^{}<>" ]+)(?:<"([^>]+)">)?(.*)$', string).groups()
 		rawValue = getter(match[0])
-		print repr(rawValue)
 		if not isinstance(rawValue, basestring):
 			if match[1] is not None:
 				out = match[1].join(rawValue)
@@ -76,9 +77,69 @@ def formatString(string, getter, error=False):
 	else:
 		return out
 
+def PreWorker(url, cache):
+	if urlparse.urlparse(url).netloc == 'graph.facebook.com':
+		facebook = cache.new('facebook', True)
+		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
+
+		if 't'+token not in facebook:
+			# this token ain't known, look for info about it
+			eurl = "https://graph.facebook.com/debug_token?input_token={token}&access_token={app_token}".format(token=token, app_token=morss.FBAPPTOKEN)
+			data = json.loads(urllib2.urlopen(eurl).read())['data']
+
+			app_id = str(data['app_id'])
+			user_id = str(data['user_id'])
+			expires = data['expires_at']
+			short = 'issued_at' not in data
+
+			facebook.set('t'+token, user_id)
+			facebook.set('e'+token, expires)
+
+			good = True
+
+			# do some woodoo to know if we already have sth better
+
+			if 'u'+user_id not in facebook:
+				# grab a new one anyway, new user
+				facebook.set('o'+user_id, token)
+				good = True
+			else:
+				# maybe it's a better one
+				last = facebook.get('u'+user_id)
+				last_expires = facebook.get('e'+last, int)
+
+				if expires > last_expires:
+					# new is better
+					good = True
+
+			if good and short and app_id == morss.FBAPPID:
+				eurl = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}".format(app_id=morss.FBAPPID, app_secret=morss.FBSECRET, short_lived_token=token)
+				values = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())
+
+				token = values['access_token'][0]
+				expires = int(time.time() + int(values['expires'][0]))
+
+				facebook.set('t'+token, user_id)
+				facebook.set('e'+token, expires)
+
+			if good:
+				facebook.set('u'+user_id, token)
+
+		# hey look for a newer token and use it
+		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
+		user_id = facebook.get('t'+token)
+		last = facebook.get('u'+user_id)
+		original = facebook.get('o'+user_id)
+
+		nurl = url.replace(token, last)
+		ncache = url.replace(token, original)
+		cache.set('redirect', nurl)
+		cache.set('cache', ncache)
+
 class Builder(object):
-	def __init__(self, link, data=None):
+	def __init__(self, link, data=None, cache=False):
 		self.link = link
+		self.cache = cache
 
 		if data is None:
 			data = urllib2.urlopen(link).read()
@@ -167,3 +228,18 @@ class Builder(object):
 						feedItem['updated'] = self.string(item, 'item_time')
 
 					self.feed.items.append(feedItem)
+
+
+		if urlparse.urlparse(self.link).netloc == 'graph.facebook.com':
+			if self.cache:
+				facebook = self.cache.new('facebook', True)
+				token = urlparse.parse_qs(urlparse.urlparse(self.link).query)['access_token'][0]
+				expires = facebook.get('e'+token, int)
+				lifespan = expires - time.time()
+
+				if lifespan < 5*24*3600:
+					new = self.feed.items.append()
+					new.title = "APP AUTHORISATION RENEWAL NEEDED"
+					new.link = "https://www.facebook.com/dialog/oauth?client_id={app_id}&redirect_uri=http://test.morss.it/:facebook/".format(app_id=morss.FBAPPID)
+					new.desc = "Please renew your Facebook app token for this app to keep working for this feed.<br/><a href='{}'>Go!</a>".format(new.link)
+					new.time = cache.get(expires, int)
