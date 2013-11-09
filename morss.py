@@ -114,8 +114,8 @@ class ParseOptions:
 			return False
 
 class Cache:
-	"""Light, error-prone caching system."""
-	def __init__(self, folder, key):
+	""" Light, error-prone caching system. """
+	def __init__(self, folder, key, persistent=False):
 		self._key = key
 		self._hash = str(hash(self._key))
 
@@ -131,6 +131,9 @@ class Cache:
 				if "\t" in line:
 					key, bdata = line.split("\t", 1)
 					self._cached[key] = b64decode(bdata)
+
+			if persistent:
+				self._cache = self._cached
 
 	def __del__(self):
 		self.save()
@@ -172,12 +175,15 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-	def new(self, key):
+	def new(self, key, persistent=False):
 		""" Returns a Cache object in the same directory """
 		if key != self._key:
-			return Cache(self._dir, key)
+			return Cache(self._dir, key, persistent)
 		else:
 			return self
+
+	def redirect(self, key, persistent=False):
+		return self.__init__(self._dir, key, persistent)
 
 class SimpleDownload(urllib2.HTTPCookieProcessor):
 	"""
