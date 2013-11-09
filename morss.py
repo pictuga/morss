@@ -423,6 +423,15 @@ def Gather(url, cachePath, options):
 
 	log(cache._hash)
 
+	if 'redirect' in cache:
+		url = cache.get('redirect')
+		log('url redirect')
+		log(url)
+
+	if 'cache' in cache:
+		cache.redirect(cache.get('cache'))
+		log('cache redirect')
+
 	# fetch feed
 	if cache.isYoungerThan(DELAY) and not options.theforce and 'xml' in cache and 'style' in cache:
 		log('xml cached')
@@ -430,10 +439,6 @@ def Gather(url, cachePath, options):
 		style = cache.get('style')
 	else:
 		try:
-			if 'redirect' in cache:
-				url = cache.get('redirect')
-				log(url)
-
 			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False)
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
