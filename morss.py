@@ -525,14 +525,20 @@ if __name__ == '__main__':
 	if 'REQUEST_URI' in os.environ:
 		HOLD = True
 
-		if 'HTTP_IF_NONE_MATCH' in os.environ and not options.force:
-			if time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
+		if 'HTTP_IF_NONE_MATCH' in os.environ:
+			if not options.force and time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
 				print 'Status: 304'
 				print
 				log(url)
 				log('etag good')
 				sys.exit(0)
 
+			cachePath = os.getcwd() + '/cache'
+
+		else:
+			cachePath = os.path.expanduser('~') + '/.cache/morss'
+
+	if 'REQUEST_URI' in os.environ:
 		print 'Status: 200'
 		print 'ETag: "%s"' % int(time.time())
 
@@ -547,10 +553,6 @@ if __name__ == '__main__':
 		print ''
 
 		HOLD = False
-
-		cachePath = os.getcwd() + '/cache'
-	else:
-		cachePath = os.path.expanduser('~') + '/.cache/morss'
 
 	if url is None:
 		print 'Please provide url.'
