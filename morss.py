@@ -547,7 +547,7 @@ if __name__ == '__main__':
 				log('etag good')
 				sys.exit(0)
 
-			cachePath = os.getcwd() + '/cache'
+		cachePath = os.getcwd() + '/cache'
 	else:
 		cachePath = os.path.expanduser('~') + '/.cache/morss'
 
