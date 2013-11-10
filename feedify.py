@@ -157,7 +157,6 @@ class Builder(object):
 
 	def raw(self, html, expr):
 		if self.rule['mode'] == 'xpath':
-			print 1, toclass(expr)
 			return html.xpath(toclass(expr))
 
 		elif self.rule['mode'] == 'json':
