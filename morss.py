@@ -548,9 +548,8 @@ if __name__ == '__main__':
 				sys.exit(0)
 
 			cachePath = os.getcwd() + '/cache'
-
-		else:
-			cachePath = os.path.expanduser('~') + '/.cache/morss'
+	else:
+		cachePath = os.path.expanduser('~') + '/.cache/morss'
 
 	if options.facebook:
 		facebook = Cache(cachePath, 'facebook', True)
