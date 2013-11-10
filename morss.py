@@ -428,7 +428,7 @@ def Gather(url, cachePath, options):
 	log(url)
 
 	url = url.replace(' ', '%20')
-	cache = Cache(cachePath, url)
+	cache = Cache(cachePath, url, options.proxy)
 
 	log(cache._hash)
 
@@ -510,11 +510,13 @@ def Gather(url, cachePath, options):
 			item.remove()
 			continue
 		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM > 0:
-			if Fill(item, cache, url, True) is False:
-				item.remove()
-				continue
+			if not options.proxy:
+				if Fill(item, cache, url, True) is False:
+					item.remove()
+					continue
 		else:
-			Fill(item, cache, url)
+			if not options.proxy:
+				Fill(item, cache, url)
 
 		if item.desc and item.content:
 			if options.clip:
