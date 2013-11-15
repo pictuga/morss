@@ -307,9 +307,9 @@ def Fix(item, feedurl='/'):
 
 	# feedburner
 	feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
-	if item.id:
-		item.link = item.id
-		log(item.link)
+	match = item.xval('feedburner:origLink')
+	if match:
+		item.link = match
 
 	# feedsportal
 	match = re.search('/([0-9a-zA-Z]{20,})/story01.htm$', item.link)
