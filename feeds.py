@@ -154,6 +154,17 @@ class FeedTime(FeedDescriptor):
 		except ValueError:
 			pass
 
+class FeedBool(FeedDescriptor):
+	def __get__(self, instance, owner):
+		getter = getattr(instance, 'get%s' % self.nname)
+		raw = getter()
+		return (raw or '').lower() != 'false'
+
+	def __set__(self, instance, value):
+		raw = 'true' if value else 'false'
+		setter = getattr(instance, 'set%s' % self.nname)
+		return setter(raw)
+
 def parseTime(value):
 	if isinstance(value, basestring):
 		if re.match(r'^[0-9]+$', value):
