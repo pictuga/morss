@@ -407,6 +407,13 @@ class FeedItem(FeedBase):
 		pass
 
 
+	def getIsPermaLink(self):
+		return ""
+
+	def setIsPermaLink(self, value):
+		pass
+
+
 	def getDesc(self):
 		return ""
 
@@ -461,6 +468,7 @@ class FeedItem(FeedBase):
 	description = desc = FeedDescriptor('desc')
 	content = FeedDescriptor('content')
 	id = FeedDescriptor('id')
+	isPermaLink = FeedBool('isPermaLink')
 	time = FeedTime('time')
 	updated = FeedTime('updated')
 
@@ -538,6 +546,16 @@ class FeedItemRSS(FeedItem):
 					'channel':	'guid'}
 		element = self.xgetCreate(table)
 		element.text = value
+
+
+	def getIsPermaLink(self):
+		return self.xget('rssfake:guid/@isPermaLink|guid/@isPermaLink')
+
+	def setIsPermaLink(self, value):
+		table = {	'rdf:rdf':	'rssfake:guid',
+					'channel':	'guid'}
+		element = self.xgetCreate(table)
+		element.attrib['isPermaLink'] = value
 
 
 	def getTime(self):
