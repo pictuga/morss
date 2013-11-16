@@ -28,6 +28,7 @@ from StringIO import StringIO
 from readability import readability
 
 LIM_ITEM = 100	# deletes what's beyond
+LIM_TIME = 7	# deletes what's after
 MAX_ITEM = 50	# cache-only beyond
 MAX_TIME = 7	# cache-only after (in sec)
 DELAY = 10*60	# xml cache & ETag cache (in sec)
@@ -506,10 +507,11 @@ def Gather(url, cachePath, options):
 				print '%s/%s' % (i+1, min(MAX_ITEM, size))
 			sys.stdout.flush()
 
-		if i+1 > LIM_ITEM > 0:
+		if time.time() - startTime > LIM_TIME >= 0 or i+1 > LIM_ITEM >= 0:
+			log('dropped')
 			item.remove()
 			continue
-		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM > 0:
+		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM >= 0:
 			if not options.proxy:
 				if Fill(item, cache, url, True) is False:
 					item.remove()
