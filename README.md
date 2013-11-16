@@ -19,36 +19,68 @@ You may also need:
 
 GPL3 code.
 
+##Arguments
+
+morss accepts some arguments, to lightly alter the output of morss. Arguments may need to have a value (usually a string or a number). In the different "Use cases" below is detailed how to pass those arguments to morss.
+
+The arguments are:
+
+- Change what morss does
+	- `proxy`: doesn't fill the articles
+	- `clip`: stick the full article content under the original feed content (useful for twitter)
+	- `keep`: by default, morss does drop feed description whenever the full-content is found (so as not to mislead users who use Firefox, since the latter only shows the description in the feed preview, so they might believe morss doens't work), but with this argument, the description is kept
+- Advanced
+	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
+	- `debug`: to have some feedback from the script execution. Useful for debugging
+	- `theforce`: force download the rss feed
+- http server only
+	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
+	- `force`: avoid using your browser cache (do not support 304 errors)
+
 ##Use cases
 
 morss will auto-detect what "mode" to use.
 
 ###Running on a server
 
-For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, such as `http://DOMAIN/MORSS/morss.py/feeds.bbci.co.uk/news/rss.xml`. Therefore the python script has to be accessible by the HTTP server. With the `.htaccess` file provided, it's also possible, on APACHE servers, to access the filled feed at `http://DOMAIN/MORSS/feeds.bbci.co.uk/news/rss.xml` (without the `morss.py`).
+For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, which will be handled throu `mod_cgi` for example on Apache severs.
 
-**NB.** Morss does **NOT** provide any HTTP server itself. This must be done with Apache or nginx with python support!
+Then visit: **`http://PATH/TO/MORSS/[morss.py]/[:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
+For example: `http://morss.example/:clip/https://twitter.com/pictuga`  
+*(Brackets indicate optional text)*
+
+The `morss.py` part is only needed if your server doesn't support the Apache redirect rule set in the provided `.htaccess`.
+
+**NB.** Morss does NOT provide any HTTP server itself. This must be done with Apache or nginx with python support!
 
 Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki).
+
+###As a CLI application
+
+Run: **`[python2.7] morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`  
+*(Brackets indicate optional text)*
 
 ###As a newsreader hook
 
 To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
-To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command `PATH/TO/MORSS/morss.py http://path/to/feed.xml`.
+To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.xml`
 
 ##Cache information
 
 morss uses a small cache directory to make the loading faster. Given the way it's designed, the cache doesn't need to be purged each while and then, unless you stop following a big amount of feeds. Only in the case of mass un-subscribing, you might want to delete the cache files corresponding to the bygone feeds. If morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`, and in `$HOME/.cache/morss` otherwise.
 
-##Extra configuration
+##Configuration
 ###Length limitation
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of time to parse it, or might even run into a memory overflow on some shared hosting plans (limits around 10Mb), in which case you might want to adjust the different values at the top of the script.
 
 - `MAX_TIME` sets the maximum amount of time spent *fetching* articles, more time might be spent taking older articles from cache. `-1` for unlimited.
-- `MAX_ITEM` sets the maximum number of articles to fetch. `0` for unlimited. More articles will be taken from cache following the next setting.
-- `LIM_ITEM` sets the maximum number of article checked, limiting both the number of articles fetched and taken from cache. Articles beyond that limit will be dropped from the feed, even if they're cached. `0` for unlimited.
+- `MAX_ITEM` sets the maximum number of articles to fetch. `-1` for unlimited. More articles will be taken from cache following the nexts settings.
+- `LIM_TIME` sets the maximum amount of time spent working on the feed (whether or not it's already cached). Articles beyond that limit will be dropped from the feed. `-1` for unlimited.
+- `LIM_ITEM` sets the maximum number of article checked, limiting both the number of articles fetched and taken from cache. Articles beyond that limit will be dropped from the feed, even if they're cached. `-1` for unlimited.
 
 ###Content matching
 
@@ -66,3 +98,4 @@ You can contribute to this projet. If you're not sure what to do, you can pick f
 
 - Add ability to run HTTP server within morss.py
 - Add ability to run morss.py as an update daemon
+- JSON output.
