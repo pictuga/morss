@@ -121,22 +121,23 @@ class FeedDescriptor(object):
 	"""
 	def __init__(self, name):
 		self.name = name
+		self.nname = name[0].upper() + name[1:]
 
 	def __get__(self, instance, owner):
-		getter = getattr(instance, 'get%s' % self.name.title())
+		getter = getattr(instance, 'get%s' % self.nname)
 		return getter()
 
 	def __set__(self, instance, value):
-		setter = getattr(instance, 'set%s' % self.name.title())
+		setter = getattr(instance, 'set%s' % self.nname)
 		return setter(value)
 
 	def __delete__(self, instance):
-		deleter = getattr(instance, 'del%s' % self.name.title())
+		deleter = getattr(instance, 'del%s' % self.nname)
 		return deleter()
 
 class FeedTime(FeedDescriptor):
 	def __get__(self, instance, owner):
-		getter = getattr(instance, 'get%s' % self.name.title())
+		getter = getattr(instance, 'get%s' % self.nname)
 		raw = getter()
 		try:
 			time = parseTime(raw)
@@ -148,7 +149,7 @@ class FeedTime(FeedDescriptor):
 		try:
 			time = parseTime(value)
 			raw = time.strftime(instance.timeFormat)
-			setter = getattr(instance, 'set%s' % self.name.title())
+			setter = getattr(instance, 'set%s' % self.nname)
 			return setter(raw)
 		except ValueError:
 			pass
