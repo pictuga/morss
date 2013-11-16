@@ -503,6 +503,9 @@ class FeedItemRSS(FeedItem):
 		return self.xval('rssfake:link|link')
 
 	def setLink(self, value):
+		if self.isPermaLink and self.id == self.link != value:
+			self.isPermaLink = False
+
 		table = {	'rdf:rdf':	'rssfake:link',
 					'channel':	'link'}
 		element = self.xgetCreate(table)
