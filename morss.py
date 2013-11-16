@@ -278,7 +278,7 @@ def decodeHTML(data, con=None):
 			enc = chardet.detect(data)['encoding']
 
 	log(enc)
-	return data.decode(enc, 'replace')
+	return data.decode(enc, 'replace') if enc else data
 
 def Fix(item, feedurl='/'):
 	""" Improves feed items (absolute links, resolve feedburner links, etc) """
