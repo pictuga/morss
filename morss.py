@@ -208,7 +208,9 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 		urllib2.HTTPCookieProcessor.http_request(self, req)
 		req.add_unredirected_header('Accept-Encoding', 'gzip')
 		req.add_unredirected_header('User-Agent', self.useragent)
-		req.add_unredirected_header('Referer', 'http://%s' % req.get_host())
+		if req.get_host() != 'feeds.feedburner.com':
+			req.add_unredirected_header('Referer', 'http://%s' % req.get_host())
+
 		if self.cache:
 			if self.etag:
 				req.add_unredirected_header('If-None-Match', self.etag)
