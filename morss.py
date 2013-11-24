@@ -499,7 +499,6 @@ def Gather(url, cachePath, options):
 	# set
 	startTime = time.time()
 	for i, item in enumerate(rss.items):
-		item = Fix(item, url)
 		if options.progress:
 			if MAX_ITEM == 0:
 				print '%s/%s' % (i+1, size)
@@ -511,7 +510,10 @@ def Gather(url, cachePath, options):
 			log('dropped')
 			item.remove()
 			continue
-		elif time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM >= 0:
+
+		item = Fix(item, url)
+
+		if time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM >= 0:
 			if not options.proxy:
 				if Fill(item, cache, url, True) is False:
 					item.remove()
