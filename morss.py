@@ -4,6 +4,9 @@ import os
 import os.path
 import time
 
+import Queue
+import threading
+
 from fnmatch import fnmatch
 from base64 import b64encode, b64decode
 import re
@@ -33,6 +36,7 @@ MAX_ITEM = 50	# cache-only beyond
 MAX_TIME = 7	# cache-only after (in sec)
 DELAY = 10*60	# xml cache & ETag cache (in sec)
 TIMEOUT = 2	# http timeout (in sec)
+THREADS = 10	# number of threads (1 for single-threaded)
 
 DEBUG = False
 HOLD = False
@@ -497,10 +501,16 @@ def Gather(url, cachePath, options):
 		return False
 
 	size = len(rss.items)
+	startTime = time.time()
+
 
 	# set
-	startTime = time.time()
-	for i, item in enumerate(rss.items):
+	def runner(queue):
+		while True:
+			worker(*queue.get())
+			queue.task_done()
+
+	def worker(i, item):
 		if options.progress:
 			if MAX_ITEM == -1:
 				print '%s/%s' % (i+1, size)
@@ -511,7 +521,7 @@ def Gather(url, cachePath, options):
 		if time.time() - startTime > LIM_TIME >= 0 or i+1 > LIM_ITEM >= 0:
 			log('dropped')
 			item.remove()
-			continue
+			return
 
 		item = Fix(item, url)
 
@@ -519,7 +529,7 @@ def Gather(url, cachePath, options):
 			if not options.proxy:
 				if Fill(item, cache, url, True) is False:
 					item.remove()
-					continue
+					return
 		else:
 			if not options.proxy:
 				Fill(item, cache, url)
@@ -530,6 +540,19 @@ def Gather(url, cachePath, options):
 				del item.desc
 			if not options.keep:
 				del item.desc
+
+	queue = Queue.Queue()
+
+	for i in range(THREADS):
+		t = threading.Thread(target=runner, args=(queue,))
+		t.daemon = True
+		t.start()
+
+	for i, item in enumerate(rss.items):
+		queue.put([i, item])
+
+	queue.join()
+	cache.save()
 
 	log(len(rss.items))
 	log(time.time() - startTime)
@@ -583,6 +606,8 @@ if __name__ == '__main__':
 
 		if 'o'+user_id not in token:
 			facebook.set('o'+user_id, ltoken)
+
+		facebook.save()
 
 		if 'REQUEST_URI' in os.environ:
 			print 'Status: 200'
