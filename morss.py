@@ -233,15 +233,15 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 
 	def http_response(self, req, resp):
 		urllib2.HTTPCookieProcessor.http_response(self, req, resp)
+		odata = data = resp.read()
 
-		if 200 <= resp.code < 300 and resp.info().maintype == 'text':
-			data = resp.read()
-
+		if 200 <= resp.code < 300:
 			# gzip
 			if resp.headers.get('Content-Encoding') == 'gzip':
 				log('un-gzip')
 				data = GzipFile(fileobj=StringIO(data), mode='r').read()
 
+		if 200 <= resp.code < 300 and resp.info().maintype == 'text':
 			# <meta> redirect
 			if resp.info().type in MIMETYPE['html']:
 				match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
@@ -262,6 +262,7 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 			if self.decode:
 				data = decodeHTML(data, resp)
 
+		if odata != data:
 			fp = StringIO(data)
 			old_resp = resp
 			resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
