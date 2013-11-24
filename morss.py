@@ -502,7 +502,7 @@ def Gather(url, cachePath, options):
 	startTime = time.time()
 	for i, item in enumerate(rss.items):
 		if options.progress:
-			if MAX_ITEM == 0:
+			if MAX_ITEM == -1:
 				print '%s/%s' % (i+1, size)
 			else:
 				print '%s/%s' % (i+1, min(MAX_ITEM, size))
