@@ -500,7 +500,7 @@ def Gather(url, cachePath, options):
 		cache.set('etag', con.headers.getheader('etag'))
 		cache.set('lastmodified', con.headers.getheader('last-modified'))
 
-		if xml[:5] == '<?xml' or con.info().type in MIMETYPE['xml']:
+		if xml.startswith('<?xml') or con.info().type in MIMETYPE['xml']:
 			style = 'normal'
 		elif feedify.supported(url):
 			style = 'feedify'
