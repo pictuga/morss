@@ -11,6 +11,7 @@ from fnmatch import fnmatch
 from base64 import b64encode, b64decode
 import re
 import string
+import json
 
 import lxml.html
 import lxml.html.clean
@@ -126,8 +127,7 @@ class Cache:
 	""" Light, error-prone caching system. """
 	def __init__(self, folder, key, persistent=False):
 		self._key = key
-		self._hash = str(hash(self._key))
-
+		self._hash = b64encode(self._key)
 		self._dir = folder
 		self._file = self._dir + '/' + self._hash
 
@@ -135,14 +135,11 @@ class Cache:
 		self._cache = {} # new things to put in cache
 
 		if os.path.isfile(self._file):
-			data = open(self._file).readlines()
-			for line in data:
-				if "\t" in line:
-					key, bdata = line.split("\t", 1)
-					self._cached[key] = b64decode(bdata)
+			data = open(self._file).read()
+			self._cached = json.loads(data)
 
-			if persistent:
-				self._cache = self._cached
+		if persistent:
+			self._cache = self._cached
 
 	def __del__(self):
 		self.save()
@@ -166,17 +163,11 @@ class Cache:
 		if len(self._cache) == 0:
 			return
 
-		out = []
-		for (key, data) in self._cache.iteritems():
-			bdata = b64encode(data)
-			out.append(str(key) + "\t" + bdata)
-		txt = "\n".join(out)
-
 		if not os.path.exists(self._dir):
 			os.makedirs(self._dir)
 
 		with open(self._file, 'w') as file:
-			file.write(txt)
+			file.write(json.dumps(self._cache))
 
 	def isYoungerThan(self, sec):
 		if not os.path.exists(self._file):
