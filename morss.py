@@ -677,8 +677,8 @@ if __name__ == '__main__':
 
 	RSS = Gather(url, cachePath, options)
 
-	if RSS is not False and not options.progress and not DEBUG:
-			print RSS
+	if RSS is not False and not options.progress and not DEBUG and not options.silent:
+		print RSS
 
 	if RSS is False and 'progress' not in options:
 		print 'Error fetching feed.'
