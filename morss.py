@@ -410,7 +410,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 		url = link.encode('utf-8')
 		con = urllib2.build_opener(SimpleDownload(decode=True)).open(url, timeout=TIMEOUT)
 		data = con.read()
-	except (urllib2.URLError, httplib.HTTPException, socket.timeout):
+	except (IOError, httplib.HTTPException):
 		log('http error')
 		cache.set(link, 'error-http')
 		return True
@@ -462,7 +462,7 @@ def Gather(url, cachePath, options):
 			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False)
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
-		except (urllib2.URLError, httplib.HTTPException, socket.timeout):
+		except (IOError, httplib.HTTPException):
 			return False
 
 		cache.set('xml', xml)
