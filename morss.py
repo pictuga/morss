@@ -656,7 +656,7 @@ if __name__ == '__main__':
 
 		if options.html:
 			print 'Content-Type: text/html'
-		elif options.debug:
+		elif options.debug or options.txt:
 			print 'Content-Type: text/plain'
 		elif options.progress:
 			print 'Content-Type: application/octet-stream'
