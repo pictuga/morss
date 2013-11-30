@@ -96,7 +96,7 @@ class ParseOptions:
 				self.url = self.url.split('/', 1)[1]
 		else:
 			if len(sys.argv) <= 1:
-				return (None, [])
+				return
 
 			roptions = sys.argv[1:-1]
 			self.url = sys.argv[-1]
