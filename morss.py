@@ -359,7 +359,7 @@ def Fix(item, feedurl='/'):
 		log(item.link)
 
 	# reddit
-	if urlparse.urlparse(item.link).netloc == 'www.reddit.com':
+	if urlparse.urlparse(feedurl).netloc == 'www.reddit.com':
 		match = lxml.html.fromstring(item.desc).xpath('//a[text()="[link]"]/@href')
 		if len(match):
 			item.link = match[0]
