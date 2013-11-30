@@ -200,13 +200,15 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 	to save bandwidth. The given headers are added back into the header on error
 	304 for easier use.
 	"""
-	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=False, cookiejar=None):
+	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=False, cookiejar=None, accept=None, strict=False):
 		urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
 		self.cache = cache
 		self.etag = etag
 		self.lastmodified = lastmodified
 		self.useragent = useragent
 		self.decode = decode
+		self.accept = accept
+		self.strict = strict
 
 	def http_request(self, req):
 		urllib2.HTTPCookieProcessor.http_request(self, req)
@@ -220,6 +222,35 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 				req.add_unredirected_header('If-None-Match', self.etag)
 			if self.lastmodified:
 				req.add_unredirected_header('If-Modified-Since', self.lastmodified)
+
+		if self.accept is not None:
+			# req.add_unredirected_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
+			if isinstance(self.accept, basestring):
+				self.accept = (self.accept,)
+
+			out = {}
+			for (i, group) in enumerate(self.accept):
+				rank = 1 - i*0.1
+
+				if isinstance(group, basestring):
+					if group in MIMETYPE:
+						group = MIMETYPE[group]
+					else:
+						out[group] = rank
+						continue
+
+				for mime in group:
+					if mime not in out:
+						out[mime] = rank
+
+			if not self.strict:
+				out['*/*'] = rank-0.1
+
+			string = ','.join([x+';q={:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
+			log(string)
+
+			req.add_unredirected_header('Accept', string)
+
 		return req
 
 	def http_error_304(self, req, fp, code, msg, headers):
@@ -408,7 +439,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 	# download
 	try:
 		url = link.encode('utf-8')
-		con = urllib2.build_opener(SimpleDownload(decode=True)).open(url, timeout=TIMEOUT)
+		con = urllib2.build_opener(SimpleDownload(decode=True, accept=('html', 'text/*'), strict=True)).open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (IOError, httplib.HTTPException):
 		log('http error')
@@ -459,7 +490,7 @@ def Gather(url, cachePath, options):
 		style = cache.get('style')
 	else:
 		try:
-			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False)
+			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False, accept=('xml','html'))
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
 		except (IOError, httplib.HTTPException):
