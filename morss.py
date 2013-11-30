@@ -293,11 +293,11 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 			if self.decode:
 				data = decodeHTML(data, resp)
 
-		if odata != data:
-			fp = StringIO(data)
-			old_resp = resp
-			resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-			resp.msg = old_resp.msg
+		fp = StringIO(data)
+		old_resp = resp
+		resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+		resp.msg = old_resp.msg
+
 		return resp
 
 	https_response = http_response
