@@ -171,7 +171,7 @@ class Cache:
 			os.makedirs(self._dir)
 
 		with open(self._file, 'w') as file:
-			file.write(json.dumps(self._cache))
+			file.write(json.dumps(self._cache, indent=4))
 
 	def isYoungerThan(self, sec):
 		if not os.path.exists(self._file):
