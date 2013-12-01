@@ -534,7 +534,11 @@ def Gather(url, cachePath, options):
 	# set
 	def runner(queue):
 		while True:
-			worker(*queue.get())
+			value = queue.get()
+			try:
+				worker(*value)
+			except:
+				log('random error in thread')
 			queue.task_done()
 
 	def worker(i, item):
