@@ -241,7 +241,7 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 			if not self.strict:
 				out['*/*'] = rank-0.1
 
-			string = ','.join([x+';q={:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
+			string = ','.join([x+';q={0:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
 			log(string)
 
 			req.add_unredirected_header('Accept', string)
