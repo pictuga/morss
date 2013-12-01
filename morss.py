@@ -21,6 +21,7 @@ import feeds
 import feedify
 
 import httplib
+import urllib
 import urllib2
 import socket
 import chardet
@@ -127,8 +128,11 @@ class Cache:
 	""" Light, error-prone caching system. """
 	def __init__(self, folder, key, persistent=False):
 		self._key = key
-		self._hash = b64encode(self._key)
 		self._dir = folder
+
+		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1
+		self._hash = urllib.quote_plus(self._key)[:maxsize]
+
 		self._file = self._dir + '/' + self._hash
 
 		self._cached = {} # what *was* cached
