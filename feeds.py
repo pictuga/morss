@@ -51,7 +51,9 @@ def parse(data):
 	match = re.search('encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
 	if match:
 		enc = match.groups()[0].lower()
-		data = data.decode(enc, 'ignore').encode(enc)
+		if not isinstance(data, unicode):
+			data = data.decode(enc, 'ignore')
+		data = data.encode(enc)
 
 	# parse
 	parser = etree.XMLParser(recover=True)
