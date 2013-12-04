@@ -96,12 +96,15 @@ class FeedBase(object):
 
 	def xgetCreate(self, table):
 		""" Returns an element, and creates it when not present """
-		tag = table[self.tag]
-		match = self.xget(tag)
+		value = table[self.tag]
+		if not isinstance(value, tuple):
+			value = (value, value)
+		new, xpath = value
+		match = self.xget(xpath)
 		if match is not None:
 			return match
 		else:
-			element = etree.Element(tagNS(tag))
+			element = etree.Element(tagNS(new))
 			self.root.append(element)
 			return element
 
@@ -592,11 +595,11 @@ class FeedItemAtom(FeedItem):
 
 
 	def getLink(self):
-		return self.xget('atom:link/@href|atom03:link/@href')
+		return self.xget('(atom:link|atom03:link)[@rel="alternate" or not(@rel)]/@href')
 
 	def setLink(self, value):
-		table = {	'atom:feed':	'atom:link',
-					'atom03:feed':	'atom03:link'}
+		table = {	'atom:feed':	('atom:link', 'atom:link[@rel="alternate" or not(@rel)]'),
+					'atom03:feed':	('atom03:link', 'atom03:link[@rel="alternate" or not(@rel)]')}
 		element = self.xgetCreate(table)
 		element.attrib['href'] = value
 
