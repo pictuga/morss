@@ -303,6 +303,9 @@ class FeedParser(FeedBase):
 	description = desc = FeedDescriptor('desc')
 	items = FeedListDescriptor('items')
 
+	def tostring(self, **k):
+		return etree.tostring(self.xml.getroottree(), pretty_print=True, **k)
+
 class FeedParserRSS(FeedParser):
 	"""
 	RSS Parser
