@@ -284,9 +284,14 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 
 					return self.parent.open(new, timeout=req.timeout)
 
-			# decode
-			if self.decode:
-				data = decodeHTML(data, resp)
+			# encoding
+			enc = detEncoding(data, resp)
+
+			if enc:
+				data = data.decode(enc, 'replace')
+
+				if not self.decode:
+					data = data.encode(enc)
 
 		fp = StringIO(data)
 		old_resp = resp
@@ -298,21 +303,21 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 	https_response = http_response
 	https_request = http_request
 
-def decodeHTML(data, con=None):
+def detEncoding(data, con=None):
 	if con is not None and con.headers.getparam('charset'):
 		log('header')
-		enc = con.headers.getparam('charset')
-	else:
-		match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data)
-		if match:
-			log('meta.re')
-			enc = match.groups()[0]
-		else:
-			log('chardet')
-			enc = chardet.detect(data)['encoding']
+		return con.headers.getparam('charset')
 
-	log(enc)
-	return data.decode(enc, 'replace') if enc else data
+	match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data)
+	if match:
+		log('meta.re')
+		return match.groups()[0]
+
+	match = re.search('encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
+	if match:
+		return match.groups()[0].lower()
+
+	return None
 
 def Fix(item, feedurl='/'):
 	""" Improves feed items (absolute links, resolve feedburner links, etc) """
