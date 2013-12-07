@@ -308,7 +308,7 @@ def detEncoding(data, con=None):
 		log('header')
 		return con.headers.getparam('charset')
 
-	match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data)
+	match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data[:1000])
 	if match:
 		log('meta.re')
 		return match.groups()[0]
