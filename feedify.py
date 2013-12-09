@@ -148,7 +148,8 @@ class Builder(object):
 		self.rule = getRule(link)
 
 		if self.rule['mode'] == 'xpath':
-			self.data = morss.decodeHTML(self.data)
+			if not isinstance(self.data, unicode):
+				self.data = self.data.decode(morss.detEncoding(self.data), 'replace')
 			self.doc = lxml.html.fromstring(self.data)
 		elif self.rule['mode'] == 'json':
 			self.doc = json.loads(data)
