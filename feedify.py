@@ -89,7 +89,7 @@ def PreWorker(url, cache):
 
 			app_id = str(data['app_id'])
 			user_id = str(data['user_id'])
-			expires = data['expires_at']
+			expires = int(data['expires_at'])
 			short = 'issued_at' not in data
 
 			facebook.set('t'+token, user_id)
@@ -106,7 +106,7 @@ def PreWorker(url, cache):
 			else:
 				# maybe it's a better one
 				last = facebook.get('u'+user_id)
-				last_expires = facebook.get('e'+last, int)
+				last_expires = facebook.get('e'+last)
 
 				if expires > last_expires:
 					# new is better
@@ -234,7 +234,7 @@ class Builder(object):
 			if self.cache:
 				facebook = self.cache.new('facebook', True)
 				token = urlparse.parse_qs(urlparse.urlparse(self.link).query)['access_token'][0]
-				expires = facebook.get('e'+token, int)
+				expires = facebook.get('e'+token)
 				lifespan = expires - time.time()
 
 				if lifespan < 5*24*3600:
@@ -242,4 +242,4 @@ class Builder(object):
 					new.title = "APP AUTHORISATION RENEWAL NEEDED"
 					new.link = "https://www.facebook.com/dialog/oauth?client_id={app_id}&redirect_uri=http://test.morss.it/:facebook/".format(app_id=morss.FBAPPID)
 					new.desc = "Please renew your Facebook app token for this app to keep working for this feed.<br/><a href='{}'>Go!</a>".format(new.link)
-					new.time = cache.get(expires, int)
+					new.time = expires
