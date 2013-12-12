@@ -140,7 +140,8 @@ class Cache:
 
 		if os.path.isfile(self._file):
 			data = open(self._file).read()
-			self._cached = json.loads(data)
+			if data:
+				self._cached = json.loads(data)
 
 		if persistent:
 			self._cache = self._cached
@@ -170,8 +171,10 @@ class Cache:
 		if not os.path.exists(self._dir):
 			os.makedirs(self._dir)
 
+		out = json.dumps(self._cache, indent=4)
+
 		with open(self._file, 'w+') as file:
-			file.write(json.dumps(self._cache, indent=4))
+			file.write(out)
 
 	def isYoungerThan(self, sec):
 		if not os.path.exists(self._file):
