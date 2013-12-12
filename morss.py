@@ -198,7 +198,7 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 	to save bandwidth. The given headers are added back into the header on error
 	304 for easier use.
 	"""
-	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=False, cookiejar=None, accept=None, strict=False):
+	def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=True, cookiejar=None, accept=None, strict=False):
 		urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
 		self.cache = cache
 		self.etag = etag
@@ -442,7 +442,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 	# download
 	try:
 		url = link.encode('utf-8')
-		con = urllib2.build_opener(SimpleDownload(decode=True, accept=('html', 'text/*'), strict=True)).open(url, timeout=TIMEOUT)
+		con = urllib2.build_opener(SimpleDownload(accept=('html', 'text/*'), strict=True)).open(url, timeout=TIMEOUT)
 		data = con.read()
 	except (IOError, httplib.HTTPException):
 		log('http error')
@@ -493,7 +493,7 @@ def Gather(url, cachePath, options):
 		style = cache.get('style')
 	else:
 		try:
-			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), decode=False, accept=('xml','html'))
+			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), accept=('xml','html'))
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
 		except (IOError, httplib.HTTPException):
