@@ -605,7 +605,7 @@ def Gather(url, cachePath, options):
 	log(len(rss.items))
 	log(time.time() - startTime)
 
-	return rss.tostring(xml_declaration=True, encoding='UTF-8')
+	return rss
 
 if __name__ == '__main__':
 	options = ParseOptions()
@@ -676,6 +676,8 @@ if __name__ == '__main__':
 			print 'Content-Type: text/plain'
 		elif options.progress:
 			print 'Content-Type: application/octet-stream'
+		elif options.json:
+			print 'Content-Type: application/json'
 		else:
 			print 'Content-Type: text/xml'
 		print ''
@@ -694,7 +696,13 @@ if __name__ == '__main__':
 	RSS = Gather(url, cachePath, options)
 
 	if RSS is not False and not options.progress and not DEBUG and not options.silent:
-		print RSS
+		if options.json:
+			if options.indent:
+				print json.dumps(RSS, sort_keys=True, indent=4, default=lambda x: dict(x))
+			else:
+				print json.dumps(RSS, sort_keys=True, default=lambda x: dict(x))
+		else:
+			print RSS.tostring(xml_declaration=True, encoding='UTF-8')
 
 	if RSS is False and 'progress' not in options:
 		print 'Error fetching feed.'
