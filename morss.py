@@ -584,9 +584,9 @@ def Gather(url, cachePath, options):
 		if options.progress:
 			end = size if MAX_ITEM == -1 else min(MAX_ITEM, size)
 			if options.json:
-				print json.dumps((i+1, end, item), default=lambda o: dict(o))
+				sys.stdout.write(json.dumps((i+1, end, item), default=lambda o: dict(o)) + "\n")
 			else:
-				print "%s/%s" % (i+1, end)
+				sys.stdout.write("%s/%s\n" % (i+1, end))
 			sys.stdout.flush()
 
 	queue = Queue.Queue()
