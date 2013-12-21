@@ -126,9 +126,10 @@ class ParseOptions:
 
 class Cache:
 	""" Light, error-prone caching system. """
-	def __init__(self, folder, key, persistent=False):
+	def __init__(self, folder, key, persistent=False, dic=False):
 		self._key = key
 		self._dir = folder
+		self._dic = dic
 
 		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1
 		self._hash = urllib.quote_plus(self._key)[:maxsize]
@@ -159,10 +160,17 @@ class Cache:
 			self._cache[key] = self._cached[key]
 			return self._cached[key]
 		else:
-			return None
+			if self._dic:
+				self._cache[key] = {}
+				return self._cache[key]
+			else:
+				return None
 
 	def set(self, key, content):
 		self._cache[key] = content
+
+	__getitem__ = get
+	__setitem__ = set
 
 	def save(self):
 		if len(self._cache) == 0:
@@ -182,10 +190,10 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-	def new(self, key, persistent=False):
+	def new(self, key, persistent=False, dic=False):
 		""" Returns a Cache object in the same directory """
 		if key != self._key:
-			return Cache(self._dir, key, persistent)
+			return Cache(self._dir, key, persistent, dic)
 		else:
 			return self
 
