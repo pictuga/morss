@@ -558,13 +558,6 @@ def Gather(url, cachePath, options):
 			queue.task_done()
 
 	def worker(i, item):
-		if options.progress:
-			if MAX_ITEM == -1:
-				print '%s/%s' % (i+1, size)
-			else:
-				print '%s/%s' % (i+1, min(MAX_ITEM, size))
-			sys.stdout.flush()
-
 		if time.time() - startTime > LIM_TIME >= 0 or i+1 > LIM_ITEM >= 0:
 			log('dropped')
 			item.remove()
@@ -587,6 +580,14 @@ def Gather(url, cachePath, options):
 				del item.desc
 			if not options.keep:
 				del item.desc
+
+		if options.progress:
+			end = size if MAX_ITEM == -1 else min(MAX_ITEM, size)
+			if options.json:
+				print json.dumps((i+1, end, item), default=lambda o: dict(o))
+			else:
+				print "%s/%s" % (i+1, end)
+			sys.stdout.flush()
 
 	queue = Queue.Queue()
 
