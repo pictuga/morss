@@ -475,6 +475,8 @@ def Gather(url, cachePath, options):
 	# url clean up
 	log(url)
 
+	if url is None:
+		return False
 
 	if urlparse.urlparse(url).scheme not in PROTOCOL:
 		url = 'http://' + url
