@@ -629,7 +629,7 @@ if __name__ == '__main__':
 		cachePath = os.path.expanduser('~') + '/.cache/morss'
 
 	if options.facebook:
-		facebook = Cache(cachePath, 'facebook', True)
+		facebook = Cache(cachePath, 'facebook', persistent=True, dic=True)
 
 		# get real token from code
 		code = urlparse.parse_qs(urlparse.urlparse(url).query)['code'][0]
@@ -648,12 +648,11 @@ if __name__ == '__main__':
 		user_id = json.loads(urllib2.urlopen(iurl).read())['id']
 
 		# do sth out of it
-		facebook.set('t'+ltoken, user_id)
-		facebook.set('e'+ltoken, expires)
-		facebook.set('u'+user_id, ltoken)
+		if user_id not in facebook['user']:
+			facebook['user'][user_id] = {'original': ltoken}
 
-		if 'o'+user_id not in token:
-			facebook.set('o'+user_id, ltoken)
+		facebook['token'][ltoken] = {'user': user_id, 'expires': expires}
+		facebook['user'][user_id]['token'] = ltoken
 
 		facebook.save()
 

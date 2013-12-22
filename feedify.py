@@ -79,10 +79,10 @@ def formatString(string, getter, error=False):
 
 def PreWorker(url, cache):
 	if urlparse.urlparse(url).netloc == 'graph.facebook.com':
-		facebook = cache.new('facebook', True)
+		facebook = cache.new('facebook', persistent=True, dic=True)
 		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
 
-		if 't'+token not in facebook:
+		if token not in facebook['token']:
 			# this token ain't known, look for info about it
 			eurl = "https://graph.facebook.com/debug_token?input_token={token}&access_token={app_token}".format(token=token, app_token=morss.FBAPPTOKEN)
 			data = json.loads(urllib2.urlopen(eurl).read())['data']
@@ -92,21 +92,18 @@ def PreWorker(url, cache):
 			expires = int(data['expires_at'])
 			short = 'issued_at' not in data
 
-			facebook.set('t'+token, user_id)
-			facebook.set('e'+token, expires)
-
-			good = True
+			facebook['token'][token] = {'user': user_id, 'expires': expires}
 
 			# do some woodoo to know if we already have sth better
 
-			if 'u'+user_id not in facebook:
+			if user_id not in facebook['user']:
 				# grab a new one anyway, new user
-				facebook.set('o'+user_id, token)
+				facebook['user'][user_id] = {'original': token}
 				good = True
 			else:
 				# maybe it's a better one
-				last = facebook.get('u'+user_id)
-				last_expires = facebook.get('e'+last)
+				last = facebook['user'][user_id]['token']
+				last_expires = facebook['token'][last]['expires']
 
 				if expires > last_expires:
 					# new is better
@@ -119,17 +116,15 @@ def PreWorker(url, cache):
 				token = values['access_token'][0]
 				expires = int(time.time() + int(values['expires'][0]))
 
-				facebook.set('t'+token, user_id)
-				facebook.set('e'+token, expires)
+				facebook['token'][token] = {'user': user_id, 'expires': expires}
 
-			if good:
-				facebook.set('u'+user_id, token)
+			facebook['user'][user_id]['token'] = token
 
 		# hey look for a newer token and use it
 		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
-		user_id = facebook.get('t'+token)
-		last = facebook.get('u'+user_id)
-		original = facebook.get('o'+user_id)
+		user_id = facebook['token'][token]['user']
+		last = facebook['user'][user_id]['token']
+		original = facebook['user'][user_id]['original']
 
 		nurl = url.replace(token, last)
 		ncache = url.replace(token, original)
@@ -234,7 +229,7 @@ class Builder(object):
 			if self.cache:
 				facebook = self.cache.new('facebook', True)
 				token = urlparse.parse_qs(urlparse.urlparse(self.link).query)['access_token'][0]
-				expires = facebook.get('e'+token)
+				expires = facebook['token'][token]['expires']
 				lifespan = expires - time.time()
 
 				if lifespan < 5*24*3600:
