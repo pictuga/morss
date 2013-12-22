@@ -353,7 +353,6 @@ class FeedParserRSS(FeedParser):
 
 
 	def getDesc(self):
-		print 'YEAH'
 		return self.xval('rssfake:description|description')
 
 	def setDesc(self, value):
