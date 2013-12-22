@@ -76,6 +76,27 @@ class FeedBase(object):
 	Base for xml-related classes, which provides simple wrappers around xpath
 	selection and item creation
 	"""
+
+	def __getitem__(self, item):
+		return getattr(self, item)
+
+	def __setitem__(self, item, value):
+		setattr(self, item, value)
+
+	def __delitem__(self, item):
+		delattr(self, item)
+
+	def __iter__(self):
+		for element in self.dic:
+			value = self[element]
+
+			if isinstance(value, FeedList):
+				value = [dict(x) for x in value]
+			elif isinstance(value, datetime):
+				value = value.isoformat()
+
+			yield element, value
+
 	def xpath(self, path):
 		""" Test xpath rule on xml tree """
 		return self.root.xpath(path, namespaces=NSMAP)
@@ -270,6 +291,7 @@ class FeedParser(FeedBase):
 	itemsClass = 'FeedItem'
 	mimetype = 'application/xml'
 	base = '<?xml?>'
+	dic = ('title', 'desc', 'items')
 
 	def __init__(self, xml=None, tag='atom:feed'):
 		if xml is None:
@@ -387,6 +409,7 @@ class FeedParserAtom(FeedParser):
 
 class FeedItem(FeedBase):
 	timeFormat = ''
+	dic = ('title', 'link', 'isPermaLink', 'desc', 'content', 'id', 'time', 'updated')
 
 	def __init__(self, xml=None, tag='atom:feed'):
 		if xml is None:
