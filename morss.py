@@ -103,9 +103,6 @@ class ParseOptions:
 			roptions = sys.argv[1:-1]
 			self.url = sys.argv[-1]
 
-		if urlparse.urlparse(self.url).scheme not in PROTOCOL:
-			self.url = 'http://' + self.url
-
 		for option in roptions:
 			split = option.split('=', 1)
 			if len(split) > 1:
@@ -475,11 +472,18 @@ def Fill(item, cache, feedurl='/', fast=False):
 	return True
 
 def Gather(url, cachePath, options):
+	# url clean up
 	log(url)
 
-	url = url.replace(' ', '%20')
-	cache = Cache(cachePath, url, options.proxy)
 
+	if urlparse.urlparse(url).scheme not in PROTOCOL:
+		url = 'http://' + url
+		log(url)
+
+	url = url.replace(' ', '%20')
+
+	# cache
+	cache = Cache(cachePath, url, options.proxy)
 	log(cache._hash)
 
 	# do some useful facebook work
@@ -546,6 +550,11 @@ def Gather(url, cachePath, options):
 	size = len(rss.items)
 	startTime = time.time()
 
+	# custom settings
+	if options.progress:
+		MAX_TIME = -1
+	if options.cache:
+		MAX_TIME = 0
 
 	# set
 	def runner(queue):
@@ -683,14 +692,6 @@ if __name__ == '__main__':
 
 		HOLD = False
 
-	if url is None:
-		print 'Please provide url.'
-		sys.exit(1)
-
-	if options.progress:
-		MAX_TIME = -1
-	if options.cache:
-		MAX_TIME = 0
 
 	RSS = Gather(url, cachePath, options)
 
