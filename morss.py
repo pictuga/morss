@@ -237,8 +237,9 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 				self.accept = (self.accept,)
 
 			out = {}
-			for (i, group) in enumerate(self.accept):
-				rank = 1 - i*0.1
+			rank = 1.1
+			for group in self.accept:
+				rank = rank - 0.1
 
 				if isinstance(group, basestring):
 					if group in MIMETYPE:
