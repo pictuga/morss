@@ -26,6 +26,10 @@ import urllib2
 import chardet
 import urlparse
 
+import wsgiref.util
+import wsgiref.simple_server
+import wsgiref.handlers
+
 from gzip import GzipFile
 from StringIO import StringIO
 
@@ -54,7 +58,7 @@ FBAPPTOKEN = FBAPPID + '|' + FBSECRET
 
 PROTOCOL = ['http', 'https', 'ftp']
 
-if 'REQUEST_URI' in os.environ:
+if 'SCRIPT_NAME' in os.environ:
 	httplib.HTTPConnection.debuglevel = 1
 
 	import cgitb
@@ -63,9 +67,9 @@ if 'REQUEST_URI' in os.environ:
 class MorssException(Exception):
 	pass
 
-def log(txt):
-	if DEBUG:
-		if HOLD:
+def log(txt, force=False):
+	if DEBUG or force:
+		if 'REQUEST_URI' in os.environ:
 			open('morss.log', 'a').write("%s\n" % repr(txt))
 		else:
 			print repr(txt)
@@ -84,16 +88,21 @@ def countWord(txt):
 		return 0
 
 class ParseOptions:
-	def __init__(self):
+	def __init__(self, environ=False):
 		self.url = ''
 		self.options = {}
 		roptions = []
 
-		if 'REQUEST_URI' in os.environ:
-			self.url = os.environ['REQUEST_URI'][1:]
+		if environ:
+			if 'REQUEST_URI' in environ:
+				self.url = environ['REQUEST_URI'][1:]
+			else:
+				self.url = environ['PATH_INFO'][1:]
 
-			if 'REDIRECT_URL' not in os.environ:
-				self.url = self.url[len(os.environ['SCRIPT_NAME']):]
+			if self.url.startswith('/morss.py'):
+				self.url = self.url[10:]
+			elif self.url.startswith('morss.py'):
+				self.url = self.url[9:]
 
 			if self.url.startswith(':'):
 				roptions = self.url.split('/')[0].split(':')[1:]
@@ -475,7 +484,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 
 	return True
 
-def Gather(url, cachePath, options):
+def Init(url, cachePath, options):
 	# url clean up
 	log(url)
 
@@ -492,6 +501,9 @@ def Gather(url, cachePath, options):
 	cache = Cache(cachePath, url, options.proxy)
 	log(cache._hash)
 
+	return (url, cache)
+
+def Fetch(url, cache, options):
 	# do some useful facebook work
 	feedify.PreWorker(url, cache)
 
@@ -545,7 +557,7 @@ def Gather(url, cachePath, options):
 		match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
 		if len(match):
 			link = urlparse.urljoin(url, match[0])
-			return Gather(link, cachePath, options)
+			return Fetch(link, cachePath, options)
 		else:
 			log('no-link html')
 			raise MorssException('Link provided is an HTML page, which doesn\'t link to a feed')
@@ -553,14 +565,35 @@ def Gather(url, cachePath, options):
 		log('random page')
 		raise MorssException('Link provided is not a valid feed')
 
+
+	cache.save()
+	return rss
+
+def Gather(rss, url, cache, options):
+	log('YEAH')
+
 	size = len(rss.items)
 	startTime = time.time()
 
 	# custom settings
+	global LIM_ITEM
+	global LIM_TIME
+	global MAX_ITEM
+	global MAX_TIME
+
 	if options.progress:
 		MAX_TIME = -1
+		LIM_TIME = 15
+		MAX_ITEM = -1
+		LIM_ITEM = -1
 	if options.cache:
 		MAX_TIME = 0
+	if options.OFCOURSENOT:
+		log('welcome home')
+		LIM_ITEM = -1
+		LIM_TIME = -1
+		MAX_ITEM = -1
+		MAX_TIME = -1
 
 	# set
 	def runner(queue):
@@ -601,14 +634,6 @@ def Gather(url, cachePath, options):
 			if not options.keep:
 				del item.desc
 
-		if options.progress:
-			end = size if MAX_ITEM == -1 else min(MAX_ITEM, size)
-			if options.json:
-				sys.stdout.write(json.dumps((i+1, end, item), default=lambda o: dict(o)) + "\n")
-			else:
-				sys.stdout.write("%s/%s\n" % (i+1, end))
-			sys.stdout.flush()
-
 	queue = Queue.Queue()
 
 	for i in range(THREADS):
@@ -627,26 +652,93 @@ def Gather(url, cachePath, options):
 
 	return rss
 
-if __name__ == '__main__':
+def cgi_app(environ, start_response):
+	options = ParseOptions(environ)
+	url = options.url
+	headers = {}
+
+	global DEBUG
+	DEBUG = options.debug
+
+	if 'HTTP_IF_NONE_MATCH' in environ:
+		if not options.force and not options.facebook and time.time() - int(environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
+			headers['status'] = '304 Not Modified'
+			start_response(headers['status'], headers.items())
+			log(url)
+			log('etag good')
+			return []
+
+	headers['status'] = '200 OK'
+	headers['etag'] = '"%s"' % int(time.time())
+
+	if options.html:
+		headers['content-type'] = 'text/html'
+	elif options.debug or options.txt:
+		headers['content-type'] = 'text/plain'
+	elif options.json:
+		headers['content-type'] = 'application/json'
+	else:
+		headers['content-type'] = 'text/xml'
+
+	url, cache = Init(url, os.getcwd() + '/cache', options)
+	RSS = Fetch(url, cache, options)
+	RSS = Gather(RSS, url, cache, options)
+
+	if headers['content-type'] == 'text/xml':
+		headers['content-type'] = RSS.mimetype
+
+	start_response(headers['status'], headers.items())
+
+	if not DEBUG and not options.silent:
+		if options.json:
+			if options.indent:
+				return json.dumps(RSS, sort_keys=True, indent=4, default=lambda x: dict(x))
+			else:
+				return json.dumps(RSS, sort_keys=True, default=lambda x: dict(x))
+		else:
+			return RSS.tostring(xml_declaration=True, encoding='UTF-8')
+
+	log('done')
+
+def cgi_wrapper(environ, start_response):
+	try:
+		return cgi_app(environ, start_response)
+	except (KeyboardInterrupt, SystemExit):
+		raise
+	except MorssException as e:
+		headers = {}
+		headers['status'] = '500 Oops'
+		headers['content-type'] = 'text/plain'
+		start_response(headers['status'], headers.items(), sys.exc_info())
+		return 'Internal Error: %s' % e.message
+	except Exception as e:
+		headers = {}
+		headers['status'] = '500 Oops'
+		headers['content-type'] = 'text/plain'
+		start_response(headers['status'], headers.items(), sys.exc_info())
+		return 'Unknown Error: %s' % e.message
+
+def cli_app():
 	options = ParseOptions()
 	url = options.url
 
-	DEBUG = bool(options.debug)
+	global DEBUG
+	DEBUG = options.debug
 
-	if 'REQUEST_URI' in os.environ:
-		HOLD = True
+	url, cache = Init(url, os.path.expanduser('~/.cache/morss'), options)
+	RSS = Fetch(url, cache, options)
+	RSS = Gather(RSS, url, cache, options)
 
-		if 'HTTP_IF_NONE_MATCH' in os.environ:
-			if not options.force and not options.facebook and time.time() - int(os.environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
-				print 'Status: 304'
-				print
-				log(url)
-				log('etag good')
-				sys.exit(0)
+	if not DEBUG and not options.silent:
+		if options.json:
+			if options.indent:
+				print json.dumps(RSS, sort_keys=True, indent=4, default=lambda x: dict(x))
+			else:
+				print json.dumps(RSS, sort_keys=True, default=lambda x: dict(x))
+		else:
+			print RSS.tostring(xml_declaration=True, encoding='UTF-8')
 
-		cachePath = os.getcwd() + '/cache'
-	else:
-		cachePath = os.path.expanduser('~') + '/.cache/morss'
+	log('done')
 
 	if options.facebook:
 		facebook = Cache(cachePath, 'facebook', persistent=True, dic=True)
@@ -685,37 +777,23 @@ if __name__ == '__main__':
 
 		sys.exit(0)
 
+def main():
 	if 'REQUEST_URI' in os.environ:
-		print 'Status: 200'
-		print 'ETag: "%s"' % int(time.time())
+		wsgiref.handlers.CGIHandler().run(cgi_wrapper)
 
-		if options.html:
-			print 'Content-Type: text/html'
-		elif options.debug or options.txt:
-			print 'Content-Type: text/plain'
-		elif options.progress:
-			print 'Content-Type: application/octet-stream'
-		elif options.json:
-			print 'Content-Type: application/json'
-		else:
-			print 'Content-Type: text/xml'
-		print ''
+	elif len(sys.argv) <= 1:
+		httpd = wsgiref.simple_server.make_server('', 8080, cgi_wrapper)
+		httpd.serve_forever()
 
-		HOLD = False
+	else:
+		try:
+			cli_app()
+		except (KeyboardInterrupt, SystemExit):
+			raise
+		except MorssException as e:
+			print 'Internal Error: %s' % e.message
+		except Exception as e:
+			print 'Unknown Error: %s' % e.message
 
-
-	RSS = Gather(url, cachePath, options)
-
-	if RSS is not False and not options.progress and not DEBUG and not options.silent:
-		if options.json:
-			if options.indent:
-				print json.dumps(RSS, sort_keys=True, indent=4, default=lambda x: dict(x))
-			else:
-				print json.dumps(RSS, sort_keys=True, default=lambda x: dict(x))
-		else:
-			print RSS.tostring(xml_declaration=True, encoding='UTF-8')
-
-	if RSS is False and 'progress' not in options:
-		print 'Error fetching feed.'
-
-	log('done')
+if __name__ == '__main__':
+	main()
