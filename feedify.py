@@ -221,6 +221,9 @@ class Builder(object):
 						feedItem['content'] = self.string(item, 'item_content')
 					if 'item_time' in self.rule:
 						feedItem['updated'] = self.string(item, 'item_time')
+					if 'item_id' in self.rule:
+						feedItem['id'] = self.string(item, 'item_id')
+						feedItem['isPermaLink'] = False
 
 					self.feed.items.append(feedItem)
 
