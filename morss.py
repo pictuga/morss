@@ -60,6 +60,9 @@ if 'REQUEST_URI' in os.environ:
 	import cgitb
 	cgitb.enable()
 
+class MorssException(Exception):
+	pass
+
 def log(txt):
 	if DEBUG:
 		if HOLD:
@@ -475,7 +478,7 @@ def Gather(url, cachePath, options):
 	log(url)
 
 	if url is None:
-		return False
+		raise MorssException('No url provided')
 
 	if urlparse.urlparse(url).scheme not in PROTOCOL:
 		url = 'http://' + url
@@ -510,7 +513,7 @@ def Gather(url, cachePath, options):
 			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
 			xml = con.read()
 		except (IOError, httplib.HTTPException):
-			return False
+			raise MorssException('Error downloading feed')
 
 		cache.set('xml', xml)
 		cache.set('etag', con.headers.getheader('etag'))
@@ -543,10 +546,10 @@ def Gather(url, cachePath, options):
 			return Gather(link, cachePath, options)
 		else:
 			log('no-link html')
-			return False
+			raise MorssException('Link provided is an HTML page, which doesn\'t link to a feed')
 	else:
 		log('random page')
-		return False
+		raise MorssException('Link provided is not a valid feed')
 
 	size = len(rss.items)
 	startTime = time.time()
