@@ -453,8 +453,8 @@ def Fill(item, cache, feedurl='/', fast=False):
 		url = link.encode('utf-8')
 		con = urllib2.build_opener(SimpleDownload(accept=('html', 'text/*'), strict=True)).open(url, timeout=TIMEOUT)
 		data = con.read()
-	except (IOError, httplib.HTTPException):
-		log('http error')
+	except (IOError, httplib.HTTPException) as e:
+		log('http error:  %s' % e.message)
 		cache.set(link, 'error-http')
 		return True
 
@@ -568,8 +568,8 @@ def Gather(url, cachePath, options):
 			value = queue.get()
 			try:
 				worker(*value)
-			except:
-				log('random error in thread')
+			except Exception as e:
+				log('Thread Error: %s' % e.message)
 			queue.task_done()
 
 	def worker(i, item):
