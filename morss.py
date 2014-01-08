@@ -123,6 +123,9 @@ class ParseOptions:
 		else:
 			return False
 
+	def __contains__(self, key):
+		return self.options.__contains__(key)
+
 class Cache:
 	""" Light, error-prone caching system. """
 	def __init__(self, folder, key, persistent=False, dic=False):
@@ -586,6 +589,11 @@ def Gather(url, cachePath, options):
 		else:
 			if not options.proxy:
 				Fill(item, cache, url)
+
+		if 'al' in options:
+			if i+1 > int(options.al):
+				item.remove()
+				return
 
 		if item.desc and item.content:
 			if options.clip:
