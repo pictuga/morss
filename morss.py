@@ -119,10 +119,10 @@ class ParseOptions:
 			if len(split) > 1:
 				if split[0].lower() == 'true':
 					self.options[split[0]] = True
-				if split[0].lower() == 'false':
+				elif split[0].lower() == 'false':
 					self.options[split[0]] = False
-
-				self.options[split[0]] = split[1]
+				else:
+					self.options[split[0]] = split[1]
 			else:
 				self.options[split[0]] = True
 
