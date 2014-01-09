@@ -96,6 +96,4 @@ morss will also try to figure out whether the full content is already in place (
 
 You can contribute to this projet. If you're not sure what to do, you can pick from this list:
 
-- Add ability to run HTTP server within morss.py
 - Add ability to run morss.py as an update daemon
-- JSON output.
