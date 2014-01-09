@@ -26,6 +26,8 @@ morss accepts some arguments, to lightly alter the output of morss. Arguments ma
 The arguments are:
 
 - Change what morss does
+	- `json`: output as JSON  
+	`indent`: returns indented JSON, takes more place, but human-readable
 	- `proxy`: doesn't fill the articles
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
 	- `keep`: by default, morss does drop feed description whenever the full-content is found (so as not to mislead users who use Firefox, since the latter only shows the description in the feed preview, so they might believe morss doens't work), but with this argument, the description is kept
@@ -33,8 +35,11 @@ The arguments are:
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
 	- `theforce`: force download the rss feed
+	- `al`: (takes an integer value) only show `value` items in output (useful because browsers are actually super-slow to parse big JSON files)
+	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - http server only
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
+	- `txt`: changes the http content-type to txt (for faster "`view-source:`"
 	- `force`: avoid using your browser cache (do not support 304 errors)
 
 ##Use cases
@@ -42,18 +47,23 @@ The arguments are:
 morss will auto-detect what "mode" to use.
 
 ###Running on a server
+####With Apache, nginx, lighttpd and others
 
-For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, which will be handled throu `mod_cgi` for example on Apache severs.
+For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, which will be handled through `mod_cgi` for example on Apache severs.
 
-Then visit: **`http://PATH/TO/MORSS/[morss.py]/[:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
+####Using morss' internal HTTP server
+
+Morss can run its own HTTP server. The later should start when you run morss without any argument, on port 8080. For now, you have to change the hardcoded port if you want to change it.
+
+####Passing arguments
+
+Then visit: **`http://PATH/TO/MORSS/[morss.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
 For example: `http://morss.example/:clip/https://twitter.com/pictuga`  
 *(Brackets indicate optional text)*
 
 The `morss.py` part is only needed if your server doesn't support the Apache redirect rule set in the provided `.htaccess`.
 
-**NB.** Morss does NOT provide any HTTP server itself. This must be done with Apache or nginx with python support!
-
-Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki).
+Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki), and most probably other clients.
 
 ###As a CLI application
 
@@ -82,6 +92,12 @@ When parsing long feeds, with a lot of items (100+), morss might take a lot of t
 - `LIM_TIME` sets the maximum amount of time spent working on the feed (whether or not it's already cached). Articles beyond that limit will be dropped from the feed. `-1` for unlimited.
 - `LIM_ITEM` sets the maximum number of article checked, limiting both the number of articles fetched and taken from cache. Articles beyond that limit will be dropped from the feed, even if they're cached. `-1` for unlimited.
 
+###Other settings
+
+- `DELAY` sets the browser cache delay, only for HTTP clients
+- `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
+- `THREADS` sets the number of threads to use. `1` makes no use of multithreading.
+
 ###Content matching
 
 The content of articles is grabbed with a [**readability** fork](https://github.com/buriy/python-readability). This means that most of the time the right content is matched. However sometimes it fails, therefore some tweaking is required. Most of the time, what has to be done is to add some "rules" in the main script file in *readability* (not in morss).
@@ -97,3 +113,4 @@ morss will also try to figure out whether the full content is already in place (
 You can contribute to this projet. If you're not sure what to do, you can pick from this list:
 
 - Add ability to run morss.py as an update daemon
+- Rewrite the readability fork, for better performances, and make it more "pythonic" (Firefox for Android may have it's own implementation, most probably cleaner than `readability.js`')
