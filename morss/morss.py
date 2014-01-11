@@ -8,14 +8,10 @@ import Queue
 import threading
 
 from fnmatch import fnmatch
-from base64 import b64encode, b64decode
 import re
-import string
 import json
 
 import lxml.html
-import lxml.html.clean
-import lxml.builder
 
 import feeds
 import feedify
@@ -26,7 +22,6 @@ import urllib2
 import chardet
 import urlparse
 
-import wsgiref.util
 import wsgiref.simple_server
 import wsgiref.handlers
 
