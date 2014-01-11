@@ -552,7 +552,8 @@ def Fetch(url, cache, options):
 		match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
 		if len(match):
 			link = urlparse.urljoin(url, match[0])
-			return Fetch(link, cachePath, options)
+			log('rss redirect: %s' % link)
+			return Fetch(link, cache.new(link), options)
 		else:
 			log('no-link html')
 			raise MorssException('Link provided is an HTML page, which doesn\'t link to a feed')
