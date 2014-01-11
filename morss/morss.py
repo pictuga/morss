@@ -566,8 +566,6 @@ def Fetch(url, cache, options):
 	return rss
 
 def Gather(rss, url, cache, options):
-	log('YEAH')
-
 	size = len(rss.items)
 	startTime = time.time()
 
