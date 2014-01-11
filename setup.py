@@ -5,9 +5,10 @@ setup(	name='morss',
 	author='pictuga',
 	author_email='contact at author name dot com',
 	url='http://morss.it/',
-	licence='GPL 3+',
+	license='GPL 3+',
 	packages=['morss'],
-	install_required=[
+	package_data={'':['feedify.ini']},
+	install_requires=[
 		'readability-lxml',
 		'python-dateutil <= 1.5',
 		'lxml'
