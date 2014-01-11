@@ -696,7 +696,7 @@ def cgi_app(environ, start_response):
 
 def cgi_wrapper(environ, start_response):
 	try:
-		return cgi_app(environ, start_response)
+		return cgi_app(environ, start_response) or []
 	except (KeyboardInterrupt, SystemExit):
 		raise
 	except MorssException as e:
