@@ -10,8 +10,10 @@ You can use this program online for free at **[morss.it](http://morss.it/)** (th
 You do need:
 - [python](http://www.python.org/) >= 2.6 < 3
 - [lxml](http://lxml.de/) for xml parsing
-- this [readability](https://github.com/buriy/python-readability) fork
+- [this](https://github.com/buriy/python-readability) readability fork
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
+- [html2text](http://www.aaronsw.com/2002/html2text/)
+- [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python < 2.7
 
 You may also need:
 - Apache, with python-cgi support, to run on a server
@@ -41,7 +43,7 @@ The arguments are:
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - http server only
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
-	- `txt`: changes the http content-type to txt (for faster "`view-source:`"
+	- `txt`: changes the http content-type to txt (for faster "`view-source:`")
 	- `force`: avoid using your browser cache (do not support 304 errors)
 
 ##Use cases
