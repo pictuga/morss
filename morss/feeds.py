@@ -6,6 +6,17 @@ import dateutil.parser
 from dateutil import tz
 import re
 
+from StringIO import StringIO
+import json
+import csv
+
+json.encoder.c_make_encoder = None
+
+try:
+	from collections import OrderedDict
+except ImportError:
+	from ordereddict import OrderedDict
+
 Element = etree.Element
 
 NSMAP = {'atom':	'http://www.w3.org/2005/Atom',
@@ -91,7 +102,7 @@ class FeedBase(object):
 			value = self[element]
 
 			if isinstance(value, FeedList):
-				value = [dict(x) for x in value]
+				value = [OrderedDict(x) for x in value]
 			elif isinstance(value, datetime):
 				value = value.isoformat()
 
@@ -329,6 +340,18 @@ class FeedParser(FeedBase):
 
 	def tostring(self, **k):
 		return etree.tostring(self.xml.getroottree(), pretty_print=True, **k)
+
+	def tojson(self, indent=None):
+		return json.dumps(OrderedDict(self), indent=indent)
+
+	def tocsv(self):
+		out = StringIO()
+		c = csv.writer(out, dialect=csv.excel)
+		for item in self.items:
+			row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item if isinstance(x[1], basestring)]
+			c.writerow(row)
+		out.seek(0)
+		return out.read()
 
 class FeedParserRSS(FeedParser):
 	"""
