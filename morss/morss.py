@@ -29,6 +29,7 @@ from gzip import GzipFile
 from StringIO import StringIO
 
 from readability import readability
+from html2text import HTML2Text
 
 LIM_ITEM = 100	# deletes what's beyond
 LIM_TIME = 7	# deletes what's after
@@ -616,18 +617,6 @@ def Gather(rss, url, cache, options):
 			if not options.proxy:
 				Fill(item, cache, url)
 
-		if 'al' in options:
-			if i+1 > int(options.al):
-				item.remove()
-				return
-
-		if item.desc and item.content:
-			if options.clip:
-				item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
-				del item.desc
-			if not options.keep:
-				del item.desc
-
 	queue = Queue.Queue()
 
 	for i in range(THREADS):
@@ -645,6 +634,39 @@ def Gather(rss, url, cache, options):
 	log(time.time() - startTime)
 
 	return rss
+
+def After(rss, options):
+	for i, item in enumerate(rss.items):
+		if 'al' in options:
+			if i+1 > int(options.al):
+				item.remove()
+				continue
+
+		if item.desc and item.content:
+			if options.clip:
+				item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
+				del item.desc
+			if not options.keep:
+				del item.desc
+
+		if options.md:
+			conv = HTML2Text(baseurl=item.link)
+			conv.unicode_snob = True
+
+			if item.desc:
+				item.desc = conv.handle(item.desc)
+			if item.content:
+				item.content = conv.handle(item.content)
+
+	if options.json:
+		if options.indent:
+			return rss.tojson(indent=4)
+		else:
+			return rss.tojson()
+	elif options.csv:
+		return rss.tocsv()
+	else:
+		return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
 def cgi_app(environ, start_response):
 	options = ParseOptions(environ)
@@ -671,6 +693,8 @@ def cgi_app(environ, start_response):
 		headers['content-type'] = 'text/plain'
 	elif options.json:
 		headers['content-type'] = 'application/json'
+	elif options.csv:
+		headers['content-type'] = 'text/csv'
 	else:
 		headers['content-type'] = 'text/xml'
 
@@ -684,13 +708,7 @@ def cgi_app(environ, start_response):
 	start_response(headers['status'], headers.items())
 
 	if not DEBUG and not options.silent:
-		if options.json:
-			if options.indent:
-				return json.dumps(RSS, sort_keys=True, indent=4, default=lambda x: dict(x))
-			else:
-				return json.dumps(RSS, sort_keys=True, default=lambda x: dict(x))
-		else:
-			return RSS.tostring(xml_declaration=True, encoding='UTF-8')
+		return After(RSS, options)
 
 	log('done')
 
@@ -724,13 +742,7 @@ def cli_app():
 	RSS = Gather(RSS, url, cache, options)
 
 	if not DEBUG and not options.silent:
-		if options.json:
-			if options.indent:
-				print json.dumps(RSS, sort_keys=True, indent=4, default=lambda x: dict(x))
-			else:
-				print json.dumps(RSS, sort_keys=True, default=lambda x: dict(x))
-		else:
-			print RSS.tostring(xml_declaration=True, encoding='UTF-8')
+		print After(RSS, options)
 
 	log('done')
 
