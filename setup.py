@@ -11,6 +11,8 @@ setup(	name='morss',
 	install_requires=[
 		'readability-lxml',
 		'python-dateutil <= 1.5',
-		'lxml'
+		'lxml',
+		'html2text',
+		'ordereddict'
 	]
 	)
