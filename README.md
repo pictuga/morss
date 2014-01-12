@@ -32,10 +32,12 @@ The arguments are:
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
 	- `keep`: by default, morss does drop feed description whenever the full-content is found (so as not to mislead users who use Firefox, since the latter only shows the description in the feed preview, so they might believe morss doens't work), but with this argument, the description is kept
 - Advanced
+	- `csv`: export to csv
+	- `md`: convert articles to Markdown
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
 	- `theforce`: force download the rss feed
-	- `al`: (takes an integer value) only show `value` items in output (useful because browsers are actually super-slow to parse big JSON files)
+	- `al`: (takes an integer value, stands for *apparent limit*) only show `value` items in output (useful because browsers are actually super-slow to parse big JSON files)
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - http server only
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
