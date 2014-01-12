@@ -408,7 +408,7 @@ class FeedParserAtom(FeedParser):
 
 class FeedItem(FeedBase):
 	timeFormat = ''
-	dic = ('title', 'link', 'isPermaLink', 'desc', 'content', 'id', 'time', 'updated')
+	dic = ('title', 'link', 'desc', 'content', 'id', 'isPermaLink', 'time', 'updated')
 
 	def __init__(self, xml=None, tag='atom:feed'):
 		if xml is None:
