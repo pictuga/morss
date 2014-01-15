@@ -700,12 +700,13 @@ def cgi_app(environ, start_response):
 
 	url, cache = Init(url, os.getcwd() + '/cache', options)
 	RSS = Fetch(url, cache, options)
-	RSS = Gather(RSS, url, cache, options)
 
 	if headers['content-type'] == 'text/xml':
 		headers['content-type'] = RSS.mimetype
 
 	start_response(headers['status'], headers.items())
+
+	RSS = Gather(RSS, url, cache, options)
 
 	if not DEBUG and not options.silent:
 		return After(RSS, options)
