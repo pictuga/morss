@@ -571,24 +571,24 @@ def Gather(rss, url, cache, options):
 	startTime = time.time()
 
 	# custom settings
-	global LIM_ITEM
-	global LIM_TIME
-	global MAX_ITEM
-	global MAX_TIME
+	lim_item = LIM_ITEM
+	lim_time = LIM_TIME
+	max_item = MAX_ITEM
+	max_time = MAX_TIME
 
 	if options.progress:
-		MAX_TIME = -1
-		LIM_TIME = 15
-		MAX_ITEM = -1
-		LIM_ITEM = -1
+		max_time = 12
+		lim_time = 13
+		max_item = -1
+		lim_item = -1
 	if options.cache:
-		MAX_TIME = 0
+		max_time = 0
 	if options.OFCOURSENOT:
 		log('welcome home')
-		LIM_ITEM = -1
-		LIM_TIME = -1
-		MAX_ITEM = -1
-		MAX_TIME = -1
+		lim_item = -1
+		lim_time = -1
+		max_item = -1
+		max_time = -1
 
 	# set
 	def runner(queue):
@@ -601,14 +601,14 @@ def Gather(rss, url, cache, options):
 			queue.task_done()
 
 	def worker(i, item):
-		if time.time() - startTime > LIM_TIME >= 0 or i+1 > LIM_ITEM >= 0:
+		if time.time() - startTime > lim_time >= 0 or i+1 > lim_item >= 0:
 			log('dropped')
 			item.remove()
 			return
 
 		item = Fix(item, url)
 
-		if time.time() - startTime > MAX_TIME >= 0 or i+1 > MAX_ITEM >= 0:
+		if time.time() - startTime > max_time >= 0 or i+1 > max_item >= 0:
 			if not options.proxy:
 				if Fill(item, cache, url, True) is False:
 					item.remove()
