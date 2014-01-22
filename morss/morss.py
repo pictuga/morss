@@ -197,9 +197,12 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-	def new(self, key, persistent=False, dic=False):
+	def new(self, key, persistent=False, dic=None):
 		""" Returns a Cache object in the same directory """
 		if key != self._key:
+			if dic is None:
+				dic = self._dic
+
 			return Cache(self._dir, key, persistent, dic)
 		else:
 			return self
