@@ -138,10 +138,11 @@ class Cache:
 		self._dir = folder
 		self._dic = dic
 
-		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1
+		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4 # ".tmp"
 		self._hash = urllib.quote_plus(self._key)[:maxsize]
 
 		self._file = self._dir + '/' + self._hash
+		self._file_tmp = self._file + '.tmp'
 
 		self._cached = {} # what *was* cached
 		self._cache = {} # new things to put in cache
@@ -188,8 +189,13 @@ class Cache:
 
 		out = json.dumps(self._cache, indent=4)
 
-		with open(self._file, 'w+') as file:
-			file.write(out)
+		try:
+			open(self._file_tmp, 'w+').write(out)
+			os.rename(self._file_tmp, self._file)
+		except IOError:
+			log('failed to write cache to tmp file')
+		except OSError:
+			log('failed to move cache to file')
 
 	def isYoungerThan(self, sec):
 		if not os.path.exists(self._file):
