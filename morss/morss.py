@@ -704,6 +704,7 @@ def cgi_app(environ, start_response):
 		headers['content-type'] = 'application/json'
 	elif options.csv:
 		headers['content-type'] = 'text/csv'
+		headers['content-disposition'] = 'attachment; filename="feed.csv"'
 	else:
 		headers['content-type'] = 'text/xml'
 
