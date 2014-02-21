@@ -709,6 +709,12 @@ def cgi_app(environ, start_response):
 		headers['content-type'] = 'text/xml'
 
 	url, cache = Init(url, os.getcwd() + '/cache', options)
+
+	if options.facebook:
+		doFacebook(url, headers, options, cache)
+		start_response(headers['status'], headers.items())
+		return
+
 	RSS = Fetch(url, cache, options)
 
 	if headers['content-type'] == 'text/xml':
@@ -757,12 +763,16 @@ def cli_app():
 
 	log('done')
 
-	if options.facebook:
-		facebook = Cache(cachePath, 'facebook', persistent=True, dic=True)
+def doFacebook(url, headers, options, cache):
+	log('fb stuff')
 
+	facebook = cache.new('facebook', persistent=True, dic=True)
+	query = urlparse.urlparse(url).query
+
+	if 'code' in query:
 		# get real token from code
-		code = urlparse.parse_qs(urlparse.urlparse(url).query)['code'][0]
-		eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri="http://test.morss.it/:facebook/")
+		code = urlparse.parse_qs(query)['code'][0]
+		eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri="http://morss.it/:facebook/")
 		token = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())['access_token'][0]
 
 		# get long-lived access token
@@ -773,7 +783,7 @@ def cli_app():
 		expires = int(time.time() + int(values['expires'][0]))
 
 		# get user id
-		iurl = "https://graph.facebook.com/me?fields=id&access_token={token}".format(ltoken)
+		iurl = "https://graph.facebook.com/me?fields=id&access_token={token}".format(token=ltoken)
 		user_id = json.loads(urllib2.urlopen(iurl).read())['id']
 
 		# do sth out of it
@@ -785,14 +795,14 @@ def cli_app():
 
 		facebook.save()
 
-		if 'REQUEST_URI' in os.environ:
-			print 'Status: 200'
-			print 'Content-Type: text/plain'
-			print ''
+		headers['set-cookie'] = 'token={token}; Path=/'.format(token=ltoken)
 
-		print "token updated"
+	# headers
+	headers['status'] = '303 See Other'
+	headers['location'] = 'http://morss.it/'
 
-		sys.exit(0)
+	log('fb done')
+	return
 
 def main():
 	if 'REQUEST_URI' in os.environ:

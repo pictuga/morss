@@ -83,42 +83,7 @@ def PreWorker(url, cache):
 		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
 
 		if token not in facebook['token']:
-			# this token ain't known, look for info about it
-			eurl = "https://graph.facebook.com/debug_token?input_token={token}&access_token={app_token}".format(token=token, app_token=morss.FBAPPTOKEN)
-			data = json.loads(urllib2.urlopen(eurl).read())['data']
-
-			app_id = str(data['app_id'])
-			user_id = str(data['user_id'])
-			expires = int(data['expires_at'])
-			short = 'issued_at' not in data
-
-			facebook['token'][token] = {'user': user_id, 'expires': expires}
-
-			# do some woodoo to know if we already have sth better
-
-			if user_id not in facebook['user']:
-				# grab a new one anyway, new user
-				facebook['user'][user_id] = {'original': token}
-				good = True
-			else:
-				# maybe it's a better one
-				last = facebook['user'][user_id]['token']
-				last_expires = facebook['token'][last]['expires']
-
-				if expires > last_expires:
-					# new is better
-					good = True
-
-			if good and short and app_id == morss.FBAPPID:
-				eurl = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}".format(app_id=morss.FBAPPID, app_secret=morss.FBSECRET, short_lived_token=token)
-				values = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())
-
-				token = values['access_token'][0]
-				expires = int(time.time() + int(values['expires'][0]))
-
-				facebook['token'][token] = {'user': user_id, 'expires': expires}
-
-			facebook['user'][user_id]['token'] = token
+			return
 
 		# hey look for a newer token and use it
 		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
