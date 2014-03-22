@@ -360,6 +360,11 @@ def Fix(item, feedurl='/'):
 	# check relative urls
 	item.link = urlparse.urljoin(feedurl, item.link)
 
+	# google translate
+	if fnmatch(item.link, 'http://translate.google.*/translate*u=*'):
+		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['u'][0]
+		log(item.link)
+
 	# google
 	if fnmatch(item.link, 'http://www.google.*/url?q=*'):
 		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['q'][0]
