@@ -361,7 +361,7 @@ def Fix(item, feedurl='/'):
 	item.link = urlparse.urljoin(feedurl, item.link)
 
 	# google
-	if fnmatch(item.link, 'http://www.google.com/url?q=*'):
+	if fnmatch(item.link, 'http://www.google.*/url?q=*'):
 		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['q'][0]
 		log(item.link)
 
