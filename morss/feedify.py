@@ -96,6 +96,13 @@ def PreWorker(url, cache):
 		cache.set('redirect', nurl)
 		cache.set('cache', ncache)
 
+	if urlparse.urlparse(url).netloc == 'itunes.apple.com':
+		match = re.search('/id([0-9]+)(\?.*)?$', url)
+		if match:
+			iid = match.groups()[0]
+			redirect = 'https://itunes.apple.com/lookup?id={id}'.format(id=iid)
+			cache.set('redirect', redirect)
+
 class Builder(object):
 	def __init__(self, link, data=None, cache=False):
 		self.link = link

@@ -543,7 +543,9 @@ def Fetch(url, cache, options):
 		cache.set('etag', con.headers.getheader('etag'))
 		cache.set('lastmodified', con.headers.getheader('last-modified'))
 
-		if xml.startswith('<?xml') or con.info().type in MIMETYPE['xml']:
+		if url.startswith('https://itunes.apple.com/lookup?id='):
+			style = 'itunes'
+		elif xml.startswith('<?xml') or con.info().type in MIMETYPE['xml']:
 			style = 'normal'
 		elif feedify.supported(url):
 			style = 'feedify'
@@ -557,7 +559,11 @@ def Fetch(url, cache, options):
 
 	log(style)
 
-	if style == 'normal':
+	if style == 'itunes':
+		link = json.loads(xml)['results'][0]['feedUrl']
+		log('itunes redirect: %s' % link)
+		return Fetch(link, cache.new(link), options)
+	elif style == 'normal':
 		rss = feeds.parse(xml)
 	elif style == 'feedify':
 		feed = feedify.Builder(url, xml, cache)
