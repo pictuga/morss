@@ -722,7 +722,7 @@ def cgi_app(environ, start_response):
 	url, cache = Init(url, os.getcwd() + '/cache', options)
 
 	if options.facebook:
-		doFacebook(url, headers, options, cache)
+		doFacebook(url, environ, headers, options, cache)
 		start_response(headers['status'], headers.items())
 		return
 
@@ -774,7 +774,7 @@ def cli_app():
 
 	log('done')
 
-def doFacebook(url, headers, options, cache):
+def doFacebook(url, environ, headers, options, cache):
 	log('fb stuff')
 
 	facebook = cache.new('facebook', persistent=True, dic=True)
@@ -792,19 +792,6 @@ def doFacebook(url, headers, options, cache):
 
 		ltoken = values['access_token'][0]
 		expires = int(time.time() + int(values['expires'][0]))
-
-		# get user id
-		iurl = "https://graph.facebook.com/me?fields=id&access_token={token}".format(token=ltoken)
-		user_id = json.loads(urllib2.urlopen(iurl).read())['id']
-
-		# do sth out of it
-		if user_id not in facebook['user']:
-			facebook['user'][user_id] = {'original': ltoken}
-
-		facebook['token'][ltoken] = {'user': user_id, 'expires': expires}
-		facebook['user'][user_id]['token'] = ltoken
-
-		facebook.save()
 
 		headers['set-cookie'] = 'token={token}; Path=/'.format(token=ltoken)
 

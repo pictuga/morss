@@ -78,24 +78,6 @@ def formatString(string, getter, error=False):
 		return out
 
 def PreWorker(url, cache):
-	if urlparse.urlparse(url).netloc == 'graph.facebook.com':
-		facebook = cache.new('facebook', persistent=True, dic=True)
-		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
-
-		if token not in facebook['token']:
-			return
-
-		# hey look for a newer token and use it
-		token = urlparse.parse_qs(urlparse.urlparse(url).query)['access_token'][0]
-		user_id = facebook['token'][token]['user']
-		last = facebook['user'][user_id]['token']
-		original = facebook['user'][user_id]['original']
-
-		nurl = url.replace(token, last)
-		ncache = url.replace(token, original)
-		cache.set('redirect', nurl)
-		cache.set('cache', ncache)
-
 	if urlparse.urlparse(url).netloc == 'itunes.apple.com':
 		match = re.search('/id([0-9]+)(\?.*)?$', url)
 		if match:
@@ -199,17 +181,3 @@ class Builder(object):
 
 					self.feed.items.append(feedItem)
 
-
-		if urlparse.urlparse(self.link).netloc == 'graph.facebook.com':
-			if self.cache:
-				facebook = self.cache.new('facebook', True)
-				token = urlparse.parse_qs(urlparse.urlparse(self.link).query)['access_token'][0]
-				expires = facebook['token'][token]['expires']
-				lifespan = expires - time.time()
-
-				if lifespan < 5*24*3600:
-					new = self.feed.items.append()
-					new.title = "APP AUTHORISATION RENEWAL NEEDED"
-					new.link = "https://www.facebook.com/dialog/oauth?client_id={app_id}&redirect_uri=http://test.morss.it/:facebook/".format(app_id=morss.FBAPPID)
-					new.desc = "Please renew your Facebook app token for this app to keep working for this feed.<br/><a href='{}'>Go!</a>".format(new.link)
-					new.time = expires
