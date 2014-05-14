@@ -786,7 +786,7 @@ def doFacebook(url, environ, headers, options, cache):
 
 	# headers
 	headers['status'] = '303 See Other'
-	headers['location'] = 'http://morss.it/'
+	headers['location'] = 'http://{domain}/'.format(domain=environ['SERVER_NAME'])
 
 	log('fb done')
 	return
