@@ -133,10 +133,9 @@ class ParseOptions:
 
 class Cache:
 	""" Light, error-prone caching system. """
-	def __init__(self, folder, key, persistent=False, dic=False):
+	def __init__(self, folder, key):
 		self._key = key
 		self._dir = folder
-		self._dic = dic
 
 		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4 # ".tmp"
 		self._hash = urllib.quote_plus(self._key)[:maxsize]
@@ -152,9 +151,6 @@ class Cache:
 			if data:
 				self._cached = json.loads(data)
 
-		if persistent:
-			self._cache = self._cached
-
 	def __del__(self):
 		self.save()
 
@@ -168,11 +164,7 @@ class Cache:
 			self._cache[key] = self._cached[key]
 			return self._cached[key]
 		else:
-			if self._dic:
-				self._cache[key] = {}
-				return self._cache[key]
-			else:
-				return None
+			return None
 
 	def set(self, key, content):
 		self._cache[key] = content
@@ -183,6 +175,10 @@ class Cache:
 	def save(self):
 		if len(self._cache) == 0:
 			return
+
+		# useful to circumvent issue caused by :proxy
+		if len(self._cache) < 5:
+			self._cache.update(self._cached)
 
 		if not os.path.exists(self._dir):
 			os.makedirs(self._dir)
@@ -203,18 +199,15 @@ class Cache:
 
 		return time.time() - os.path.getmtime(self._file) < sec
 
-	def new(self, key, persistent=False, dic=None):
+	def new(self, key):
 		""" Returns a Cache object in the same directory """
 		if key != self._key:
-			if dic is None:
-				dic = self._dic
-
-			return Cache(self._dir, key, persistent, dic)
+			return Cache(self._dir, key)
 		else:
 			return self
 
-	def redirect(self, key, persistent=False):
-		return self.__init__(self._dir, key, persistent)
+	def redirect(self, key):
+		return self.__init__(self._dir, key)
 
 class SimpleDownload(urllib2.HTTPCookieProcessor):
 	"""
@@ -508,7 +501,7 @@ def Init(url, cachePath, options):
 	url = url.replace(' ', '%20')
 
 	# cache
-	cache = Cache(cachePath, url, options.proxy)
+	cache = Cache(cachePath, url)
 	log(cache._hash)
 
 	return (url, cache)
@@ -766,7 +759,6 @@ def cli_app():
 def doFacebook(url, environ, headers, options, cache):
 	log('fb stuff')
 
-	facebook = cache.new('facebook', persistent=True, dic=True)
 	query = urlparse.urlparse(url).query
 
 	if 'code' in query:
