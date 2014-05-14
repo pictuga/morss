@@ -596,19 +596,8 @@ def Gather(rss, url, cache, options):
 	max_item = MAX_ITEM
 	max_time = MAX_TIME
 
-	if options.progress:
-		max_time = 12
-		lim_time = 13
-		max_item = -1
-		lim_item = -1
 	if options.cache:
 		max_time = 0
-	if options.OFCOURSENOT:
-		log('welcome home')
-		lim_item = -1
-		lim_time = -1
-		max_item = -1
-		max_time = -1
 
 	# set
 	def runner(queue):
