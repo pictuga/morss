@@ -363,6 +363,11 @@ def Fix(item, feedurl='/'):
 		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['q'][0]
 		log(item.link)
 
+	# google news
+	if fnmatch(item.link, 'http://news.google.com/news/url*url=*'):
+		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['url'][0]
+		log(item.link)
+
 	# facebook
 	if fnmatch(item.link, 'https://www.facebook.com/l.php?u=*'):
 		item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['u'][0]
