@@ -735,6 +735,33 @@ def cgi_app(environ, start_response):
 	log('done')
 
 def cgi_wrapper(environ, start_response):
+	# simple http server for html and css
+	files = {
+		'':				'text/html',
+		'index.html':	'text/html'}
+
+	if 'REQUEST_URI' in environ:
+		url = environ['REQUEST_URI'][1:]
+	else:
+		url = environ['PATH_INFO'][1:]
+
+	if url in files:
+		headers = {}
+
+		if url == '':
+			url = 'index.html'
+
+		if os.path.isfile(url):
+			headers['status'] = '200 OK'
+			headers['content-type'] = files[url]
+			start_response(headers['status'], headers.items())
+			return open(url, 'rb').read()
+		else:
+			headers['status'] = '404 Not found'
+			start_response(headers['status'], headers.items())
+			return ''
+
+	# actual morss use
 	try:
 		return cgi_app(environ, start_response) or []
 	except (KeyboardInterrupt, SystemExit):
