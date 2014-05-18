@@ -350,6 +350,13 @@ def Fix(item, feedurl='/'):
 		log('no link')
 		return item
 
+	# wikipedia daily highlight
+	if fnmatch(feedurl, 'http*://*.wikipedia.org/w/api.php?*&feedformat=atom'):
+		match = lxml.html.fromstring(item.desc).xpath('//b/a/@href')
+		if len(match):
+			item.link = match[0]
+			log(item.link)
+
 	# check relative urls
 	item.link = urlparse.urljoin(feedurl, item.link)
 
