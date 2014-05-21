@@ -40,7 +40,6 @@ TIMEOUT = 2	# http timeout (in sec)
 THREADS = 10	# number of threads (1 for single-threaded)
 
 DEBUG = False
-HOLD = False
 
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HTML = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.11) Gecko/20101012 Firefox/3.6.11'
