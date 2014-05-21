@@ -94,7 +94,7 @@ For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.
 
 ###As a python library
 
-This is actually possible, but some code clean up is still required for this to be worth documentating.
+This is actually possible, but some code clean up is still required for this to be worth documenting.
 
 ##Cache information
 
