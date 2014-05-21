@@ -92,6 +92,10 @@ To use this script, you have to enable "(Unix) command" in liferea feed settings
 For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
+###As a python library
+
+This is actually possible, but some code clean up is still required for this to be worth documentating.
+
 ##Cache information
 
 morss uses a small cache directory to make the loading faster. Given the way it's designed, the cache doesn't need to be purged each while and then, unless you stop following a big amount of feeds. Only in the case of mass un-subscribing, you might want to delete the cache files corresponding to the bygone feeds. If morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`, and in `$HOME/.cache/morss` otherwise.
