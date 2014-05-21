@@ -94,7 +94,23 @@ For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.
 
 ###As a python library
 
-This is actually possible, but some code clean up is still required for this to be worth documenting.
+The code was not optimized to be used as a library. Therefore you can't really pass options to morss (see Arguments above), unless you rewrite the `ParseOptions` class.  
+However here is a quick draft of what your code should you like if you intend to use morss as a library.
+
+	import morss
+	url = 'http://newspaper.example/feed.xml'
+	options = morss.ParseOptions() # there's no easy way to pass arguments by hand from python so far...
+	cache_path = '/tmp/morss-cache' # cache folder, needs write permission
+	url, cache = Init(url, cache_path, options)
+	
+	RSS = Fetch(url, cache, options) # this only grabs the RSS feed
+	RSS = Gather(RSS, url, cache, options) # this fills the feed and cleans it up
+	After(RSS, options) # formats final feed
+	
+	output_xml = rss.tostring(xml_declaration=True, encoding='UTF-8')
+	output_json = rss.tojson()
+	output_json_indented = rss.tojson(indent=4)
+	output_csv = rss.tocsv()
 
 ##Cache information
 
