@@ -99,19 +99,16 @@ However here is a quick draft of what your code should you like if you intend to
 
 ```python
 import morss
+
 url = 'http://newspaper.example/feed.xml'
 options = morss.ParseOptions() # there's no easy way to pass arguments by hand from python so far...
 cache_path = '/tmp/morss-cache' # cache folder, needs write permission
 url, cache = Init(url, cache_path, options)
 
-RSS = Fetch(url, cache, options) # this only grabs the RSS feed
-RSS = Gather(RSS, url, cache, options) # this fills the feed and cleans it up
-After(RSS, options) # formats final feed
+rss = Fetch(url, cache, options) # this only grabs the RSS feed
+rss = Gather(rss, url, cache, options) # this fills the feed and cleans it up
 
-output_xml = rss.tostring(xml_declaration=True, encoding='UTF-8')
-output_json = rss.tojson()
-output_json_indented = rss.tojson(indent=4)
-output_csv = rss.tocsv()
+output = After(rss, options) # formats final feed
 ```
 
 ##Cache information
