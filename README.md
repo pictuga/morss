@@ -3,6 +3,10 @@
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds, commonly available on internet. Indeed most newspapers only make a small description available to users in their rss feeds, which makes the RSS feed rather useless. So this tool intends to fix that problem.
 This tool opens the links from the rss feed, then downloads the full article from the newspaper website and puts it back in the rss feed.
 
+Morss also provides additional features, such as: .csv and json export, extended control over output. A strength of morss is its ability to deal with broken feeds, and to replace tracking links with direct links to the actual content.
+Morss can also generate feeds from html and json files (see `feedify.py`), which for instance makes it possible to get feeds for Facebook or Twitter, using hand-written rules (ie. there's no automatic detection of links to build feeds). Please mind that feeds based on html files may stop working unexpectedly, due to html structure changes on the target website.
+Additionally morss can grab the source xml feed of iTunes podcast, and detect rss feeds in html pages' `<meta>`.
+
 You can use this program online for free at **[morss.it](http://morss.it/)** (there's also a [test](http://test.morss.it/) version).
 
 ##Dependencies
@@ -51,9 +55,14 @@ The arguments are:
 morss will auto-detect what "mode" to use.
 
 ###Running on a server
+
+To achieve this, you will have to move the files of `/morss/` and of `/www/` into one single folder.
+
 ####With Apache, nginx, lighttpd and others
 
 For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, which will be handled through `mod_cgi` for example on Apache severs.
+
+Please pay attention to `/www/morss.py` permissions for it to be executable. Also ensure that the provided `/www/.htaccess` works well with your server.
 
 ####Using morss' internal HTTP server
 
