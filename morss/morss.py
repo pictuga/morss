@@ -649,7 +649,7 @@ def cgi_app(environ, start_response):
 	else:
 		url = environ['PATH_INFO'][1:]
 
-	re.sub(r'^/?morss.py/', '', url)
+	url = re.sub(r'^/?morss.py/', '', url)
 
 	if url.startswith(':'):
 		options = url.split('/')[0].split(':')[1:]
