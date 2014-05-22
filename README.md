@@ -27,7 +27,7 @@ GPL3 code.
 
 ##Arguments
 
-morss accepts some arguments, to lightly alter the output of morss. Arguments may need to have a value (usually a string or a number). In the different "Use cases" below is detailed how to pass those arguments to morss.
+morss accepts some arguments, to lightly alter the output of morss. Arguments are all boolean. In the different "Use cases" below is detailed how to pass those arguments to morss.
 
 The arguments are:
 
@@ -43,7 +43,6 @@ The arguments are:
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
 	- `theforce`: force download the rss feed
-	- `al`: (takes an integer value, stands for *apparent limit*) only show `value` items in output (useful because browsers are actually super-slow to parse big JSON files)
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - http server only
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
@@ -70,7 +69,7 @@ Morss can run its own HTTP server. The later should start when you run morss wit
 
 ####Passing arguments
 
-Then visit: **`http://PATH/TO/MORSS/[morss.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
+Then visit: **`http://PATH/TO/MORSS/[morss.py/][:argwithoutvalue[...]]/FEEDURL`**  
 For example: `http://morss.example/:clip/https://twitter.com/pictuga`  
 *(Brackets indicate optional text)*
 
@@ -80,7 +79,7 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 ###As a CLI application
 
-Run: **`[python2.7] morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+Run: **`[python2.7] morss.py [argwithoutvalue] [...] FEEDURL`**  
 For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
@@ -88,20 +87,19 @@ For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`
 
 To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
-To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/morss.py [argwithoutvalue] [...] FEEDURL`**  
 For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
 ###As a python library
 
-The code was not optimized to be used as a library. Therefore you can't really pass options to morss (see Arguments above), unless you rewrite the `ParseOptions` class.  
-However here is a quick draft of what your code should you like if you intend to use morss as a library.
+The code was not optimized to be used as a library. However here is a quick draft of what your code should you like if you intend to use morss as a library.
 
 ```python
 import morss
 
 url = 'http://newspaper.example/feed.xml'
-options = morss.ParseOptions() # there's no easy way to pass arguments by hand from python so far...
+options = morss.Options(['force', 'quiet']) # arguments
 cache_path = '/tmp/morss-cache' # cache folder, needs write permission
 url, cache = Init(url, cache_path, options)
 

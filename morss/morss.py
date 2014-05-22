@@ -82,53 +82,18 @@ def countWord(txt):
 	else:
 		return 0
 
-class ParseOptions:
-	def __init__(self, environ=False):
-		self.url = ''
-		self.options = {}
-		roptions = []
-
-		if environ:
-			if 'REQUEST_URI' in environ:
-				self.url = environ['REQUEST_URI'][1:]
-			else:
-				self.url = environ['PATH_INFO'][1:]
-
-			if self.url.startswith('/morss.py'):
-				self.url = self.url[10:]
-			elif self.url.startswith('morss.py'):
-				self.url = self.url[9:]
-
-			if self.url.startswith(':'):
-				roptions = self.url.split('/')[0].split(':')[1:]
-				self.url = self.url.split('/', 1)[1]
-		else:
-			if len(sys.argv) <= 1:
-				return
-
-			roptions = sys.argv[1:-1]
-			self.url = sys.argv[-1]
-
-		for option in roptions:
-			split = option.split('=', 1)
-			if len(split) > 1:
-				if split[0].lower() == 'true':
-					self.options[split[0]] = True
-				elif split[0].lower() == 'false':
-					self.options[split[0]] = False
-				else:
-					self.options[split[0]] = split[1]
-			else:
-				self.options[split[0]] = True
+class Options:
+	def __init__(self, options=None):
+		self.options = options or []
 
 	def __getattr__(self, key):
-		if key in self.options:
-			return self.options[key]
-		else:
-			return False
+		return key in self.options
+
+	def __setitem__(self, key, value):
+		self.options[key] = value
 
 	def __contains__(self, key):
-		return self.options.__contains__(key)
+		return key in self.options
 
 class Cache:
 	""" Light, error-prone caching system. """
@@ -682,8 +647,22 @@ def After(rss, options):
 		return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
 def cgi_app(environ, start_response):
-	options = ParseOptions(environ)
-	url = options.url
+	# get options
+	if 'REQUEST_URI' in environ:
+		url = environ['REQUEST_URI'][1:]
+	else:
+		url = environ['PATH_INFO'][1:]
+
+	re.sub(r'^/?morss.py/', '', url)
+
+	if url.startswith(':'):
+		options = url.split('/')[0].split(':')[1:]
+		url = url.split('/', 1)[1]
+	else:
+		options = []
+
+	# init
+	options = Options(options)
 	headers = {}
 
 	global DEBUG
@@ -697,6 +676,7 @@ def cgi_app(environ, start_response):
 			log('etag good')
 			return []
 
+	# headers
 	headers['status'] = '200 OK'
 	headers['etag'] = '"%s"' % int(time.time())
 
@@ -719,6 +699,7 @@ def cgi_app(environ, start_response):
 		start_response(headers['status'], headers.items())
 		return
 
+	# get the work done
 	RSS = Fetch(url, cache, options)
 
 	if headers['content-type'] == 'text/xml':
@@ -779,8 +760,8 @@ def cgi_wrapper(environ, start_response):
 		return 'Unknown Error: %s' % e.message
 
 def cli_app():
-	options = ParseOptions()
-	url = options.url
+	options = Options(sys.argv[1:-1])
+	url = sys.argv[-1]
 
 	global DEBUG
 	DEBUG = options.debug
