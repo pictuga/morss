@@ -93,7 +93,7 @@ For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.
 
 ###As a python library
 
-The code was not optimized to be used as a library. However here is a quick draft of what your code should you like if you intend to use morss as a library.
+The code was not optimized to be used as a library. However here is a quick draft of what your code should look like if you intend to use morss as a library. This requires a lot of function calls, to have fine control over the different steps.
 
 ```python
 import morss
@@ -101,8 +101,8 @@ import morss
 url = 'http://newspaper.example/feed.xml'
 options = morss.Options(['force', 'quiet']) # arguments
 cache_path = '/tmp/morss-cache' # cache folder, needs write permission
-url, cache = morss.Init(url, cache_path, options)
 
+url, cache = morss.Init(url, cache_path, options) # properly create folders and objects
 rss = morss.Fetch(url, cache, options) # this only grabs the RSS feed
 rss = morss.Gather(rss, url, cache, options) # this fills the feed and cleans it up
 
