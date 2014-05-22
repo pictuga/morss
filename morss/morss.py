@@ -615,10 +615,6 @@ def Gather(rss, url, cache, options):
 
 def After(rss, options):
 	for i, item in enumerate(rss.items):
-		if 'al' in options:
-			if i+1 > int(options.al):
-				item.remove()
-				continue
 
 		if item.desc and item.content:
 			if options.clip:
