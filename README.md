@@ -101,12 +101,12 @@ import morss
 url = 'http://newspaper.example/feed.xml'
 options = morss.Options(['force', 'quiet']) # arguments
 cache_path = '/tmp/morss-cache' # cache folder, needs write permission
-url, cache = Init(url, cache_path, options)
+url, cache = morss.Init(url, cache_path, options)
 
-rss = Fetch(url, cache, options) # this only grabs the RSS feed
-rss = Gather(rss, url, cache, options) # this fills the feed and cleans it up
+rss = morss.Fetch(url, cache, options) # this only grabs the RSS feed
+rss = morss.Gather(rss, url, cache, options) # this fills the feed and cleans it up
 
-output = After(rss, options) # formats final feed
+output = morss.After(rss, options) # formats final feed
 ```
 
 ##Cache information
