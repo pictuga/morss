@@ -96,19 +96,17 @@ For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.
 Quickly get a full-text feed:
 ```python
 >>> import morss
->>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
->>> cache = '/tmp/morss-cache' # cache folder, needs write permission
->>> xml_string = morss.process(url, cache)
+>>> xml_string = morss.process('http://feeds.bbci.co.uk/news/rss.xml')
 >>> xml_string[:50]
 "<?xml version='1.0' encoding='UTF-8'?>\n<?xml-style"
 ```
 
-Passing arguments:
+Using cache and passing arguments:
 ```python
 >>> import morss
 >>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
->>> cache = '/tmp/morss-cache'
->>> options = ['csv', 'md']
+>>> cache = '/tmp/morss-cache' # cache folder, needs write permission
+>>> options = ['csv', 'md'] # simple list()
 >>> xml_string = morss.process(url, cache, options)
 >>> xml_string[:50]
 '{"title": "BBC News - Home", "desc": "The latest s'
