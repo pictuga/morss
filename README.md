@@ -93,8 +93,28 @@ For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.
 
 ###As a python library
 
-The code was not optimized to be used as a library. However here is a quick draft of what your code should look like if you intend to use morss as a library. This requires a lot of function calls, to have fine control over the different steps.
+Quickly get a full-text feed:
+```python
+>>> import morss
+>>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
+>>> cache = '/tmp/morss-cache' # cache folder, needs write permission
+>>> xml_string = morss.process(url, cache)
+>>> xml_string[:50]
+"<?xml version='1.0' encoding='UTF-8'?>\n<?xml-style"
+```
 
+Passing arguments:
+```python
+>>> import morss
+>>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
+>>> cache = '/tmp/morss-cache'
+>>> options = ['csv', 'md']
+>>> xml_string = morss.process(url, cache, options)
+>>> xml_string[:50]
+'{"title": "BBC News - Home", "desc": "The latest s'
+```
+
+Doing it step-by-step:
 ```python
 import morss
 
