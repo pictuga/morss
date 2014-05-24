@@ -97,18 +97,22 @@ class Options:
 
 class Cache:
 	""" Light, error-prone caching system. """
-	def __init__(self, folder, key, lifespan=10*24*3600):
+	def __init__(self, folder=None, key='cache', lifespan=10*24*3600):
 		self._key = key
 		self._dir = folder
 		self._lifespan = lifespan
+
+		self._cache = {}
+
+		if self._dir is None:
+			self._hash = "NO CACHE"
+			return
 
 		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4 # ".tmp"
 		self._hash = urllib.quote_plus(self._key)[:maxsize]
 
 		self._file = self._dir + '/' + self._hash
 		self._file_tmp = self._file + '.tmp'
-
-		self._cache = {}
 
 		if os.path.isfile(self._file):
 			data = open(self._file).read()
@@ -135,7 +139,7 @@ class Cache:
 	__setitem__ = set
 
 	def save(self):
-		if len(self._cache) == 0:
+		if len(self._cache) == 0 or self._dir is None:
 			return
 
 		if not os.path.exists(self._dir):
@@ -643,7 +647,7 @@ def After(rss, options):
 	else:
 		return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
-def process(url, cache, options=None):
+def process(url, cache=None, options=None):
 	if options == None:
 		options = []
 
