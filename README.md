@@ -112,6 +112,8 @@ Using cache and passing arguments:
 '{"title": "BBC News - Home", "desc": "The latest s'
 ```
 
+`morss.process` is actually a wrapper around simpler function. It's still possible to call the simpler functions, to have more control on what's happening under the hood.
+
 Doing it step-by-step:
 ```python
 import morss
