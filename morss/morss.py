@@ -97,9 +97,10 @@ class Options:
 
 class Cache:
 	""" Light, error-prone caching system. """
-	def __init__(self, folder, key):
+	def __init__(self, folder, key, lifespan=10*24*3600):
 		self._key = key
 		self._dir = folder
+		self._lifespan = lifespan
 
 		maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4 # ".tmp"
 		self._hash = urllib.quote_plus(self._key)[:maxsize]
@@ -107,31 +108,28 @@ class Cache:
 		self._file = self._dir + '/' + self._hash
 		self._file_tmp = self._file + '.tmp'
 
-		self._cached = {} # what *was* cached
-		self._cache = {} # new things to put in cache
+		self._cache = {}
 
 		if os.path.isfile(self._file):
 			data = open(self._file).read()
 			if data:
-				self._cached = json.loads(data)
+				self._cache = json.loads(data)
 
 	def __del__(self):
 		self.save()
 
 	def __contains__(self, key):
-		return key in self._cache or key in self._cached
+		return key in self._cache
 
 	def get(self, key):
 		if key in self._cache:
-			return self._cache[key]
-		elif key in self._cached:
-			self._cache[key] = self._cached[key]
-			return self._cached[key]
+			self._cache[key]['last'] = time.time()
+			return self._cache[key]['value']
 		else:
 			return None
 
 	def set(self, key, content):
-		self._cache[key] = content
+		self._cache[key] = {'last': time.time(), 'value': content}
 
 	__getitem__ = get
 	__setitem__ = set
@@ -140,12 +138,12 @@ class Cache:
 		if len(self._cache) == 0:
 			return
 
-		# useful to circumvent issue caused by :proxy
-		if len(self._cache) < 5:
-			self._cache.update(self._cached)
-
 		if not os.path.exists(self._dir):
 			os.makedirs(self._dir)
+
+		for i in self._cache:
+			if time.time() - self._cache[i]['last'] > self._lifespan > -1:
+				del self._cache[i]
 
 		out = json.dumps(self._cache, indent=4)
 
@@ -157,21 +155,24 @@ class Cache:
 		except OSError:
 			log('failed to move cache to file')
 
-	def isYoungerThan(self, sec):
-		if not os.path.exists(self._file):
-			return False
+	def last(self, key):
+		if key not in self._cache:
+			return -1
 
-		return time.time() - os.path.getmtime(self._file) < sec
+		return self._cache[key]['last']
 
-	def new(self, key):
+	def age(self, key):
+		if key not in self._cache:
+			return -1
+
+		return time.time() - self.last(key)
+
+	def new(self, *arg, **karg):
 		""" Returns a Cache object in the same directory """
-		if key != self._key:
-			return Cache(self._dir, key)
+		if arg[0] != self._key:
+			return Cache(self._dir, *arg, **karg)
 		else:
 			return self
-
-	def redirect(self, key):
-		return self.__init__(self._dir, key)
 
 class SimpleDownload(urllib2.HTTPCookieProcessor):
 	"""
@@ -421,7 +422,7 @@ def Fill(item, cache, feedurl='/', fast=False):
 		content = cache.get(link)
 		match = re.search(r'^error-([a-z]{2,10})$', content)
 		if match:
-			if cache.isYoungerThan(DELAY):
+			if cache.age(link) > DELAY:
 				log('cached error: %s' % match.groups()[0])
 				return True
 			else:
@@ -496,7 +497,7 @@ def Fetch(url, cache, options):
 		log('cache redirect')
 
 	# fetch feed
-	if cache.isYoungerThan(DELAY) and not options.theforce and 'xml' in cache and 'style' in cache:
+	if not options.theforce and 'xml' in cache and cache.age('xml') < DELAY and 'style' in cache:
 		log('xml cached')
 		xml = cache.get('xml')
 		style = cache.get('style')
