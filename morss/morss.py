@@ -643,6 +643,17 @@ def After(rss, options):
 	else:
 		return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
+def process(url, cache, options=None):
+	if options == None:
+		options = []
+
+	options = Options(options)
+	url, cache = Init(url, cache, options)
+	rss = Fetch(url, cache, options)
+	rss = Gather(rss, url, cache, options)
+
+	return After(rss, options)
+
 def cgi_app(environ, start_response):
 	# get options
 	if 'REQUEST_URI' in environ:
