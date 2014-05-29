@@ -10,6 +10,13 @@ from StringIO import StringIO
 import json
 import csv
 
+try:
+	from wheezy.template.engine import Engine
+	from wheezy.template.loader import DictLoader
+	from wheezy.template.ext.core import CoreExtension
+except ImportError:
+	Engine = DictLoader = CoreExtension = None
+
 json.encoder.c_make_encoder = None
 
 try:
@@ -352,6 +359,15 @@ class FeedParser(FeedBase):
 			c.writerow(row)
 		out.seek(0)
 		return out.read()
+
+	def tohtml(self):
+		if DictLoader is None:
+			log('dep wheezy.template needed')
+
+		loader = DictLoader({'reader': open('reader.html.template').read()})
+		engine = Engine(loader=loader, extensions=[CoreExtension()])
+		template = engine.get_template('reader')
+		return template.render({'feed':self}).encode('utf-8')
 
 class FeedParserRSS(FeedParser):
 	"""

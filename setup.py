@@ -13,6 +13,7 @@ setup(	name='morss',
 		'python-dateutil <= 1.5',
 		'lxml',
 		'html2text',
-		'ordereddict'
+		'ordereddict',
+		'wheezy.template'
 	]
 	)

@@ -1,0 +1,41 @@
+@require(feed)
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>@feed.title &#8211; via morss</title>
+		<meta charset="UTF-8" />
+		<meta name="description" content="@feed.desc (via morss)" />
+		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+		<link rel="stylesheet" href="https://thisisdallas.github.io/Simple-Grid/simpleGrid.css" />
+	</head>
+
+	<body>
+		<div id="header">
+			<h1>@feed.title</h1>
+			@if feed.desc:
+				<h2>@feed.desc</h2>
+			@end
+			<p>- via morss</p>
+		</div>
+
+		<div id="content" class="grid grid-pad">
+			@for item in feed.items:
+				<div class="col-1-3">
+				<div class="item">
+					<a class="title link" href="@item.link" target="_blank">@item.title</a>
+					<div class="article">@item.content</div>
+				</div>
+				</div>
+			@end
+		</div>
+
+	<script>
+		var items = document.getElementsByClassName('item')
+		for (var i in items)
+			items[i].onclick = function()
+			{
+				this.classList.toggle('active')
+			}
+	</script>
+	</body>
+</html>

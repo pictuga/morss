@@ -644,6 +644,8 @@ def After(rss, options):
 			return rss.tojson()
 	elif options.csv:
 		return rss.tocsv()
+	elif options.reader:
+		return rss.tohtml()
 	else:
 		return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
@@ -692,7 +694,7 @@ def cgi_app(environ, start_response):
 	headers['status'] = '200 OK'
 	headers['etag'] = '"%s"' % int(time.time())
 
-	if options.html:
+	if options.html or options.reader:
 		headers['content-type'] = 'text/html'
 	elif options.debug or options.txt:
 		headers['content-type'] = 'text/plain'
