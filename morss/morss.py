@@ -145,7 +145,7 @@ class Cache:
 		if not os.path.exists(self._dir):
 			os.makedirs(self._dir)
 
-		for i in self._cache:
+		for i in self._cache.keys():
 			if time.time() - self._cache[i]['last'] > self._lifespan > -1:
 				del self._cache[i]
 
