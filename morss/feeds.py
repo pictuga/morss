@@ -38,6 +38,11 @@ NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
          'rssfake': 'http://purl.org/rss/1.0/'}
 
 
+def camel_case_to_underscore(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
 def load(url):
     d = urllib2.urlopen(url).read()
     return parse(d)
@@ -183,21 +188,21 @@ class FeedDescriptor(object):
         self.proper_name = name[0].upper() + name[1:]
 
     def __get__(self, instance, owner):
-        getter = getattr(instance, 'get%s' % self.proper_name)
+        getter = getattr(instance, 'get_%s' % camel_case_to_underscore(self.proper_name))
         return getter()
 
     def __set__(self, instance, value):
-        setter = getattr(instance, 'set%s' % self.proper_name)
+        setter = getattr(instance, 'set_%s' % camel_case_to_underscore(self.proper_name))
         return setter(value)
 
     def __delete__(self, instance):
-        deleter = getattr(instance, 'del%s' % self.proper_name)
+        deleter = getattr(instance, 'del_%s' % camel_case_to_underscore(self.proper_name))
         return deleter()
 
 
 class FeedTime(FeedDescriptor):
     def __get__(self, instance, owner):
-        getter = getattr(instance, 'get%s' % self.proper_name)
+        getter = getattr(instance, 'get_%s' % camel_case_to_underscore(self.proper_name))
         raw = getter()
         try:
             time = parse_time(raw)
@@ -209,7 +214,7 @@ class FeedTime(FeedDescriptor):
         try:
             time = parse_time(value)
             raw = time.strftime(instance.timeFormat)
-            setter = getattr(instance, 'set%s' % self.proper_name)
+            setter = getattr(instance, 'set_%s' % camel_case_to_underscore(self.proper_name))
             return setter(raw)
         except ValueError:
             pass
@@ -217,13 +222,13 @@ class FeedTime(FeedDescriptor):
 
 class FeedBool(FeedDescriptor):
     def __get__(self, instance, owner):
-        getter = getattr(instance, 'get%s' % self.proper_name)
+        getter = getattr(instance, 'get_%s' % camel_case_to_underscore(self.proper_name))
         raw = getter()
         return (raw or '').lower() != 'false'
 
     def __set__(self, instance, value):
         raw = 'true' if value else 'false'
-        setter = getattr(instance, 'set%s' % self.proper_name)
+        setter = getattr(instance, 'set_%s' % camel_case_to_underscore(self.proper_name))
         return setter(raw)
 
 
@@ -317,9 +322,9 @@ class FeedListDescriptor(object):
         if key in self.items:
             return self.items[key]
         else:
-            getter = getattr(instance, 'get%s' % self.name.title())
-            className = globals()[getattr(instance, '%sClass' % self.name)]
-            self.items[key] = FeedList(instance, getter, instance.tag, className)
+            getter = getattr(instance, 'get_{0}'.format(camel_case_to_underscore(self.name.title())))
+            class_name = globals()[getattr(instance, '%sClass' % camel_case_to_underscore(self.name))]
+            self.items[key] = FeedList(instance, getter, instance.tag, class_name)
             return self.items[key]
 
     def __set__(self, instance, value):
@@ -334,7 +339,7 @@ class FeedParser(FeedBase):
     base = '<?xml?>'
     dic = ('title', 'desc', 'items')
     title = FeedDescriptor('title') or ''
-    description = FeedDescriptor('desc') or ''
+    desc = FeedDescriptor('desc') or ''
     items = FeedListDescriptor('items') or []
 
     def __init__(self, xml=None, tag='atom:feed'):
@@ -353,14 +358,14 @@ class FeedParser(FeedBase):
     def del_title(self):
         self.title = ""
 
-    def get_description(self):
-        return self.description
+    def get_desc(self):
+        return self.desc
 
-    def set_description(self, value):
-        self.description = value
+    def set_desc(self, value):
+        self.desc = value
 
-    def del_description(self):
-        self.description = ""
+    def del_desc(self):
+        self.desc = ""
 
     def get_items(self):
         return self.items
@@ -413,15 +418,15 @@ class FeedParserRSS(FeedParser):
         element = self.xget_create(table)
         element.text = value
 
-    def get_description(self):
-        return self.xval('rssfake:description|description')
+    def get_desc(self):
+        return self.xval('rssfake:desc|desc')
 
-    def set_description(self, value):
+    def set_desc(self, value):
         if not value:
-            return self.xdel('rssfake:description|description')
+            return self.xdel('rssfake:desc|desc')
 
-        table = {'rdf:rdf': 'rssfake:description',
-                 'channel': 'description'}
+        table = {'rdf:rdf': 'rssfake:desc',
+                 'channel': 'desc'}
         element = self.xget_create(table)
         element.text = value
 
@@ -450,10 +455,10 @@ class FeedParserAtom(FeedParser):
         element = self.xget_create(table)
         element.text = value
 
-    def get_description(self):
+    def get_desc(self):
         return self.xval('atom:subtitle|atom03:subtitle')
 
-    def set_description(self, value):
+    def set_desc(self, value):
         if not value:
             return self.xdel('atom:subtitle|atom03:subtitle')
 
@@ -471,7 +476,7 @@ class FeedItem(FeedBase):
     dic = ('title', 'link', 'desc', 'content', 'id', 'isPermaLink', 'time', 'updated')
     title = FeedDescriptor('title')
     link = FeedDescriptor('link')
-    description = FeedDescriptor('desc')
+    desc = FeedDescriptor('desc')
     content = FeedDescriptor('content')
     id = FeedDescriptor('id')
     is_permalink = FeedBool('isPermaLink')
@@ -509,14 +514,14 @@ class FeedItem(FeedBase):
     def set_is_a_permalink(self, value):
         self.is_permalink = value
 
-    def get_description(self):
-        return self.description
+    def get_desc(self):
+        return self.desc
 
-    def set_description(self, value):
-        self.description = value
+    def set_desc(self, value):
+        self.desc = value
 
-    def del_description(self):
-        self.description = ""
+    def del_desc(self):
+        self.desc = ""
 
     def get_content(self):
         return self.content
@@ -555,8 +560,8 @@ class FeedItem(FeedBase):
         self.updated = None
 
     def push_content(self, value):
-        if not self.description and self.content:
-            self.description = self.content
+        if not self.desc and self.content:
+            self.desc = self.content
 
         self.content = value
 
@@ -594,15 +599,15 @@ class FeedItemRSS(FeedItem):
         element.text = value
 
 
-    def get_description(self):
-        return self.xval('rssfake:description|description')
+    def get_desc(self):
+        return self.xval('rssfake:desc|desc')
 
-    def set_description(self, value):
+    def set_desc(self, value):
         if not value:
-            return self.xdel('rssfake:description|description')
+            return self.xdel('rssfake:desc|desc')
 
-        table = {'rdf:rdf': 'rssfake:description',
-                 'channel': 'description'}
+        table = {'rdf:rdf': 'rssfake:desc',
+                 'channel': 'desc'}
         element = self.xget_create(table)
         element.text = value
 
@@ -678,7 +683,7 @@ class FeedItemAtom(FeedItem):
         element = self.xget_create(table)
         element.attrib['href'] = value
 
-    def get_description(self):
+    def get_desc(self):
         # default "type" is "text"
         element = self.xget('atom:summary|atom03:summary')
         if element is not None:
@@ -686,7 +691,7 @@ class FeedItemAtom(FeedItem):
         else:
             return ""
 
-    def set_description(self, value):
+    def set_desc(self, value):
         if not value:
             return self.xdel('atom:summary|atom03:summary')
 

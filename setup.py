@@ -12,4 +12,5 @@ if __name__ == '__main__':
           version=__version__,
           package_dir={package_name: package_name},
           packages=find_packages(),
-          package_data={package_name: ['feedify.ini']})
+          package_data={package_name: ['feedify.ini']},
+          test_suite=package_name + '.tests')
