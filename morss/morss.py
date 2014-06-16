@@ -508,7 +508,7 @@ def Fetch(url, cache, options):
 	else:
 		try:
 			opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), accept=('xml','html'))
-			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT)
+			con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT*2)
 			xml = con.read()
 		except (IOError, httplib.HTTPException):
 			raise MorssException('Error downloading feed')
