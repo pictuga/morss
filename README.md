@@ -40,6 +40,8 @@ The arguments are:
 - Advanced
 	- `csv`: export to csv
 	- `md`: convert articles to Markdown
+	- `nolink`: drop links, but keeps links' inner text
+	- `noref`: drop items' link
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
 	- `theforce`: force download the rss feed

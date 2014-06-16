@@ -11,6 +11,7 @@ from fnmatch import fnmatch
 import re
 import json
 
+import lxml.etree
 import lxml.html
 
 import feeds
@@ -627,6 +628,16 @@ def After(rss, options):
 				del item.desc
 			if not options.keep:
 				del item.desc
+
+		if options.nolink and item.content:
+			content = lxml.html.fromstring(item.content)
+			for link in content.xpath('//a'):
+				log(link.text_content())
+				link.drop_tag()
+			item.content = lxml.etree.tostring(content)
+
+		if options.noref:
+			item.link = ''
 
 		if options.md:
 			conv = HTML2Text(baseurl=item.link)
