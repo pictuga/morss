@@ -30,11 +30,10 @@
 		</div>
 
 	<script>
-		var items = document.getElementsByClassName('item')
+		var items = document.getElementsByClassName('item');
 		for (var i in items)
-			items[i].onclick = function()
-			{
-				this.classList.toggle('active')
+			items[i].onclick = function() {
+				this.classList.toggle('active');
 			}
 	</script>
 	</body>

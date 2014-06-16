@@ -1,19 +1,15 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
+from morss import __version__
 
-setup(	name='morss',
-	description='Get full-text RSS feeds',
-	author='pictuga',
-	author_email='contact at author name dot com',
-	url='http://morss.it/',
-	license='GPL 3+',
-	packages=['morss'],
-	package_data={'':['feedify.ini']},
-	install_requires=[
-		'readability-lxml',
-		'python-dateutil <= 1.5',
-		'lxml',
-		'html2text',
-		'ordereddict',
-		'wheezy.template'
-	]
-	)
+if __name__ == '__main__':
+    package_name = 'morss'
+    setup(name=package_name,
+          description='Get full-text RSS feeds',
+          author='pictuga, Samuel Marks',
+          author_email='contact at pictuga dot com',
+          url='http://morss.it/',
+          license='GPL 3+',
+          version=__version__,
+          package_dir={package_name: package_name},
+          packages=find_packages(),
+          package_data={package_name: ['feedify.ini']})
