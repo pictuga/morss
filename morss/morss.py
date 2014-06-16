@@ -792,7 +792,7 @@ def doFacebook(url, environ, headers, options, cache):
 	if 'code' in query:
 		# get real token from code
 		code = urlparse.parse_qs(query)['code'][0]
-		eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri="http://morss.it/:facebook/")
+		eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri=environ['SCRIPT_URI'])
 		token = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())['access_token'][0]
 
 		# get long-lived access token
