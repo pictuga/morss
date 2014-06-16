@@ -496,10 +496,6 @@ def Fetch(url, cache, options):
 		log('url redirect')
 		log(url)
 
-	if 'cache' in cache:
-		cache.redirect(cache.get('cache'))
-		log('cache redirect')
-
 	# fetch feed
 	if not options.theforce and 'xml' in cache and cache.age('xml') < DELAY and 'style' in cache:
 		log('xml cached')
