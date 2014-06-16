@@ -610,6 +610,13 @@ def Gather(rss, url, cache, options):
 	queue.join()
 	cache.save()
 
+	if options.ad:
+		new = rss.items.append()
+		new.title = "Are you hungry?"
+		new.desc = "Eat some Galler chocolate :)"
+		new.link = "http://www.galler.com/"
+		new.time = "5 Oct 2013 22:42"
+
 	log(len(rss.items))
 	log(time.time() - startTime)
 
