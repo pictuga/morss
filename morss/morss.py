@@ -760,18 +760,13 @@ def cgi_wrapper(environ, start_response):
 		return cgi_app(environ, start_response) or []
 	except (KeyboardInterrupt, SystemExit):
 		raise
-	except MorssException as e:
-		headers = {}
-		headers['status'] = '500 Oops'
-		headers['content-type'] = 'text/plain'
-		start_response(headers['status'], headers.items(), sys.exc_info())
-		return 'Internal Error: %s' % e.message
 	except Exception as e:
 		headers = {}
 		headers['status'] = '500 Oops'
 		headers['content-type'] = 'text/plain'
 		start_response(headers['status'], headers.items(), sys.exc_info())
-		return 'Unknown Error: %s' % e.message
+		log('ERROR: %s' % e.message, force=True)
+		return 'An error happened'
 
 def cli_app():
 	options = Options(sys.argv[1:-1])
@@ -829,10 +824,8 @@ def main():
 			cli_app()
 		except (KeyboardInterrupt, SystemExit):
 			raise
-		except MorssException as e:
-			print 'Internal Error: %s' % e.message
 		except Exception as e:
-			print 'Unknown Error: %s' % e.message
+			print 'ERROR: %s' % e.message
 
 if __name__ == '__main__':
 	main()
