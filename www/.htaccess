@@ -1,5 +1,6 @@
-AddHandler cgi-script .py
 Options +ExecCGI
+AddHandler cgi-script .py
+
 
 ErrorDocument 404 /morss.py
 ErrorDocument 500 "A very nasty bug found his way onto this very server"

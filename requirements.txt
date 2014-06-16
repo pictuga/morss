@@ -1,0 +1,6 @@
+lxml
+git+https://github.com/buriy/python-readability#egg=readability-lxml
+python-dateutil <= 1.5
+html2text
+ordereddict
+wheezy.template
