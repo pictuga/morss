@@ -527,6 +527,7 @@ def Fetch(url, cache, options):
 
 		cache.set('style', style)
 
+	# decide what to do
 	log(style)
 
 	if style == 'itunes':
