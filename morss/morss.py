@@ -209,7 +209,6 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 				req.add_unredirected_header('If-Modified-Since', self.lastmodified)
 
 		if self.accept is not None:
-			# req.add_unredirected_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
 			if isinstance(self.accept, basestring):
 				self.accept = (self.accept,)
 
