@@ -87,7 +87,7 @@ def parse(data):
 		if tag in mtable:
 			return mtable[tag](doc, tag)
 
-	raise FeedException('unknow feed type')
+	raise FeedException('unknown feed type')
 
 class FeedBase(object):
 	"""
