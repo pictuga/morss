@@ -246,7 +246,7 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
 
 	def http_response(self, req, resp):
 		urllib2.HTTPCookieProcessor.http_response(self, req, resp)
-		odata = data = resp.read()
+		data = resp.read()
 
 		if 200 <= resp.code < 300:
 			# gzip
