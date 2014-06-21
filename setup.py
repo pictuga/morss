@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
 
 package_name = 'morss'
-setup(    name=package_name,
+setup(
+    name=package_name,
     description='Get full-text RSS feeds',
     author='pictuga',
     author_email='contact at author name dot com',

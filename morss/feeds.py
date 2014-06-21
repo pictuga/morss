@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 
-from lxml import etree
 from datetime import datetime
-import dateutil.parser
-from dateutil import tz
-import re
-
 from StringIO import StringIO
+
+import re
 import json
 import csv
+import urllib2
+
+from lxml import etree
+from dateutil import tz
+import dateutil.parser
 
 try:
     from wheezy.template.engine import Engine
@@ -26,21 +28,22 @@ except ImportError:
 
 Element = etree.Element
 
-NSMAP = {'atom':    'http://www.w3.org/2005/Atom',
-    'atom03':    'http://purl.org/atom/ns#',
-    'media':    'http://search.yahoo.com/mrss/',
-    'rdf':        'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-    'slash':    'http://purl.org/rss/1.0/modules/slash/',
-    'dc':        'http://purl.org/dc/elements/1.1/',
-    'content':    'http://purl.org/rss/1.0/modules/content/',
-    'rssfake':    'http://purl.org/rss/1.0/'}
+NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
+         'atom03': 'http://purl.org/atom/ns#',
+         'media': 'http://search.yahoo.com/mrss/',
+         'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+         'slash': 'http://purl.org/rss/1.0/modules/slash/',
+         'dc': 'http://purl.org/dc/elements/1.1/',
+         'content': 'http://purl.org/rss/1.0/modules/content/',
+         'rssfake': 'http://purl.org/rss/1.0/'}
+
 
 def load(url):
-    import urllib2
     d = urllib2.urlopen(url).read()
     return parse(d)
 
-def tagNS(tag, nsmap=NSMAP):
+
+def tag_NS(tag, nsmap=NSMAP):
     match = re.search(r'^\{([^\}]+)\}(.*)$', tag)
     if match:
         match = match.groups()
@@ -55,14 +58,18 @@ def tagNS(tag, nsmap=NSMAP):
                 return "{%s}%s" % (nsmap[match[0]], match[1].lower())
     return tag
 
-def innerHTML(xml):
+
+def inner_html(xml):
     return (xml.text or '') + ''.join([etree.tostring(child) for child in xml.iterchildren()])
 
-def cleanNode(xml):
+
+def clean_node(xml):
     [xml.remove(child) for child in xml.iterchildren()]
+
 
 class FeedException(Exception):
     pass
+
 
 def parse(data):
     # encoding
@@ -80,14 +87,15 @@ def parse(data):
     # rss
     match = doc.xpath("//atom03:feed|//atom:feed|//channel|//rdf:rdf|//rdf:RDF", namespaces=NSMAP)
     if len(match):
-        mtable = {    'rdf:rdf': FeedParserRSS, 'channel': FeedParserRSS,
-                    'atom03:feed': FeedParserAtom, 'atom:feed': FeedParserAtom }
+        m_table = {'rdf:rdf': FeedParserRSS, 'channel': FeedParserRSS,
+                   'atom03:feed': FeedParserAtom, 'atom:feed': FeedParserAtom}
         match = match[0]
-        tag = tagNS(match.tag)
-        if tag in mtable:
-            return mtable[tag](doc, tag)
+        tag = tag_NS(match.tag)
+        if tag in m_table:
+            return m_table[tag](doc, tag)
 
     raise FeedException('unknown feed type')
+
 
 class FeedBase(object):
     """
@@ -135,7 +143,7 @@ class FeedBase(object):
         else:
             return ""
 
-    def xgetCreate(self, table):
+    def xget_create(self, table):
         """ Returns an element, and creates it when not present """
         value = table[self.tag]
         if not isinstance(value, tuple):
@@ -145,7 +153,7 @@ class FeedBase(object):
         if match is not None:
             return match
         else:
-            element = etree.Element(tagNS(new))
+            element = etree.Element(tag_NS(new))
             self.root.append(element)
             return element
 
@@ -158,58 +166,62 @@ class FeedBase(object):
         """ Returns string using lxml. Arguments passed to tostring """
         return etree.tostring(self.xml, pretty_print=True, **k)
 
+
 class FeedDescriptor(object):
     """
     Descriptor which gives off elements based on "self.getName" and
     "self.setName" as getter/setters. Looks far better, and avoids duplicates
     """
+
     def __init__(self, name):
         self.name = name
-        self.nname = name[0].upper() + name[1:]
 
     def __get__(self, instance, owner):
-        getter = getattr(instance, 'get%s' % self.nname)
+        getter = getattr(instance, 'get_%s' % self.name)
         return getter()
 
     def __set__(self, instance, value):
-        setter = getattr(instance, 'set%s' % self.nname)
+        setter = getattr(instance, 'set_%s' % self.name)
         return setter(value)
 
     def __delete__(self, instance):
-        deleter = getattr(instance, 'del%s' % self.nname)
+        deleter = getattr(instance, 'del_%s' % self.name)
         return deleter()
+
 
 class FeedTime(FeedDescriptor):
     def __get__(self, instance, owner):
-        getter = getattr(instance, 'get%s' % self.nname)
+        getter = getattr(instance, 'get_%s' % self.name)
         raw = getter()
         try:
-            time = parseTime(raw)
+            time = parse_time(raw)
             return time
         except ValueError:
             return None
 
     def __set__(self, instance, value):
         try:
-            time = parseTime(value)
+            time = parse_time(value)
             raw = time.strftime(instance.timeFormat)
-            setter = getattr(instance, 'set%s' % self.nname)
+            setter = getattr(instance, 'set_%s' % self.name)
             return setter(raw)
         except ValueError:
             pass
 
+
 class FeedBool(FeedDescriptor):
     def __get__(self, instance, owner):
-        getter = getattr(instance, 'get%s' % self.nname)
+        getter = getattr(instance, 'get_%s' % self.name)
         raw = getter()
         return (raw or '').lower() != 'false'
 
     def __set__(self, instance, value):
         raw = 'true' if value else 'false'
-        setter = getattr(instance, 'set%s' % self.nname)
+        setter = getattr(instance, 'set_%s' % self.name)
         return setter(raw)
 
-def parseTime(value):
+
+def parse_time(value):
     if isinstance(value, basestring):
         if re.match(r'^[0-9]+$', value):
             return datetime.fromtimestamp(int(value), tz.tzutc())
@@ -222,6 +234,7 @@ def parseTime(value):
     else:
         return False
 
+
 class FeedList(object):
     """
     Class to map a list of xml elements against a list of matching objects,
@@ -231,14 +244,15 @@ class FeedList(object):
 
     Comes with its very own descriptor.
     """
-    def __init__(self, parent, getter, tag, childClass):
+
+    def __init__(self, parent, getter, tag, child_class):
         self.parent = parent
         self.getter = getter
-        self.childClass = childClass
+        self.childClass = child_class
         self.tag = tag
-        self._children = {} # id(xml) => FeedItem
+        self._children = {}  # id(xml) => FeedItem
 
-    def getChildren(self):
+    def get_children(self):
         children = self.getter()
         out = []
         for child in children:
@@ -269,7 +283,7 @@ class FeedList(object):
         return new
 
     def __getitem__(self, key):
-        return self.getChildren()[key]
+        return self.get_children()[key]
 
     def __delitem__(self, key):
         child = self.getter()[key]
@@ -282,28 +296,31 @@ class FeedList(object):
     def __len__(self):
         return len(self.getter())
 
+
 class FeedListDescriptor(object):
     """
     Descriptor for FeedList
     """
+
     def __init__(self, name):
         self.name = name
-        self.items = {} # id(instance) => FeedList
+        self.items = {}  # id(instance) => FeedList
 
     def __get__(self, instance, owner=None):
         key = id(instance)
         if key in self.items:
             return self.items[key]
         else:
-            getter = getattr(instance, 'get%s' % self.name.title())
-            className = globals()[getattr(instance, '%sClass' % self.name)]
-            self.items[key] = FeedList(instance, getter, instance.tag, className)
+            getter = getattr(instance, 'get_%s' % self.name)
+            class_name = globals()[getattr(instance, '%sClass' % self.name)]
+            self.items[key] = FeedList(instance, getter, instance.tag, class_name)
             return self.items[key]
 
     def __set__(self, instance, value):
         feedlist = self.__get__(instance)
         [x.remove() for x in [x for x in f.items]]
         [feedlist.append(x) for x in value]
+
 
 class FeedParser(FeedBase):
     itemsClass = 'FeedItem'
@@ -318,27 +335,25 @@ class FeedParser(FeedBase):
         self.root = self.xml.xpath("//atom03:feed|//atom:feed|//channel|//rssfake:channel", namespaces=NSMAP)[0]
         self.tag = tag
 
-    def getTitle(self):
+    def get_title(self):
         return ""
 
-    def setTitle(self, value):
+    def set_title(self, value):
         pass
 
-    def delTitle(self):
+    def del_title(self):
         self.title = ""
 
-
-    def getDesc(self):
+    def get_desc(self):
         pass
 
-    def setDesc(self, value):
+    def set_desc(self, value):
         pass
 
-    def delDesc(self):
+    def del_desc(self):
         self.desc = ""
 
-
-    def getItems(self):
+    def get_items(self):
         return []
 
     title = FeedDescriptor('title')
@@ -355,7 +370,8 @@ class FeedParser(FeedBase):
         out = StringIO()
         c = csv.writer(out, dialect=csv.excel)
         for item in self.items:
-            row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item if isinstance(x[1], basestring)]
+            row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item if
+                   isinstance(x[1], basestring)]
             c.writerow(row)
         out.seek(0)
         return out.read()
@@ -367,7 +383,8 @@ class FeedParser(FeedBase):
         loader = DictLoader({'reader': open('reader.html.template').read()})
         engine = Engine(loader=loader, extensions=[CoreExtension()])
         template = engine.get_template('reader')
-        return template.render({'feed':self}).encode('utf-8')
+        return template.render({'feed': self}).encode('utf-8')
+
 
 class FeedParserRSS(FeedParser):
     """
@@ -375,37 +392,37 @@ class FeedParserRSS(FeedParser):
     """
     itemsClass = 'FeedItemRSS'
     mimetype = 'application/rss+xml'
-    base = {    'rdf:rdf':    '<?xml version="1.0" encoding="utf-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/"><channel rdf:about="http://example.org/rss.rdf"></channel></rdf:RDF>',
-                'channel':    '<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel></channel></rss>'}
+    base = {
+        'rdf:rdf': '<?xml version="1.0" encoding="utf-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/"><channel rdf:about="http://example.org/rss.rdf"></channel></rdf:RDF>',
+        'channel': '<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel></channel></rss>'}
 
-    def getTitle(self):
+    def get_title(self):
         return self.xval('rssfake:title|title')
 
-    def setTitle(self, value):
+    def set_title(self, value):
         if not value:
             return self.xdel('rssfake:title|title')
 
-        table = {    'rdf:rdf':    'rssfake:title',
-                    'channel':    'title'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:title',
+                 'channel': 'title'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getDesc(self):
+    def get_desc(self):
         return self.xval('rssfake:description|description')
 
-    def setDesc(self, value):
+    def set_desc(self, value):
         if not value:
             return self.xdel('rssfake:description|description')
 
-        table = {    'rdf:rdf':    'rssfake:description',
-                    'channel':    'description'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:description',
+                 'channel': 'description'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getItems(self):
+    def get_items(self):
         return self.xpath('rssfake:item|item')
+
 
 class FeedParserAtom(FeedParser):
     """
@@ -413,123 +430,115 @@ class FeedParserAtom(FeedParser):
     """
     itemsClass = 'FeedItemAtom'
     mimetype = 'application/atom+xml'
-    base = {    'atom:feed':    '<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>',
-                'atom03:feed':    '<?xml version="1.0" encoding="utf-8"?><feed version="0.3" xmlns="http://purl.org/atom/ns#"></feed>'}
+    base = {'atom:feed': '<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>',
+            'atom03:feed': '<?xml version="1.0" encoding="utf-8"?><feed version="0.3" xmlns="http://purl.org/atom/ns#"></feed>'}
 
-    def getTitle(self):
+    def get_title(self):
         return self.xval('atom:title|atom03:title')
 
-    def setTitle(self, value):
+    def set_title(self, value):
         if not value:
             return self.xval('atom:title|atom03:title')
 
-        table = {    'atom:feed':    'atom:title',
-                    'atom03:feed':    'atom03:title'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:title',
+                 'atom03:feed': 'atom03:title'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getDesc(self):
+    def get_desc(self):
         return self.xval('atom:subtitle|atom03:subtitle')
 
-    def setDesc(self, value):
+    def set_desc(self, value):
         if not value:
             return self.xdel('atom:subtitle|atom03:subtitle')
 
-        table = {    'atom:feed':    'atom:subtitle',
-                    'atom03:feed':    'atom03:subtitle'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:subtitle',
+                 'atom03:feed': 'atom03:subtitle'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getItems(self):
+    def get_items(self):
         return self.xpath('atom:entry|atom03:entry')
+
 
 class FeedItem(FeedBase):
     timeFormat = ''
-    dic = ('title', 'link', 'desc', 'content', 'id', 'isPermaLink', 'time', 'updated')
+    dic = ('title', 'link', 'desc', 'content', 'id', 'is_permalink', 'time', 'updated')
 
     def __init__(self, xml=None, tag='atom:feed'):
         if xml is None:
-            xml = Element(tagNS(self.base[tag]))
+            xml = Element(tag_NS(self.base[tag]))
 
         self.root = self.xml = xml
         self.tag = tag
 
-    def getTitle(self):
+    def get_title(self):
         return ""
 
-    def setTitle(self):
+    def set_title(self, value):
         pass
 
-    def delTitle(self):
+    def del_title(self):
         self.title = ""
 
-
-    def getLink(self):
+    def get_link(self):
         return ""
 
-    def setLink(self, value):
+    def set_link(self, value):
         pass
 
-    def delLink(self):
+    def del_link(self):
         self.link = ""
 
-
-    def getIsPermaLink(self):
+    def get_is_permalink(self):
         return ""
 
-    def setIsPermaLink(self, value):
+    def set_is_permalink(self, value):
         pass
 
-
-    def getDesc(self):
+    def get_desc(self):
         return ""
 
-    def setDesc(self, value):
+    def set_desc(self, value):
         pass
 
-    def delDesc(self):
+    def del_desc(self):
         self.desc = ""
 
-
-    def getContent(self):
+    def get_content(self):
         return ""
 
-    def setContent(self, value):
+    def set_content(self, value):
         pass
 
-    def delContent(self):
+    def del_content(self):
         self.content = ""
 
-
-    def getId(self):
+    def get_id(self):
         return ""
 
-    def setId(self, value):
+    def set_id(self, value):
         pass
 
-    def delId(self):
+    def del_id(self):
         self.id = ""
 
-
-    def getTime(self):
+    def get_time(self):
         return None
 
-    def setTime(self, value):
+    def set_time(self, value):
         pass
 
     def delTime(self):
         self.time = None
 
-
-    def getUpdated(self):
+    def get_updated(self):
         return None
 
-    def setUpdated(self, value):
+    def set_updated(self, value):
         pass
 
-    def delUpdated(self):
+    def del_updated(self):
         self.updated = None
 
     title = FeedDescriptor('title')
@@ -537,11 +546,11 @@ class FeedItem(FeedBase):
     description = desc = FeedDescriptor('desc')
     content = FeedDescriptor('content')
     id = FeedDescriptor('id')
-    isPermaLink = FeedBool('isPermaLink')
+    is_permalink = FeedBool('is_permalink')
     time = FeedTime('time')
     updated = FeedTime('updated')
 
-    def pushContent(self, value):
+    def push_content(self, value):
         if not self.desc and self.content:
             self.desc = self.content
 
@@ -550,201 +559,192 @@ class FeedItem(FeedBase):
     def remove(self):
         self.xml.getparent().remove(self.xml)
 
+
 class FeedItemRSS(FeedItem):
     timeFormat = '%a, %d %b %Y %H:%M:%S %Z'
-    base =  {    'rdf:rdf':    'rssfake:item',
-                'channel':    'item'}
+    base = {'rdf:rdf': 'rssfake:item',
+            'channel': 'item'}
 
-    def getTitle(self):
+    def get_title(self):
         return self.xval('rssfake:title|title')
 
-    def setTitle(self, value):
+    def set_title(self, value):
         if not value:
             return self.xdel('rssfake:title|title')
 
-        table = {    'rdf:rdf':    'rssfake:title',
-                    'channel':    'title'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:title',
+                 'channel': 'title'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getLink(self):
+    def get_link(self):
         return self.xval('rssfake:link|link')
 
-    def setLink(self, value):
-        if self.isPermaLink and self.id == self.link != value:
-            self.isPermaLink = False
+    def set_link(self, value):
+        if self.is_permalink and self.id == self.link != value:
+            self.is_permalink = False
 
-        table = {    'rdf:rdf':    'rssfake:link',
-                    'channel':    'link'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:link',
+                 'channel': 'link'}
+        element = self.xget_create(table)
         element.text = value
 
 
-    def getDesc(self):
+    def get_desc(self):
         return self.xval('rssfake:description|description')
 
-    def setDesc(self, value):
+    def set_desc(self, value):
         if not value:
             return self.xdel('rssfake:description|description')
 
-        table = {    'rdf:rdf':    'rssfake:description',
-                    'channel':    'description'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:description',
+                 'channel': 'description'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getContent(self):
+    def get_content(self):
         return self.xval('content:encoded')
 
-    def setContent(self, value):
+    def set_content(self, value):
         if not value:
             return self.xdel('content:encoded')
 
-        table = {    'rdf:rdf':    'content:encoded',
-                    'channel':    'content:encoded'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'content:encoded',
+                 'channel': 'content:encoded'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getId(self):
+    def get_id(self):
         return self.xval('rssfake:guid|guid')
 
-    def setId(self, value):
+    def set_id(self, value):
         if not value:
             return self.xdel('rssfake:guid|guid')
 
-        table = {    'rdf:rdf':    'rssfake:guid',
-                    'channel':    'guid'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:guid',
+                 'channel': 'guid'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getIsPermaLink(self):
+    def get_is_permalink(self):
         return self.xget('rssfake:guid/@isPermaLink|guid/@isPermaLink')
 
-    def setIsPermaLink(self, value):
-        table = {    'rdf:rdf':    'rssfake:guid',
-                    'channel':    'guid'}
-        element = self.xgetCreate(table)
+    def set_is_permalink(self, value):
+        table = {'rdf:rdf': 'rssfake:guid',
+                 'channel': 'guid'}
+        element = self.xget_create(table)
         element.attrib['isPermaLink'] = value
 
-
-    def getTime(self):
+    def get_time(self):
         return self.xval('rssfake:pubDate|pubDate')
 
-    def setTime(self, value):
+    def set_time(self, value):
         if not value:
             return self.xdel('rssfake:pubDate|pubDate')
 
-        table = {    'rdf:rdf':    'rssfake:pubDate',
-                    'channel':    'pubDate'}
-        element = self.xgetCreate(table)
+        table = {'rdf:rdf': 'rssfake:pubDate',
+                 'channel': 'pubDate'}
+        element = self.xget_create(table)
         element.text = value
+
 
 class FeedItemAtom(FeedItem):
     timeFormat = '%Y-%m-%dT%H:%M:%SZ'
-    base = {    'atom:feed':    'atom:entry',
-                'atom03:feed':    'atom03:entry'}
+    base = {'atom:feed': 'atom:entry',
+            'atom03:feed': 'atom03:entry'}
 
-    def getTitle(self):
+    def get_title(self):
         return self.xval('atom:title|atom03:title')
 
-    def setTitle(self, value):
+    def set_title(self, value):
         if not value:
             return self.xdel('atom:title|atom03:title')
 
-        table = {    'atom:feed':    'atom:title',
-                    'atom03:feed':    'atom03:title'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:title',
+                 'atom03:feed': 'atom03:title'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getLink(self):
+    def get_link(self):
         return self.xget('(atom:link|atom03:link)[@rel="alternate" or not(@rel)]/@href')
 
-    def setLink(self, value):
-        table = {    'atom:feed':    ('atom:link', 'atom:link[@rel="alternate" or not(@rel)]'),
-                    'atom03:feed':    ('atom03:link', 'atom03:link[@rel="alternate" or not(@rel)]')}
-        element = self.xgetCreate(table)
+    def set_link(self, value):
+        table = {'atom:feed': ('atom:link', 'atom:link[@rel="alternate" or not(@rel)]'),
+                 'atom03:feed': ('atom03:link', 'atom03:link[@rel="alternate" or not(@rel)]')}
+        element = self.xget_create(table)
         element.attrib['href'] = value
 
-
-    def getDesc(self):
+    def get_desc(self):
         # default "type" is "text"
         element = self.xget('atom:summary|atom03:summary')
         if element is not None:
-            return innerHTML(element)
+            return inner_html(element)
         else:
             return ""
 
-    def setDesc(self, value):
+    def set_desc(self, value):
         if not value:
             return self.xdel('atom:summary|atom03:summary')
 
-        table = {    'atom:feed':    'atom:summary',
-                    'atom03:feed':    'atom03:summary'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:summary',
+                 'atom03:feed': 'atom03:summary'}
+        element = self.xget_create(table)
         if element.attrib.get('type', '') == 'xhtml':
-            cleanNode(element)
+            clean_node(element)
         element.attrib['type'] = 'html'
         element.text = value
 
-
-    def getContent(self):
+    def get_content(self):
         element = self.xget('atom:content|atom03:content')
         if element is not None:
-            return innerHTML(element)
+            return inner_html(element)
         else:
             return ""
 
-    def setContent(self, value):
+    def set_content(self, value):
         if not value:
             return self.xdel('atom:content|atom03:content')
 
-        table = {    'atom:feed':    'atom:content',
-                    'atom03:feed':    'atom03:content'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:content',
+                 'atom03:feed': 'atom03:content'}
+        element = self.xget_create(table)
         if element.attrib.get('type', '') == 'xhtml':
-            cleanNode(element)
+            clean_node(element)
         element.attrib['type'] = 'html'
         element.text = value
 
-
-    def getId(self):
+    def get_id(self):
         return self.xval('atom:id|atom03:id')
 
-    def setId(self, value):
+    def set_id(self, value):
         if not value:
             return self.xdel('atom:id|atom03:id')
 
-        table = {    'atom:feed':    'atom:id',
-                    'atom03:feed':    'atom03:id'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:id',
+                 'atom03:feed': 'atom03:id'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getTime(self):
+    def get_time(self):
         return self.xval('atom:published|atom03:published')
 
-    def setTime(self, value):
+    def set_time(self, value):
         if not value:
             return self.xdel('atom:published|atom03:published')
 
-        table = {    'atom:feed':    'atom:published',
-                    'atom03:feed':    'atom03:published'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:published',
+                 'atom03:feed': 'atom03:published'}
+        element = self.xget_create(table)
         element.text = value
 
-
-    def getUpdated(self):
+    def get_updated(self):
         return self.xval('atom:updated|atom03:updated')
 
-    def setUpdated(self, value):
+    def set_updated(self, value):
         if not value:
             return self.xdel('atom:updated|atom03:updated')
 
-        table = {    'atom:feed':    'atom:updated',
-                    'atom03:feed':    'atom03:updated'}
-        element = self.xgetCreate(table)
+        table = {'atom:feed': 'atom:updated',
+                 'atom03:feed': 'atom03:updated'}
+        element = self.xget_create(table)
         element.text = value

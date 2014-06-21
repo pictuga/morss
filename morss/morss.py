@@ -31,21 +31,22 @@ from StringIO import StringIO
 from readability import readability
 from html2text import HTML2Text
 
-LIM_ITEM = 100    # deletes what's beyond
-LIM_TIME = 7    # deletes what's after
-MAX_ITEM = 50    # cache-only beyond
-MAX_TIME = 7    # cache-only after (in sec)
-DELAY = 10*60    # xml cache & ETag cache (in sec)
-TIMEOUT = 2    # http timeout (in sec)
-THREADS = 10    # number of threads (1 for single-threaded)
+LIM_ITEM = 100  # deletes what's beyond
+LIM_TIME = 7  # deletes what's after
+MAX_ITEM = 50  # cache-only beyond
+MAX_TIME = 7  # cache-only after (in sec)
+DELAY = 10 * 60  # xml cache & ETag cache (in sec)
+TIMEOUT = 2  # http timeout (in sec)
+THREADS = 10  # number of threads (1 for single-threaded)
 
 DEBUG = False
 
 UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
 UA_HTML = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
-MIMETYPE = {    'xml':    ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
-                'html':    ['text/html', 'application/xhtml+xml', 'application/xml']}
+MIMETYPE = {
+    'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
+    'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
 FBAPPID = "<insert yours>"
 FBSECRET = "<insert yours>"
@@ -57,10 +58,13 @@ if 'SCRIPT_NAME' in os.environ:
     httplib.HTTPConnection.debuglevel = 1
 
     import cgitb
+
     cgitb.enable()
+
 
 class MorssException(Exception):
     pass
+
 
 def log(txt, force=False):
     if DEBUG or force:
@@ -70,17 +74,18 @@ def log(txt, force=False):
             print repr(txt)
 
 
-def lenHTML(txt):
+def len_html(txt):
     if len(txt):
         return len(lxml.html.fromstring(txt).text_content())
     else:
         return 0
 
-def countWord(txt):
+
+def count_words(txt):
     if len(txt):
         return len(lxml.html.fromstring(txt).text_content().split())
-    else:
-        return 0
+    return 0
+
 
 class Options:
     def __init__(self, options=None):
@@ -95,9 +100,11 @@ class Options:
     def __contains__(self, key):
         return key in self.options
 
+
 class Cache:
     """ Light, error-prone caching system. """
-    def __init__(self, folder=None, key='cache', lifespan=10*24*3600):
+
+    def __init__(self, folder=None, key='cache', lifespan=10 * 24 * 3600):
         self._key = key
         self._dir = folder
         self._lifespan = lifespan
@@ -108,7 +115,7 @@ class Cache:
             self._hash = "NO CACHE"
             return
 
-        maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4 # ".tmp"
+        maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4  # ".tmp"
         self._hash = urllib.quote_plus(self._key)[:maxsize]
 
         self._file = self._dir + '/' + self._hash
@@ -178,13 +185,16 @@ class Cache:
         else:
             return self
 
+
 class SimpleDownload(urllib2.HTTPCookieProcessor):
     """
     Custom urllib2 handler to download a page, using etag/last-modified headers,
     to save bandwidth. The given headers are added back into the header on error
     304 for easier use.
     """
-    def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=True, cookiejar=None, accept=None, strict=False):
+
+    def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=True, cookiejar=None,
+                 accept=None, strict=False):
         urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
         self.cache = cache
         self.etag = etag
@@ -214,7 +224,7 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
             out = {}
             rank = 1.1
             for group in self.accept:
-                rank = rank - 0.1
+                rank -= 0.1
 
                 if isinstance(group, basestring):
                     if group in MIMETYPE:
@@ -228,9 +238,9 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
                         out[mime] = rank
 
             if not self.strict:
-                out['*/*'] = rank-0.1
+                out['*/*'] = rank - 0.1
 
-            string = ','.join([x+';q={0:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
+            string = ','.join([x + ';q={0:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
             req.add_unredirected_header('Accept', string)
 
         return req
@@ -259,20 +269,20 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
             if resp.info().type in MIMETYPE['html']:
                 match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
                 if match:
-                    newurl = match.groups()[0]
-                    log('redirect: %s' % newurl)
+                    new_url = match.groups()[0]
+                    log('redirect: %s' % new_url)
 
-                    newheaders = dict((k,v) for k,v in req.headers.items()
-                        if k.lower() not in ('content-length', 'content-type'))
-                    new = urllib2.Request(newurl,
-                        headers=newheaders,
-                        origin_req_host=req.get_origin_req_host(),
-                        unverifiable=True)
+                    new_headers = dict((k, v) for k, v in req.headers.items()
+                                       if k.lower() not in ('content-length', 'content-type'))
+                    new = urllib2.Request(new_url,
+                                          headers=new_headers,
+                                          origin_req_host=req.get_origin_req_host(),
+                                          unverifiable=True)
 
                     return self.parent.open(new, timeout=req.timeout)
 
             # encoding
-            enc = detEncoding(data, resp)
+            enc = detect_encoding(data, resp)
 
             if enc:
                 data = data.decode(enc, 'replace')
@@ -290,7 +300,8 @@ class SimpleDownload(urllib2.HTTPCookieProcessor):
     https_response = http_response
     https_request = http_request
 
-def detEncoding(data, con=None):
+
+def detect_encoding(data, con=None):
     if con is not None and con.headers.getparam('charset'):
         log('header')
         return con.headers.getparam('charset')
@@ -305,6 +316,7 @@ def detEncoding(data, con=None):
         return match.groups()[0].lower()
 
     return None
+
 
 def Fix(item, feedurl='/'):
     """ Improves feed items (absolute links, resolve feedburner links, etc) """
@@ -358,7 +370,8 @@ def Fix(item, feedurl='/'):
     match = re.search('/([0-9a-zA-Z]{20,})/story01.htm$', item.link)
     if match:
         url = match.groups()[0].split('0')
-        t = {'A':'0', 'B':'.', 'C':'/', 'D':'?', 'E':'-', 'H':',', 'I':'_', 'L':'http://', 'S':'www.', 'N':'.com', 'O':'.co.uk'}
+        t = {'A': '0', 'B': '.', 'C': '/', 'D': '?', 'E': '-', 'H': ',', 'I': '_', 'L': 'http://', 'S': 'www.',
+             'N': '.com', 'O': '.co.uk'}
         item.link = ''.join([(t[s[0]] if s[0] in t else '=') + s[1:] for s in url[1:]])
         log(item.link)
 
@@ -371,6 +384,7 @@ def Fix(item, feedurl='/'):
 
     return item
 
+
 def Fill(item, cache, feedurl='/', fast=False):
     """ Returns True when it has done its best """
 
@@ -381,8 +395,8 @@ def Fill(item, cache, feedurl='/', fast=False):
     log(item.link)
 
     # content already provided?
-    count_content = countWord(item.content)
-    count_desc = countWord(item.desc)
+    count_content = count_words(item.content)
+    count_desc = count_words(item.desc)
 
     if max(count_content, count_desc) > 500:
         if count_desc > count_content:
@@ -392,7 +406,7 @@ def Fill(item, cache, feedurl='/', fast=False):
         log('long enough')
         return True
 
-    if count_content > 5*count_desc > 0 and count_content > 50:
+    if count_content > 5 * count_desc > 0 and count_content > 50:
         log('content bigger enough')
         return True
 
@@ -432,7 +446,7 @@ def Fill(item, cache, feedurl='/', fast=False):
                 log('old error')
         else:
             log('cached')
-            item.pushContent(cache.get(link))
+            item.push_content(cache.get(link))
             return True
 
     # super-fast mode
@@ -457,8 +471,8 @@ def Fill(item, cache, feedurl='/', fast=False):
 
     out = readability.Document(data, url=con.url).summary(True)
 
-    if countWord(out) > max(count_content, count_desc) > 0:
-        item.pushContent(out)
+    if count_words(out) > max(count_content, count_desc) > 0:
+        item.push_content(out)
         cache.set(link, out)
     else:
         log('not bigger enough')
@@ -467,7 +481,8 @@ def Fill(item, cache, feedurl='/', fast=False):
 
     return True
 
-def Init(url, cachePath, options):
+
+def Init(url, cache_path, options):
     # url clean up
     log(url)
 
@@ -481,14 +496,15 @@ def Init(url, cachePath, options):
     url = url.replace(' ', '%20')
 
     # cache
-    cache = Cache(cachePath, url)
+    cache = Cache(cache_path, url)
     log(cache._hash)
 
     return (url, cache)
 
+
 def Fetch(url, cache, options):
     # do some useful facebook work
-    feedify.PreWorker(url, cache)
+    feedify.pre_worker(url, cache)
 
     if 'redirect' in cache:
         url = cache.get('redirect')
@@ -502,8 +518,9 @@ def Fetch(url, cache, options):
         style = cache.get('style')
     else:
         try:
-            opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'), accept=('xml','html'))
-            con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT*2)
+            opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'),
+                                    accept=('xml', 'html'))
+            con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT * 2)
             xml = con.read()
         except (IOError, httplib.HTTPException):
             raise MorssException('Error downloading feed')
@@ -540,7 +557,8 @@ def Fetch(url, cache, options):
         feed.build()
         rss = feed.feed
     elif style == 'html':
-        match = lxml.html.fromstring(xml).xpath("//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
+        match = lxml.html.fromstring(xml).xpath(
+            "//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
         if len(match):
             link = urlparse.urljoin(url, match[0])
             log('rss redirect: %s' % link)
@@ -552,13 +570,13 @@ def Fetch(url, cache, options):
         log('random page')
         raise MorssException('Link provided is not a valid feed')
 
-
     cache.save()
     return rss
 
+
 def Gather(rss, url, cache, options):
     size = len(rss.items)
-    startTime = time.time()
+    start_time = time.time()
 
     # custom settings
     lim_item = LIM_ITEM
@@ -580,14 +598,14 @@ def Gather(rss, url, cache, options):
             queue.task_done()
 
     def worker(i, item):
-        if time.time() - startTime > lim_time >= 0 or i+1 > lim_item >= 0:
+        if time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0:
             log('dropped')
             item.remove()
             return
 
         item = Fix(item, url)
 
-        if time.time() - startTime > max_time >= 0 or i+1 > max_item >= 0:
+        if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
             if not options.proxy:
                 if Fill(item, cache, url, True) is False:
                     item.remove()
@@ -617,9 +635,10 @@ def Gather(rss, url, cache, options):
         new.time = "5 Oct 2013 22:42"
 
     log(len(rss.items))
-    log(time.time() - startTime)
+    log(time.time() - start_time)
 
     return rss
+
 
 def After(rss, options):
     for i, item in enumerate(rss.items):
@@ -662,8 +681,9 @@ def After(rss, options):
     else:
         return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
+
 def process(url, cache=None, options=None):
-    if options == None:
+    if not options:
         options = []
 
     options = Options(options)
@@ -672,6 +692,7 @@ def process(url, cache=None, options=None):
     rss = Gather(rss, url, cache, options)
 
     return After(rss, options)
+
 
 def cgi_app(environ, start_response):
     # get options
@@ -696,7 +717,8 @@ def cgi_app(environ, start_response):
     DEBUG = options.debug
 
     if 'HTTP_IF_NONE_MATCH' in environ:
-        if not options.force and not options.facebook and time.time() - int(environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
+        if not options.force and not options.facebook and time.time() - int(
+                environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
             headers['status'] = '304 Not Modified'
             start_response(headers['status'], headers.items())
             log(url)
@@ -722,30 +744,31 @@ def cgi_app(environ, start_response):
     url, cache = Init(url, os.getcwd() + '/cache', options)
 
     if options.facebook:
-        doFacebook(url, environ, headers, options, cache)
+        do_facebook(url, environ, headers, options, cache)
         start_response(headers['status'], headers.items())
         return
 
     # get the work done
-    RSS = Fetch(url, cache, options)
+    rss = Fetch(url, cache, options)
 
     if headers['content-type'] == 'text/xml':
-        headers['content-type'] = RSS.mimetype
+        headers['content-type'] = rss.mimetype
 
     start_response(headers['status'], headers.items())
 
-    RSS = Gather(RSS, url, cache, options)
+    rss = Gather(rss, url, cache, options)
 
     if not DEBUG and not options.silent:
-        return After(RSS, options)
+        return After(rss, options)
 
     log('done')
+
 
 def cgi_wrapper(environ, start_response):
     # simple http server for html and css
     files = {
-        '':                'text/html',
-        'index.html':    'text/html'}
+        '': 'text/html',
+        'index.html': 'text/html'}
 
     if 'REQUEST_URI' in environ:
         url = environ['REQUEST_URI'][1:]
@@ -774,12 +797,11 @@ def cgi_wrapper(environ, start_response):
     except (KeyboardInterrupt, SystemExit):
         raise
     except Exception as e:
-        headers = {}
-        headers['status'] = '500 Oops'
-        headers['content-type'] = 'text/plain'
+        headers = {'status': '500 Oops', 'content-type': 'text/plain'}
         start_response(headers['status'], headers.items(), sys.exc_info())
         log('ERROR: %s' % e.message, force=True)
         return 'An error happened'
+
 
 def cli_app():
     options = Options(sys.argv[1:-1])
@@ -789,15 +811,16 @@ def cli_app():
     DEBUG = options.debug
 
     url, cache = Init(url, os.path.expanduser('~/.cache/morss'), options)
-    RSS = Fetch(url, cache, options)
-    RSS = Gather(RSS, url, cache, options)
+    rss = Fetch(url, cache, options)
+    rss = Gather(rss, url, cache, options)
 
     if not DEBUG and not options.silent:
-        print After(RSS, options)
+        print After(rss, options)
 
     log('done')
 
-def doFacebook(url, environ, headers, options, cache):
+
+def do_facebook(url, environ, headers, options, cache):
     log('fb stuff')
 
     query = urlparse.urlparse(url).query
@@ -805,11 +828,13 @@ def doFacebook(url, environ, headers, options, cache):
     if 'code' in query:
         # get real token from code
         code = urlparse.parse_qs(query)['code'][0]
-        eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri=environ['SCRIPT_URI'])
+        eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(
+            app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri=environ['SCRIPT_URI'])
         token = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())['access_token'][0]
 
         # get long-lived access token
-        eurl = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}".format(app_id=FBAPPID, app_secret=FBSECRET, short_lived_token=token)
+        eurl = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}".format(
+            app_id=FBAPPID, app_secret=FBSECRET, short_lived_token=token)
         values = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())
 
         ltoken = values['access_token'][0]
@@ -823,6 +848,7 @@ def doFacebook(url, environ, headers, options, cache):
 
     log('fb done')
     return
+
 
 def main():
     if 'REQUEST_URI' in os.environ:
