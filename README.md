@@ -19,6 +19,9 @@ You do need:
 - [html2text](http://www.aaronsw.com/2002/html2text/)
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python < 2.7
 
+Simplest way to get these:
+  `pip install -r requirements.txt`
+
 You may also need:
 - Apache, with python-cgi support, to run on a server
 - a fast internet connection
