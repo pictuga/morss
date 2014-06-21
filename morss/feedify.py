@@ -11,7 +11,6 @@ import lxml.html
 import json
 import urlparse
 
-import time
 
 def toclass(query):
 	pattern = r'\[class=([^\]]+)\]'

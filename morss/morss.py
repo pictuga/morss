@@ -20,7 +20,6 @@ import feedify
 import httplib
 import urllib
 import urllib2
-import chardet
 import urlparse
 
 import wsgiref.simple_server
