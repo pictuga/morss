@@ -163,7 +163,7 @@ morss will also try to figure out whether the full content is already in place (
 
 ##Todo
 
-You can contribute to this projet. If you're not sure what to do, you can pick from this list:
+You can contribute to this project. If you're not sure what to do, you can pick from this list:
 
 - Add ability to run morss.py as an update daemon
 - Rewrite the readability fork, for better performances, and make it more "pythonic" (Firefox for Android may have it's own implementation, most probably cleaner than `readability.js`')
