@@ -473,7 +473,7 @@ class FeedItem(FeedBase):
 		pass
 
 	def delLink(self):
-		pass
+		self.link = ""
 
 
 	def getIsPermaLink(self):
