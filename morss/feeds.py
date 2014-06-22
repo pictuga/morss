@@ -378,7 +378,7 @@ class FeedParser(FeedBase):
 
     def tohtml(self):
         if DictLoader is None:
-            log('dep wheezy.template needed')
+            raise ImportError('dep wheezy.template needed')
 
         loader = DictLoader({'reader': open('reader.html.template').read()})
         engine = Engine(loader=loader, extensions=[CoreExtension()])
