@@ -616,7 +616,7 @@ def Gather(rss, url, cache, options):
 
     queue = Queue.Queue()
 
-    for i in range(THREADS):
+    for i in xrange(THREADS):
         t = threading.Thread(target=runner, args=(queue,))
         t.daemon = True
         t.start()
