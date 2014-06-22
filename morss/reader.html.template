@@ -24,7 +24,7 @@
 				<div class="item">
 					@if item.link:
 						<a class="title link" href="@item.link" target="_blank">@item.title</a>
-					@else
+					@else:
 						<span class="title">@item.title</span>
 					@end
 					<div class="article">@item.content</div>
