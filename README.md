@@ -51,6 +51,7 @@ The arguments are:
 	- `debug`: to have some feedback from the script execution. Useful for debugging
 	- `theforce`: force download the rss feed
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
+	- `smart`: try to show only new elements in feed, to make it lighter (based on 304 headers)
 - http server only
 	- `callback=NAME`: for JSONP calls
 	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
