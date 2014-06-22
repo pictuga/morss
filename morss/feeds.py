@@ -589,7 +589,6 @@ class FeedItemRSS(FeedItem):
         element = self.xget_create(table)
         element.text = value
 
-
     def get_desc(self):
         return self.xval('rssfake:description|description')
 
