@@ -22,7 +22,11 @@
 			@for item in feed.items:
 				<div class="col-1-3">
 				<div class="item">
-					<a class="title link" href="@item.link" target="_blank">@item.title</a>
+					@if item.link:
+						<a class="title link" href="@item.link" target="_blank">@item.title</a>
+					@else
+						<span class="title">@item.title</span>
+					@end
 					<div class="article">@item.content</div>
 				</div>
 				</div>
