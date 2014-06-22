@@ -10,5 +10,5 @@ setup(
     license='GPL 3+',
     package_dir={package_name: package_name},
     packages=find_packages(),
-    package_data={package_name: ['feedify.ini']},
+    package_data={package_name: ['feedify.ini', 'reader.html.template']},
     test_suite=package_name + '.tests')
