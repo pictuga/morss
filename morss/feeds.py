@@ -273,8 +273,8 @@ class FeedList(object):
             return new
 
         for key in self.childClass.__dict__:
-            if key[:3] == 'set':
-                attr = key[3:].lower()
+            if key.startswith('set_'):
+                attr = key[4:]
                 if hasattr(cousin, attr):
                     setattr(new, attr, getattr(cousin, attr))
                 elif attr in cousin:
