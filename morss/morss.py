@@ -757,6 +757,9 @@ def cgi_app(environ, start_response):
     headers['status'] = '200 OK'
     headers['etag'] = '"%s"' % int(time.time())
 
+    if options.cors:
+        headers['access-control-allow-origin'] = '*'
+
     if options.html or options.reader:
         headers['content-type'] = 'text/html'
     elif options.debug or options.txt:
