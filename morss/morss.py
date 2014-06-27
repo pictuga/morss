@@ -693,7 +693,9 @@ def After(rss, options):
             if item.content:
                 item.content = conv.handle(item.content)
 
-    if options.json:
+    if re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
+        return '%s(%s)' % (options.callback, rss.tojson())
+    elif options.json:
         if options.indent:
             return rss.tojson(indent=4)
         else:
