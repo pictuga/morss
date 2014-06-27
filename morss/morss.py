@@ -422,7 +422,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
     count_content = count_words(item.content)
     count_desc = count_words(item.desc)
 
-    if max(count_content, count_desc) > 500:
+    if not options.hungry and max(count_content, count_desc) > 500:
         if count_desc > count_content:
             item.content = item.desc
             del item.desc
@@ -430,7 +430,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         log('long enough')
         return True
 
-    if count_content > 5 * count_desc > 0 and count_content > 50:
+    if not options.hungry and count_content > 5 * count_desc > 0 and count_content > 50:
         log('content bigger enough')
         return True
 
