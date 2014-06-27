@@ -88,17 +88,41 @@ def count_words(txt):
 
 
 class Options:
-    def __init__(self, options=None):
-        self.options = options or []
+    def __init__(self, options=None, **args):
+        if len(args):
+            self.options = args
+            self.options.update(options or {})
+        else:
+            self.options = options or {}
 
     def __getattr__(self, key):
-        return key in self.options
+        if key in self.options:
+            return self.options[key]
+        else:
+            return False
 
     def __setitem__(self, key, value):
         self.options[key] = value
 
     def __contains__(self, key):
         return key in self.options
+
+
+def parseOptions(options):
+    """ Turns ['md=True'] into {'md':True} """
+    out = {}
+    for option in options:
+        split = option.split('=', 1)
+        if len(split) > 1:
+            if split[0].lower() == 'true':
+                out[split[0]] = True
+            elif split[0].lower() == 'false':
+                out[split[0]] = False
+            else:
+                out[split[0]] = split[1]
+        else:
+            out[split[0]] = True
+    return out
 
 
 class Cache:
@@ -704,13 +728,17 @@ def cgi_app(environ, start_response):
     url = re.sub(r'^/?morss.py/', '', url)
 
     if url.startswith(':'):
-        options = url.split('/')[0].split(':')[1:]
-        url = url.split('/', 1)[1]
+        split = url.split('/', 1)
+        options = split[0].split(':')[1:]
+        if len(split) > 1:
+            url = split[1]
+        else:
+            url = ''
     else:
         options = []
 
     # init
-    options = Options(options)
+    options = Options(parseOptions(options))
     headers = {}
 
     global DEBUG
@@ -804,7 +832,7 @@ def cgi_wrapper(environ, start_response):
 
 
 def cli_app():
-    options = Options(sys.argv[1:-1])
+    options = Options(parseOptions(sys.argv[1:-1]))
     url = sys.argv[-1]
 
     global DEBUG

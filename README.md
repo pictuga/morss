@@ -30,7 +30,7 @@ GPL3 code.
 
 ##Arguments
 
-morss accepts some arguments, to lightly alter the output of morss. Arguments are all boolean. In the different "Use cases" below is detailed how to pass those arguments to morss.
+morss accepts some arguments, to lightly alter the output of morss. Arguments may need to have a value (usually a string or a number). In the different "Use cases" below is detailed how to pass those arguments to morss.
 
 The arguments are:
 
@@ -74,7 +74,7 @@ Morss can run its own HTTP server. The later should start when you run morss wit
 
 ####Passing arguments
 
-Then visit: **`http://PATH/TO/MORSS/[morss.py/][:argwithoutvalue[...]]/FEEDURL`**  
+Then visit: **`http://PATH/TO/MORSS/[morss.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
 For example: `http://morss.example/:clip/https://twitter.com/pictuga`  
 *(Brackets indicate optional text)*
 
@@ -84,7 +84,7 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 ###As a CLI application
 
-Run: **`[python2.7] morss.py [argwithoutvalue] [...] FEEDURL`**  
+Run: **`[python2.7] morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
 For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
@@ -92,7 +92,7 @@ For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`
 
 To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
-To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/morss.py [argwithoutvalue] [...] FEEDURL`**  
+To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
 For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
@@ -111,7 +111,7 @@ Using cache and passing arguments:
 >>> import morss
 >>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
 >>> cache = '/tmp/morss-cache' # cache folder, needs write permission
->>> options = ['csv', 'md'] # simple list()
+>>> options = {'csv':True, 'md':True}
 >>> xml_string = morss.process(url, cache, options)
 >>> xml_string[:50]
 '{"title": "BBC News - Home", "desc": "The latest s'
@@ -124,7 +124,7 @@ Doing it step-by-step:
 import morss
 
 url = 'http://newspaper.example/feed.xml'
-options = morss.Options(['force', 'quiet']) # arguments
+options = morss.Options(csv=True, md=True) # arguments
 cache_path = '/tmp/morss-cache' # cache folder, needs write permission
 
 url, cache = morss.Init(url, cache_path, options) # properly create folders and objects
