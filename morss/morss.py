@@ -409,7 +409,7 @@ def Fix(item, feedurl='/'):
     return item
 
 
-def Fill(item, cache, feedurl='/', fast=False):
+def Fill(item, cache, options, feedurl='/', fast=False):
     """ Returns True when it has done its best """
 
     if not item.link:
@@ -631,12 +631,12 @@ def Gather(rss, url, cache, options):
 
         if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
             if not options.proxy:
-                if Fill(item, cache, url, True) is False:
+                if Fill(item, cache, options, url, True) is False:
                     item.remove()
                     return
         else:
             if not options.proxy:
-                Fill(item, cache, url)
+                Fill(item, cache, options, url)
 
     queue = Queue.Queue()
 
