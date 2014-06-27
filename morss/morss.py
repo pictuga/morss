@@ -693,8 +693,11 @@ def After(rss, options):
             if item.content:
                 item.content = conv.handle(item.content)
 
-    if options.callback and re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
-        return '%s(%s)' % (options.callback, rss.tojson())
+    if options.callback:
+        if re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
+            return '%s(%s)' % (options.callback, rss.tojson())
+        else:
+            raise MorssException('Invalid callback var name')
     elif options.json:
         if options.indent:
             return rss.tojson(indent=4)
@@ -768,6 +771,8 @@ def cgi_app(environ, start_response):
         headers['content-type'] = 'text/plain'
     elif options.json:
         headers['content-type'] = 'application/json'
+    elif options.callback:
+        headers['content-type'] = 'application/javascript'
     elif options.csv:
         headers['content-type'] = 'text/csv'
         headers['content-disposition'] = 'attachment; filename="feed.csv"'
