@@ -145,10 +145,14 @@ class Cache:
         self._file = self._dir + '/' + self._hash
         self._file_tmp = self._file + '.tmp'
 
-        if os.path.isfile(self._file):
+        try:
             data = open(self._file).read()
             if data:
                 self._cache = json.loads(data)
+        except IOError:
+            pass
+        except ValueError:
+            log('JSON cache parse fail')
 
     def __del__(self):
         self.save()
