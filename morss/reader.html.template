@@ -27,7 +27,13 @@
 					@else:
 						<span class="title">@item.title</span>
 					@end
-					<div class="article">@item.content</div>
+					<div class="article">
+						@if item.content:
+							@item.content
+						@else:
+							@item.desc
+						@end
+					</div>
 				</div>
 				</div>
 			@end
