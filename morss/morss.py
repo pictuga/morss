@@ -670,6 +670,10 @@ def Gather(rss, url, cache, options):
 
 def After(rss, options):
     for i, item in enumerate(list(rss.items)):
+        if options.strip:
+            del item.desc
+            del item.content
+
         if options.search:
             if options.search not in item.title:
                 item.remove()
