@@ -674,6 +674,10 @@ def After(rss, options):
             del item.desc
             del item.content
 
+        if options.empty:
+            item.remove()
+            continue
+
         if options.search:
             if options.search not in item.title:
                 item.remove()
