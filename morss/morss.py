@@ -811,9 +811,10 @@ def cgi_app(environ, start_response):
     start_response(headers['status'], headers.items())
 
     rss = Gather(rss, url, cache, options)
+    out = After(rss, options)
 
     if not DEBUG and not options.silent:
-        return After(rss, options)
+        return out
 
     log('done')
 
@@ -867,9 +868,10 @@ def cli_app():
     url, cache = Init(url, os.path.expanduser('~/.cache/morss'), options)
     rss = Fetch(url, cache, options)
     rss = Gather(rss, url, cache, options)
+    out = After(rss, options)
 
     if not DEBUG and not options.silent:
-        print After(rss, options)
+        print out
 
     log('done')
 
