@@ -40,6 +40,7 @@ The arguments are:
 	- `proxy`: doesn't fill the articles
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
 	- `keep`: by default, morss does drop feed description whenever the full-content is found (so as not to mislead users who use Firefox, since the latter only shows the description in the feed preview, so they might believe morss doens't work), but with this argument, the description is kept
+	- `search=STRING`: does a basic case-sensitive search in the feed
 - Advanced
 	- `csv`: export to csv
 	- `md`: convert articles to Markdown
@@ -56,6 +57,9 @@ The arguments are:
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
 	- `txt`: changes the http content-type to txt (for faster "`view-source:`")
 	- `force`: avoid using your browser cache (do not support 304 errors)
+- Completely useless
+	- `strip`: remove all description and content from feed items
+	- `empty`: remove all feed items
 
 ##Use cases
 
