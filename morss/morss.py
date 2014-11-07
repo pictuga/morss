@@ -670,6 +670,11 @@ def Gather(rss, url, cache, options):
 
 def After(rss, options):
     for i, item in enumerate(list(rss.items)):
+        if options.smart and options.last:
+            if item.time < feeds.parse_time(options.last) and i > 2:
+                item.remove()
+                continue
+
         if options.strip:
             del item.desc
             del item.content
@@ -766,8 +771,8 @@ def cgi_app(environ, start_response):
     DEBUG = options.debug
 
     if 'HTTP_IF_NONE_MATCH' in environ:
-        if not options.force and not options.facebook and time.time() - int(
-                environ['HTTP_IF_NONE_MATCH'][1:-1]) < DELAY:
+        options.last = int(environ['HTTP_IF_NONE_MATCH'][1:-1])
+        if not options.force and not options.facebook and time.time() - options.last < DELAY:
             headers['status'] = '304 Not Modified'
             start_response(headers['status'], headers.items())
             log(url)
