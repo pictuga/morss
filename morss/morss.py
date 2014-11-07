@@ -788,7 +788,7 @@ def cgi_app(environ, start_response):
 
     if options.html or options.reader:
         headers['content-type'] = 'text/html'
-    elif options.debug or options.txt:
+    elif options.txt:
         headers['content-type'] = 'text/plain'
     elif options.json:
         headers['content-type'] = 'application/json'
@@ -818,7 +818,7 @@ def cgi_app(environ, start_response):
     rss = Gather(rss, url, cache, options)
     out = After(rss, options)
 
-    if not DEBUG and not options.silent:
+    if not options.silent:
         return out
 
     log('done')
@@ -875,7 +875,7 @@ def cli_app():
     rss = Gather(rss, url, cache, options)
     out = After(rss, options)
 
-    if not DEBUG and not options.silent:
+    if not options.silent:
         print out
 
     log('done')
