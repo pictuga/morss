@@ -137,9 +137,11 @@ cache_path = '/tmp/morss-cache' # cache folder, needs write permission
 
 url, cache = morss.Init(url, cache_path, options) # properly create folders and objects
 rss = morss.Fetch(url, cache, options) # this only grabs the RSS feed
+rss = morss.Before(rss, options) # applies first round of options
 rss = morss.Gather(rss, url, cache, options) # this fills the feed and cleans it up
+rss = morss.After(rss, options) # applies second round of options
 
-output = morss.After(rss, options) # formats final feed
+output = morss.Format(rss, options) # formats final feed
 ```
 
 ##Cache information
