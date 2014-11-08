@@ -872,7 +872,7 @@ def cgi_wrapper(environ, start_response):
     except Exception as e:
         headers = {'status': '500 Oops', 'content-type': 'text/plain'}
         start_response(headers['status'], headers.items(), sys.exc_info())
-        log('ERROR: %s' % e.message, force=True)
+        log('ERROR <%s>: %s' % (url, e.message), force=True)
         return 'An error happened'
 
 
