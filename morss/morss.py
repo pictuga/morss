@@ -782,7 +782,7 @@ def cgi_app(environ, start_response):
     DEBUG = options.debug
 
     if 'HTTP_IF_NONE_MATCH' in environ:
-        options.last = int(environ['HTTP_IF_NONE_MATCH'][1:-1])
+        options['last'] = int(environ['HTTP_IF_NONE_MATCH'][1:-1])
         if not options.force and not options.facebook and time.time() - options.last < DELAY:
             headers['status'] = '304 Not Modified'
             start_response(headers['status'], headers.items())
