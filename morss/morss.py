@@ -668,7 +668,7 @@ def Gather(rss, url, cache, options):
     return rss
 
 
-def After(rss, options):
+def Before(rss, options):
     for i, item in enumerate(list(rss.items)):
         if options.smart and options.last:
             if item.time < feeds.parse_time(options.last) and i > 2:
@@ -688,6 +688,11 @@ def After(rss, options):
                 item.remove()
                 continue
 
+    return rss
+
+
+def After(rss, options):
+    for i, item in enumerate(list(rss.items)):
         if item.desc and item.content:
             if options.clip:
                 item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
@@ -714,6 +719,10 @@ def After(rss, options):
             if item.content:
                 item.content = conv.handle(item.content)
 
+    return rss
+
+
+def Format(rss, options):
     if options.callback:
         if re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
             return '%s(%s)' % (options.callback, rss.tojson())
@@ -739,9 +748,11 @@ def process(url, cache=None, options=None):
     options = Options(options)
     url, cache = Init(url, cache, options)
     rss = Fetch(url, cache, options)
+    rss = Before(rss, options)
     rss = Gather(rss, url, cache, options)
+    rss = After(rss, options)
 
-    return After(rss, options)
+    return Format(rss, options)
 
 
 def cgi_app(environ, start_response):
@@ -815,8 +826,10 @@ def cgi_app(environ, start_response):
 
     start_response(headers['status'], headers.items())
 
+    rss = Before(rss, options)
     rss = Gather(rss, url, cache, options)
-    out = After(rss, options)
+    rss = After(rss, options)
+    out = Format(rss, options)
 
     if not options.silent:
         return out
@@ -872,8 +885,10 @@ def cli_app():
 
     url, cache = Init(url, os.path.expanduser('~/.cache/morss'), options)
     rss = Fetch(url, cache, options)
+    rss = Before(rss, options)
     rss = Gather(rss, url, cache, options)
-    out = After(rss, options)
+    rss = After(rss, options)
+    out = Format(rss, options)
 
     if not options.silent:
         print out
