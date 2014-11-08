@@ -649,7 +649,7 @@ def Gather(rss, url, cache, options):
         t.daemon = True
         t.start()
 
-    for i, item in enumerate(rss.items):
+    for i, item in enumerate(list(rss.items)):
         queue.put([i, item])
 
     queue.join()
