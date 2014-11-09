@@ -675,10 +675,6 @@ def Before(rss, options):
                 item.remove()
                 continue
 
-        if options.strip:
-            del item.desc
-            del item.content
-
         if options.empty:
             item.remove()
             continue
@@ -693,6 +689,10 @@ def Before(rss, options):
 
 def After(rss, options):
     for i, item in enumerate(list(rss.items)):
+        if options.strip:
+            del item.desc
+            del item.content
+
         if item.desc and item.content:
             if options.clip:
                 item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
