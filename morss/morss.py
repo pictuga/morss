@@ -873,7 +873,7 @@ def cgi_wrapper(environ, start_response):
         headers = {'status': '500 Oops', 'content-type': 'text/plain'}
         start_response(headers['status'], headers.items(), sys.exc_info())
         log('ERROR <%s>: %s' % (url, e.message), force=True)
-        return 'An error happened'
+        return 'An error happened:\n%s' % e.message
 
 
 def cli_app():
