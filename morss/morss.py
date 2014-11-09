@@ -550,6 +550,8 @@ def Fetch(url, cache, options):
                                     accept=('xml', 'html'))
             con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT * 2)
             xml = con.read()
+        except (urllib2.HTTPError) as e:
+            raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
         except (IOError, httplib.HTTPException):
             raise MorssException('Error downloading feed')
 
