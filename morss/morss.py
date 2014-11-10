@@ -613,9 +613,13 @@ def Gather(rss, url, cache, options):
     lim_time = LIM_TIME
     max_item = MAX_ITEM
     max_time = MAX_TIME
+    threads = THREADS
 
     if options.cache:
         max_time = 0
+
+    if options.mono:
+        threads = 1
 
     # set
     def runner(queue):
@@ -646,7 +650,7 @@ def Gather(rss, url, cache, options):
 
     queue = Queue.Queue()
 
-    for i in xrange(THREADS):
+    for i in xrange(threads):
         t = threading.Thread(target=runner, args=(queue,))
         t.daemon = True
         t.start()

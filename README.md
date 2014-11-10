@@ -49,6 +49,7 @@ The arguments are:
 	- `hungry`: grab full-article even if it already looks long enough
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
+	- `mono`: disable multithreading while fetching, makes debugging easier
 	- `theforce`: force download the rss feed
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 	- `smart`: try to show only new elements in feed, to make it lighter (based on 304 headers)
