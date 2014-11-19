@@ -39,6 +39,7 @@ THREADS = 10  # number of threads (1 for single-threaded)
 
 DEBUG = False
 
+CA_CERT = 'cacert.pem' # ca cert file
 DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 MIMETYPE = {
@@ -211,7 +212,8 @@ class Cache:
             return self
 
 
-default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
+default_handlers = [crawler.VerifiedHTTPSHandler(ca_certs=CA_CERT),
+                    crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
                     crawler.AutoRefererHandler(), crawler.MetaRedirectHandler(),
                     crawler.EncodingFixHandler()]
 
@@ -432,6 +434,8 @@ def Fetch(url, cache, options):
             xml = con.read()
         except (urllib2.HTTPError) as e:
             raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
+        except (crawler.InvalidCertificateException) as e:
+            raise MorssException('Error downloading feed (Invalid SSL Certificate)')
         except (IOError, httplib.HTTPException):
             raise MorssException('Error downloading feed')
 
