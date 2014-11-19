@@ -16,6 +16,7 @@ import lxml.html
 
 import feeds
 import feedify
+import crawler
 
 import httplib
 import urllib
@@ -24,9 +25,6 @@ import urlparse
 
 import wsgiref.simple_server
 import wsgiref.handlers
-
-from gzip import GzipFile
-from StringIO import StringIO
 
 from readability import readability
 from html2text import HTML2Text
@@ -41,8 +39,7 @@ THREADS = 10  # number of threads (1 for single-threaded)
 
 DEBUG = False
 
-UA_RSS = 'Liferea/1.8.12 (Linux; fr_FR.utf8; http://liferea.sf.net/)'
-UA_HTML = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
+DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
@@ -214,136 +211,20 @@ class Cache:
             return self
 
 
-class SimpleDownload(urllib2.HTTPCookieProcessor):
-    """
-    Custom urllib2 handler to download a page, using etag/last-modified headers,
-    to save bandwidth. The given headers are added back into the header on error
-    304 for easier use.
-    """
+default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
+                    crawler.AutoRefererHandler(), crawler.MetaRedirectHandler(),
+                    crawler.EncodingFixHandler()]
 
-    def __init__(self, cache="", etag=None, lastmodified=None, useragent=UA_HTML, decode=True, cookiejar=None,
-                 accept=None, strict=False):
-        urllib2.HTTPCookieProcessor.__init__(self, cookiejar)
-        self.cache = cache
-        self.etag = etag
-        self.lastmodified = lastmodified
-        self.useragent = useragent
-        self.decode = decode
-        self.accept = accept
-        self.strict = strict
+def accept_handler(*kargs):
+    handlers = default_handlers[:]
+    handlers.append(crawler.ContentNegociationHandler(*kargs))
+    return handlers
 
-    def http_request(self, req):
-        urllib2.HTTPCookieProcessor.http_request(self, req)
-        req.add_unredirected_header('Accept-Encoding', 'gzip')
-        req.add_unredirected_header('User-Agent', self.useragent)
-        if req.get_host() != 'feeds.feedburner.com':
-            req.add_unredirected_header('Referer', 'http://%s' % req.get_host())
-
-        if self.cache:
-            if self.etag:
-                req.add_unredirected_header('If-None-Match', self.etag)
-            if self.lastmodified:
-                req.add_unredirected_header('If-Modified-Since', self.lastmodified)
-
-        if self.accept is not None:
-            if isinstance(self.accept, basestring):
-                self.accept = (self.accept,)
-
-            out = {}
-            rank = 1.1
-            for group in self.accept:
-                rank -= 0.1
-
-                if isinstance(group, basestring):
-                    if group in MIMETYPE:
-                        group = MIMETYPE[group]
-                    else:
-                        out[group] = rank
-                        continue
-
-                for mime in group:
-                    if mime not in out:
-                        out[mime] = rank
-
-            if not self.strict:
-                out['*/*'] = rank - 0.1
-
-            string = ','.join([x + ';q={0:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
-            req.add_unredirected_header('Accept', string)
-
-        return req
-
-    def http_error_304(self, req, fp, code, msg, headers):
-        log('http cached')
-        if self.etag:
-            headers.addheader('etag', self.etag)
-        if self.lastmodified:
-            headers.addheader('last-modified', self.lastmodified)
-        resp = urllib2.addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
-        return resp
-
-    def http_response(self, req, resp):
-        urllib2.HTTPCookieProcessor.http_response(self, req, resp)
-        data = resp.read()
-
-        if 200 <= resp.code < 300:
-            # gzip
-            if resp.headers.get('Content-Encoding') == 'gzip':
-                log('un-gzip')
-                data = GzipFile(fileobj=StringIO(data), mode='r').read()
-
-        if 200 <= resp.code < 300 and resp.info().maintype == 'text':
-            # <meta> redirect
-            if resp.info().type in MIMETYPE['html']:
-                match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
-                if match:
-                    new_url = match.groups()[0]
-                    log('redirect: %s' % new_url)
-
-                    new_headers = dict((k, v) for k, v in req.headers.items()
-                                       if k.lower() not in ('content-length', 'content-type'))
-                    new = urllib2.Request(new_url,
-                                          headers=new_headers,
-                                          origin_req_host=req.get_origin_req_host(),
-                                          unverifiable=True)
-
-                    return self.parent.open(new, timeout=req.timeout)
-
-            # encoding
-            enc = detect_encoding(data, resp)
-
-            if enc:
-                data = data.decode(enc, 'replace')
-
-                if not self.decode:
-                    data = data.encode(enc)
-
-        fp = StringIO(data)
-        old_resp = resp
-        resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-        resp.msg = old_resp.msg
-
-        return resp
-
-    https_response = http_response
-    https_request = http_request
-
-
-def detect_encoding(data, con=None):
-    if con is not None and con.headers.getparam('charset'):
-        log('header')
-        return con.headers.getparam('charset')
-
-    match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data[:1000])
-    if match:
-        log('meta.re')
-        return match.groups()[0]
-
-    match = re.search('encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
-    if match:
-        return match.groups()[0].lower()
-
-    return None
+def etag_handler(accept, strict, cache, etag, lastmodified):
+    handlers = default_handlers[:]
+    handlers.append(crawler.ContentNegociationHandler(accept, strict))
+    handlers.append(crawler.EtagHandler(cache, etag, lastmodified))
+    return handlers
 
 
 def Fix(item, feedurl='/'):
@@ -485,7 +366,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
     # download
     try:
         url = link.encode('utf-8')
-        con = urllib2.build_opener(SimpleDownload(accept=('html', 'text/*'), strict=True)).open(url, timeout=TIMEOUT)
+        con = urllib2.build_opener(*accept_handler(('html', 'text/*'), True)).open(url, timeout=TIMEOUT)
         data = con.read()
     except (IOError, httplib.HTTPException) as e:
         log('http error:  %s' % e.message)
@@ -546,9 +427,8 @@ def Fetch(url, cache, options):
         style = cache.get('style')
     else:
         try:
-            opener = SimpleDownload(cache.get(url), cache.get('etag'), cache.get('lastmodified'),
-                                    accept=('xml', 'html'))
-            con = urllib2.build_opener(opener).open(url, timeout=TIMEOUT * 2)
+            opener = etag_handler(('xml', 'html'), False, cache.get(url), cache.get('etag'), cache.get('lastmodified'))
+            con = urllib2.build_opener(*opener).open(url, timeout=TIMEOUT * 2)
             xml = con.read()
         except (urllib2.HTTPError) as e:
             raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
