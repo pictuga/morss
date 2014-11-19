@@ -10,7 +10,7 @@ from fnmatch import fnmatch
 import lxml.html
 
 import feeds
-import morss
+import crawler
 
 
 def to_class(query):
@@ -103,7 +103,7 @@ class Builder(object):
 
         if self.rule['mode'] == 'xpath':
             if not isinstance(self.data, unicode):
-                self.data = self.data.decode(morss.detect_encoding(self.data), 'replace')
+                self.data = self.data.decode(crawler.detect_encoding(self.data), 'replace')
             self.doc = lxml.html.fromstring(self.data)
         elif self.rule['mode'] == 'json':
             self.doc = json.loads(data)
