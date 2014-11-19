@@ -46,10 +46,6 @@ MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
     'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
-FBAPPID = "<insert yours>"
-FBSECRET = "<insert yours>"
-FBAPPTOKEN = FBAPPID + '|' + FBSECRET
-
 PROTOCOL = ['http', 'https', 'ftp']
 
 if 'SCRIPT_NAME' in os.environ:
@@ -673,7 +669,7 @@ def cgi_app(environ, start_response):
 
     if 'HTTP_IF_NONE_MATCH' in environ:
         options['last'] = int(environ['HTTP_IF_NONE_MATCH'][1:-1])
-        if not options.force and not options.facebook and time.time() - options.last < DELAY:
+        if not options.force and time.time() - options.last < DELAY:
             headers['status'] = '304 Not Modified'
             start_response(headers['status'], headers.items())
             log(url)
@@ -702,11 +698,6 @@ def cgi_app(environ, start_response):
         headers['content-type'] = 'text/xml'
 
     url, cache = Init(url, os.getcwd() + '/cache', options)
-
-    if options.facebook:
-        do_facebook(url, environ, headers, options, cache)
-        start_response(headers['status'], headers.items())
-        return
 
     # get the work done
     rss = Fetch(url, cache, options)
@@ -784,36 +775,6 @@ def cli_app():
         print out
 
     log('done')
-
-
-def do_facebook(url, environ, headers, options, cache):
-    log('fb stuff')
-
-    query = urlparse.urlparse(url).query
-
-    if 'code' in query:
-        # get real token from code
-        code = urlparse.parse_qs(query)['code'][0]
-        eurl = "https://graph.facebook.com/oauth/access_token?client_id={app_id}&redirect_uri={redirect_uri}&client_secret={app_secret}&code={code_parameter}".format(
-            app_id=FBAPPID, app_secret=FBSECRET, code_parameter=code, redirect_uri=environ['SCRIPT_URI'])
-        token = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())['access_token'][0]
-
-        # get long-lived access token
-        eurl = "https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={app_id}&client_secret={app_secret}&fb_exchange_token={short_lived_token}".format(
-            app_id=FBAPPID, app_secret=FBSECRET, short_lived_token=token)
-        values = urlparse.parse_qs(urllib2.urlopen(eurl).read().strip())
-
-        ltoken = values['access_token'][0]
-        expires = int(time.time() + int(values['expires'][0]))
-
-        headers['set-cookie'] = 'token={token}; Path=/'.format(token=ltoken)
-
-    # headers
-    headers['status'] = '303 See Other'
-    headers['location'] = 'http://{domain}/'.format(domain=environ['SERVER_NAME'])
-
-    log('fb done')
-    return
 
 
 def main():
