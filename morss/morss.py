@@ -56,6 +56,13 @@ if 'SCRIPT_NAME' in os.environ:
     cgitb.enable()
 
 
+def filterOptions(options):
+    allowed = ['proxy', 'clip', 'keep', 'cache', 'force', 'silent', 'pro', 'debug']
+    filtered = dict([(key,value) for (key,value) in options.items() if key in allowed])
+
+    return filtered
+
+
 class MorssException(Exception):
     pass
 
@@ -661,7 +668,7 @@ def cgi_app(environ, start_response):
         options = []
 
     # init
-    options = Options(parseOptions(options))
+    options = Options(filterOptions(parseOptions(options)))
     headers = {}
 
     global DEBUG
@@ -758,7 +765,7 @@ def cgi_wrapper(environ, start_response):
 
 
 def cli_app():
-    options = Options(parseOptions(sys.argv[1:-1]))
+    options = Options(filterOptions(parseOptions(sys.argv[1:-1])))
     url = sys.argv[-1]
 
     global DEBUG
