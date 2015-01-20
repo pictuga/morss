@@ -247,6 +247,32 @@ def Fix(item, feedurl='/'):
     # check relative urls
     item.link = urlparse.urljoin(feedurl, item.link)
 
+    # Techmeme
+    if fnmatch(item.link, 'http://www.techmeme.com/*'):
+        #match = re.search('<A HREF="(.+?)"><IMG VSPACE="4"', item.desc)
+        match_list = re.findall('<A HREF="(.+?)">', item.desc)
+        for i in match_list:
+            if not re.search('techmeme.com', i):
+                match = i
+                #break
+        if match:
+            #item.link = match.group(1)
+            item.link = match
+            log(item.link)
+
+    # SeekingAlpha
+    if fnmatch(item.link, 'http://seekingalpha.com/*'):
+        match = re.sub('\?.*','',item.link)
+        if match:
+            item.link = match
+            log(item.link)
+
+    if fnmatch(item.link, 'http://www.reddit.com/r/scotch+whisky+worldwhisky*'):
+        match = re.search('\\[link\\]\\<\\/a\\>\\ \\<a\\ href\\=\\"(.+?)">\\[', item.desc)
+        if match:
+            item.link = match.group(1)
+            log(item.link)
+
     # google translate
     if fnmatch(item.link, 'http://translate.google.*/translate*u=*'):
         item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['u'][0]
