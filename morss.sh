@@ -53,7 +53,7 @@ do_start() {
     return 1
   fi
   cd $PROJECT
-  source $VIRTUALENV/bin/activate
+  . $VIRTUALENV/bin/activate
   $CMD
   if [ $? = 0 ]; then
     return 0
