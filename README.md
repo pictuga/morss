@@ -77,6 +77,42 @@ For this, you need to make sure your host allows python script execution. This m
 
 Please pay attention to `/www/morss.py` permissions for it to be executable. Also ensure that the provided `/www/.htaccess` works well with your server.
 
+####[With nginx + uWSGI](https://blog.ronsonchan.com/setting-up-morss-full-text-rss-expander-on-debian-wheezy/)
+1. [Set up a virtualenv](https://www.digitalocean.com/community/tutorials/how-to-deploy-python-wsgi-applications-using-uwsgi-web-server-with-nginx) for morss
+
+		mkdir /var/www/morss
+		cd /var/www/morss
+		virtualenv morss_venv
+	
+2. Clone project into the current morss directory `git clone https://github.com/pictuga/morss/morss.git`
+3. Since we're going to run it in server mode, we will move all the files to the root `/var/www/morss/morss`
+
+		mv morss/* .
+        mv www/* .
+4. Activate the interpreter inside the virtual environment: `source morss_venv/bin/activate`
+5. Set up uWSGI `pip install uwsgi`
+6. Since the Virtual Environment is self contained, grab the morss requirements: `pip install -r requirements.txt`
+7. Test to see if it works, run `uwsgi --http-socket :8080 --file morss.py --callable cgi_wrapper`
+8. Access `http://<YOUR IP>:8080` and you should get the morss default page.
+
+#####Connecting to nginx
+
+1. Create a new nginx config file for morss with the following, [Example configuration for webapplications](https://www.digitalocean.com/community/tutorials/how-to-deploy-python-wsgi-applications-using-uwsgi-web-server-with-nginx):
+
+        location / {
+                include            uwsgi_params;
+                uwsgi_pass         uwsgicluster; #OR THE <IP ADDRESS>:<PORT> OF MORSS SERVER
+
+                proxy_redirect     off;
+                proxy_set_header   Host $host;
+                proxy_set_header   X-Real-IP $remote_addr;
+                proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header   X-Forwarded-Host $server_name;
+
+        }
+3. Launch uWSGI with `uwsgi --socket :8080 --file morss.py --callable cgi_wrapper`. Can also use the included `uwsgi.ini` file by launching it this way `uwsgi --ini uwsgi.ini`
+4.  nginx should now be serving up everything at `http://<NGINX X SERVER IP>`
+
 ####Using morss' internal HTTP server
 
 Morss can run its own HTTP server. The later should start when you run morss without any argument, on port 8080. For now, you have to change the hardcoded port if you want to change it.
