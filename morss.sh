@@ -31,7 +31,7 @@ NAME=morss
 DESC=$NAME
 LOGFILE="$LOGDIR$NAME.log"
 PIDFILE="$PROJECT$NAME.pid"
-CMD="uwsgi --ini /morss/uwsgi.ini"
+CMD="uwsgi --ini /var/www/morss/morss/uwsgi.ini"
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
