@@ -4,8 +4,8 @@
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Should-Start:      $python $uwsgi
-# Default-Start:     30 2 3 4 5
-# Default-Stop:      70 0 1 6
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
 # Short-Description: virtualenv + uwsgi + morss debian init script
 # Description:       virtualenv + uwsgi + morss debian init script
 ### END INIT INFO
@@ -21,23 +21,22 @@
 
 PROJECT=/var/www/morss
 VIRTUALENV=/var/www/morss/morss_venv
-LOGDIR=/var/log/morss/
+LOGDIR=/var/log/
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/bin:/usr/bin
 USER=www-data
 GROUP=www-data
 IP=0.0.0.0
 PORT=8080
-MORSSFILE=morss/morss.py
+MORSSFILE=morss.py
 CALLABLE=cgi_wrapper
 PROCESSES=5
 # I am lazy and just call the init script gunicorn-project
 NAME=morss
 DESC=$NAME
-MASTER=true
 LOGFILE="$LOGDIR$NAME.log"
 PIDFILE="$PROJECT$NAME.pid"
-CMD="uwsgi --uid $USER --gid $GROUP --http-socket $IP:$PORT --file $MORSSFILE --callable $CALLABLE --processes $PROCESSES --daemonize $LOGFILE --pidfile $PIDFILE --master $MASTER"
+CMD="uwsgi --uid $USER --gid $GROUP --socket $IP:$PORT --wsgi-file $MORSSFILE --callable $CALLABLE --processes $PROCESSES --daemonize $LOGFILE --pidfile $PIDFILE --master --enable-threads"
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -80,7 +79,7 @@ do_stop() {
   if [ -f $PIDFILE ]; then
     PID=`cat $PIDFILE`
     rm $PIDFILE
-    kill -15 $PID
+    kill -INT $PID
     if [ $? = 0 ]; then
       return 0
     else
