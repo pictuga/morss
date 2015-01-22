@@ -26,12 +26,18 @@ LOGDIR=/var/log/morss/
 PATH=/bin:/usr/bin
 USER=www-data
 GROUP=www-data
+IP=0.0.0.0
+PORT=8080
+MORSSFILE=morss/morss.py
+CALLABLE=cgi_wrapper
+PROCESSES=5
 # I am lazy and just call the init script gunicorn-project
 NAME=morss
 DESC=$NAME
+MASTER=true
 LOGFILE="$LOGDIR$NAME.log"
 PIDFILE="$PROJECT$NAME.pid"
-CMD="uwsgi --ini /var/www/morss/morss/uwsgi.ini"
+CMD="uwsgi --uid $USER --gid $GROUP --http-socket $IP:$PORT --file $MORSSFILE --callable $CALLABLE --processes $PROCESSES --daemonize $LOGFILE --pidfile $PIDFILE --master $MASTER"
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
