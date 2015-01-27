@@ -11,6 +11,7 @@
 ### END INIT INFO
 
 # Borrowed from: http://kuttler.eu/code/debian-init-script-virtualenv-gunicorn-django/
+# Borrowed from: https://gist.github.com/leplatrem/5684206
 # Please remove the "Author" lines above and replace them
 # with your own name if you copy and modify this script.
 #
@@ -44,108 +45,39 @@ CMD="uwsgi --uid $USER --gid $GROUP --socket $IP:$PORT --wsgi-file $MORSSFILE --
 # Define LSB log_* functions.
 # Depend on lsb-base (>= 3.2-14) to ensure that this file is present
 # and status_of_proc is working.
+
 . /lib/lsb/init-functions
-
-#
-# Function that starts the daemon/service
-#
-do_start() {
-  # Return
-  #   0 if daemon has been started
-  #   1 if daemon was already running
-  #   2 if daemon could not be started
-  if [ -e $PIDFILE ]; then
-    return 1
-  fi
-  cd $PROJECT
-  . $VIRTUALENV/bin/activate
-  $CMD
-  if [ $? = 0 ]; then
-    return 0
-  else
-    return 2
-  fi
-}
-
-#
-# Function that stops the daemon/service
-#
-do_stop() {
-  # Return
-  #   0 if daemon has been stopped
-  #   1 if daemon was already stopped
-  #   2 if daemon could not be stopped
-  #   other if a failure occurred
-  if [ -f $PIDFILE ]; then
-    PID=`cat $PIDFILE`
-    rm $PIDFILE
-    kill -INT $PID
-    if [ $? = 0 ]; then
-      return 0
-    else
-      return 2
-    fi
-  else
-    return 1
-  fi
-}
-
-do_reload() {
-  if [ -f $PIDFILE ]; then
-    PID=`cat $PIDFILE`
-    kill -HUP $PID
-    return $?
-  fi
-  return 2
-}
-
+ 
+ 
+if [ -e "/etc/default/$NAME" ]
+then
+    . /etc/default/$NAME
+fi
+ 
+ 
 case "$1" in
   start)
-  [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
-  do_start
-  case "$?" in
-    0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-    2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-  esac
-  ;;
+        log_daemon_msg "Starting deferred execution scheduler" "$NAME"
+        source $ACTIVATE
+        $CMD
+        log_end_msg $?
+    ;;
   stop)
-  [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
-  do_stop
-  case "$?" in
-    0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-    2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-  esac
-  ;;
-  restart)
-  log_daemon_msg "Restarting $DESC" "$NAME"
-  do_stop
-  case "$?" in
-    0|1)
-    do_start
-    case "$?" in
-      0) log_end_msg 0 ;;
-      1) log_end_msg 1 ;; # Old process is still running
-      *) log_end_msg 1 ;; # Failed to start
-    esac
+        log_daemon_msg "Stopping deferred execution scheduler" "NAME"
+        killproc -p $PIDFILE $NAME
+        log_end_msg $?
     ;;
-    *)
-      # Failed to stop
-    log_end_msg 1
+  force-reload|restart)
+    $0 stop
+    $0 start
     ;;
-  esac
-  ;;
-  reload)
-  log_daemon_msg "Reloading $DESC" "$NAME"
-  do_reload
-  case "$?" in
-    0) log_end_msg 0 ;;
-    *) log_end_msg 1 ;;
-  esac
-  ;;
+  status)
+    status_of_proc -p $PIDFILE $NAME && exit 0 || exit $?
+    ;;
   *)
-  echo "Usage: $SCRIPTNAME {start|stop|restart|reload}" >&2
-  exit 3
-  ;;
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload|status}"
+    exit 1
+    ;;
 esac
-
-:
+ 
+exit 0
