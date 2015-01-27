@@ -58,12 +58,13 @@ fi
 case "$1" in
   start)
         log_daemon_msg "Starting deferred execution scheduler" "$NAME"
-        source $ACTIVATE
+        cd $PROJECT $ACTIVATE
+        . $VIRTUALENV/bin/activate
         $CMD
         log_end_msg $?
     ;;
   stop)
-        log_daemon_msg "Stopping deferred execution scheduler" "NAME"
+        log_daemon_msg "Stopping deferred execution scheduler" "$NAME"
         killproc -p $PIDFILE $NAME
         log_end_msg $?
     ;;
