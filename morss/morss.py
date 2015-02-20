@@ -357,7 +357,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
                 log('cached error: %s' % match.groups()[0])
                 return True
             else:
-                log('old error')
+                log('ignored old error: %s' % match.groups()[0])
         else:
             log('cached')
             item.push_content(cache.get(link))
@@ -389,7 +389,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         item.push_content(out)
         cache.set(link, out)
     else:
-        log('not bigger enough')
+        log('link not bigger enough')
         cache.set(link, 'error-length')
         return True
 
