@@ -57,10 +57,14 @@ if 'SCRIPT_NAME' in os.environ:
 
 
 def filterOptions(options):
-    allowed = ['proxy', 'clip', 'keep', 'cache', 'force', 'silent', 'pro', 'debug']
-    filtered = dict([(key,value) for (key,value) in options.items() if key in allowed])
+    return options
 
-    return filtered
+    # example of filtering code below
+
+    #allowed = ['proxy', 'clip', 'keep', 'cache', 'force', 'silent', 'pro', 'debug']
+    #filtered = dict([(key,value) for (key,value) in options.items() if key in allowed])
+
+    #return filtered
 
 
 class MorssException(Exception):
