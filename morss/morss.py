@@ -631,7 +631,10 @@ def Format(rss, options):
     elif options.reader:
         return rss.tohtml()
     else:
-        return rss.tostring(xml_declaration=True, encoding='UTF-8')
+        if options.indent:
+            return rss.tostring(xml_declaration=True, encoding='UTF-8', pretty_print=True)
+        else:
+            return rss.tostring(xml_declaration=True, encoding='UTF-8')
 
 
 def process(url, cache=None, options=None):

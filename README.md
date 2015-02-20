@@ -35,8 +35,7 @@ morss accepts some arguments, to lightly alter the output of morss. Arguments ma
 The arguments are:
 
 - Change what morss does
-	- `json`: output as JSON  
-	`indent`: returns indented JSON, takes more place, but human-readable
+	- `json`: output as JSON
 	- `proxy`: doesn't fill the articles
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
 	- `keep`: by default, morss does drop feed description whenever the full-content is found (so as not to mislead users who use Firefox, since the latter only shows the description in the feed preview, so they might believe morss doens't work), but with this argument, the description is kept
@@ -44,6 +43,7 @@ The arguments are:
 - Advanced
 	- `csv`: export to csv
 	- `md`: convert articles to Markdown
+	- `indent`: returns indented XML or JSON, takes more place, but human-readable
 	- `nolink`: drop links, but keeps links' inner text
 	- `noref`: drop items' link
 	- `hungry`: grab full-article even if it already looks long enough

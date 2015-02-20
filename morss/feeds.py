@@ -361,7 +361,7 @@ class FeedParser(FeedBase):
     items = FeedListDescriptor('items')
 
     def tostring(self, **k):
-        return etree.tostring(self.xml.getroottree(), pretty_print=True, **k)
+        return etree.tostring(self.xml.getroottree(), **k)
 
     def tojson(self, indent=None):
         return json.dumps(OrderedDict(self), indent=indent)
