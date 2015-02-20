@@ -353,7 +353,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         content = cache.get(link)
         match = re.search(r'^error-([a-z]{2,10})$', content)
         if match:
-            if cache.age(link) < DELAY:
+            if cache.age(link) < DELAY and not options.theforce:
                 log('cached error: %s' % match.groups()[0])
                 return True
             else:
