@@ -318,7 +318,7 @@ class FeedListDescriptor(object):
 
     def __set__(self, instance, value):
         feedlist = self.__get__(instance)
-        [x.remove() for x in [x for x in f.items]]
+        [x.remove() for x in list(feedlist)]
         [feedlist.append(x) for x in value]
 
 
