@@ -34,7 +34,7 @@ LIM_TIME = 7  # deletes what's after
 MAX_ITEM = 50  # cache-only beyond
 MAX_TIME = 7  # cache-only after (in sec)
 DELAY = 10 * 60  # xml cache & ETag cache (in sec)
-TIMEOUT = 2  # http timeout (in sec)
+TIMEOUT = 4  # http timeout (in sec)
 THREADS = 10  # number of threads (1 for single-threaded)
 
 DEBUG = False
