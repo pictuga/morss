@@ -590,12 +590,12 @@ def After(rss, options):
             del item.desc
             del item.content
 
-        if item.desc and item.content:
-            if options.clip:
-                item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
-                del item.desc
-            if not options.keep:
-                del item.desc
+        if options.clip and item.desc and item.content:
+            item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
+            del item.desc
+
+        if not options.keep:
+            del item.desc
 
         if options.nolink and item.content:
             content = lxml.html.fromstring(item.content)
