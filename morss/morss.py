@@ -389,7 +389,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
 
     out = readability.Document(data, url=con.url).summary(True)
 
-    if options.hungry or count_words(out) > max(count_content, count_desc) > 0:
+    if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
         cache.set(link, out)
     else:
