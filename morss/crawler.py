@@ -1,4 +1,3 @@
-import httplib
 import ssl
 import socket
 
@@ -8,10 +7,12 @@ try:
     from StringIO import StringIO
     from urllib2 import URLError
     from urllib2 import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
+    from httplib import HTTPException, HTTPConnection, HTTPS_PORT
 except:
     from io import StringIO
     from urllib.error import URLError
     from urllib.request import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
+    from http.client import HTTPException, HTTPConnection, HTTPS_PORT
 
 
 import re
@@ -24,9 +25,9 @@ MIMETYPE = {
 
 # SSL-related code proudly copy-pasted from https://stackoverflow.com/questions/1087227/validate-ssl-certificates-with-python
 
-class InvalidCertificateException(httplib.HTTPException, URLError):
+class InvalidCertificateException(HTTPException, URLError):
     def __init__(self, host, cert, reason):
-        httplib.HTTPException.__init__(self)
+        HTTPException.__init__(self)
         self.host = host
         self.cert = cert
         self.reason = reason
@@ -36,12 +37,12 @@ class InvalidCertificateException(httplib.HTTPException, URLError):
                 (self.host, self.reason, self.cert))
 
 
-class CertValidatingHTTPSConnection(httplib.HTTPConnection):
-    default_port = httplib.HTTPS_PORT
+class CertValidatingHTTPSConnection(HTTPConnection):
+    default_port = HTTPS_PORT
 
     def __init__(self, host, port=None, key_file=None, cert_file=None,
                              ca_certs=None, strict=None, **kwargs):
-        httplib.HTTPConnection.__init__(self, host, port, strict, **kwargs)
+        HTTPConnection.__init__(self, host, port, strict, **kwargs)
         self.key_file = key_file
         self.cert_file = cert_file
         self.ca_certs = ca_certs
