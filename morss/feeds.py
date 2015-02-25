@@ -28,6 +28,11 @@ except ImportError:
     from io import StringIO
     from urllib.request import urlopen
 
+try:
+    basestring
+except NameError:
+    basestring = unicode = str
+
 
 Element = etree.Element
 
@@ -79,7 +84,7 @@ def parse(data):
     match = re.search('encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
     if match:
         enc = match.groups()[0].lower()
-        if not isinstance(data, unicode):
+        if isinstance(data, bytes):
             data = data.decode(enc, 'ignore')
         data = data.encode(enc)
 
@@ -373,8 +378,8 @@ class FeedParser(FeedBase):
         out = StringIO()
         c = csv.writer(out, dialect=csv.excel)
         for item in self.items:
-            row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item if
-                   isinstance(x[1], basestring)]
+            row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item] # str
+                   #isinstance(x[1], basestring)] # bytes or str
             c.writerow(row)
         out.seek(0)
         return out.read()

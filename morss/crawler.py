@@ -14,8 +14,12 @@ except ImportError:
     from urllib.request import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
     from http.client import HTTPException, HTTPConnection, HTTPS_PORT
 
-
 import re
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 
 MIMETYPE = {

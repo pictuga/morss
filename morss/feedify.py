@@ -18,6 +18,11 @@ except ImportError:
     from urllib.parse import urlparse, urljoin
     from urllib.request import urlopen
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 def to_class(query):
     pattern = r'\[class=([^\]]+)\]'
@@ -108,7 +113,7 @@ class Builder(object):
         self.rule = get_rule(link)
 
         if self.rule['mode'] == 'xpath':
-            if not isinstance(self.data, unicode):
+            if isinstance(self.data, bytes):
                 self.data = self.data.decode(crawler.detect_encoding(self.data), 'replace')
             self.doc = lxml.html.fromstring(self.data)
         elif self.rule['mode'] == 'json':
