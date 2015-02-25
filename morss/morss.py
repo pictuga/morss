@@ -76,7 +76,7 @@ def log(txt, force=False):
         if 'REQUEST_URI' in os.environ:
             open('morss.log', 'a').write("%s\n" % repr(txt))
         else:
-            print repr(txt)
+            print(repr(txt))
 
 
 def len_html(txt):
@@ -786,7 +786,7 @@ def cli_app():
     out = Format(rss, options)
 
     if not options.silent:
-        print out
+        print(out)
 
     log('done')
 
@@ -805,7 +805,7 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception as e:
-            print 'ERROR: %s' % e.message
+            print('ERROR: %s' % e.message)
 
 if __name__ == '__main__':
     main()
