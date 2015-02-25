@@ -1,1 +1,1 @@
-from morss import *
+from .morss import *

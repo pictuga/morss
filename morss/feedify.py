@@ -9,8 +9,8 @@ from ConfigParser import ConfigParser
 from fnmatch import fnmatch
 import lxml.html
 
-import feeds
-import crawler
+from . import feeds
+from . import crawler
 
 
 def to_class(query):

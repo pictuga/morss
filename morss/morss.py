@@ -14,9 +14,9 @@ import json
 import lxml.etree
 import lxml.html
 
-import feeds
-import feedify
-import crawler
+from . import feeds
+from . import feedify
+from . import crawler
 
 import httplib
 import urllib
