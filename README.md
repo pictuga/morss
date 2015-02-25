@@ -93,7 +93,7 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 ###As a CLI application
 
-Run: **`[python2.7] morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+Run: **`[python2.7] -m morss.morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
 For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
