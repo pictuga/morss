@@ -1,10 +1,18 @@
-import urllib2
 import httplib
 import ssl
 import socket
 
 from gzip import GzipFile
-from StringIO import StringIO
+
+try:
+    from StringIO import StringIO
+    from urllib2 import URLError
+    from urllib2 import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
+except:
+    from io import StringIO
+    from urllib.error import URLError
+    from urllib.request import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
+
 
 import re
 
@@ -16,7 +24,7 @@ MIMETYPE = {
 
 # SSL-related code proudly copy-pasted from https://stackoverflow.com/questions/1087227/validate-ssl-certificates-with-python
 
-class InvalidCertificateException(httplib.HTTPException, urllib2.URLError):
+class InvalidCertificateException(httplib.HTTPException, URLError):
     def __init__(self, host, cert, reason):
         httplib.HTTPException.__init__(self)
         self.host = host
@@ -72,9 +80,9 @@ class CertValidatingHTTPSConnection(httplib.HTTPConnection):
                                                   'hostname mismatch')
 
 
-class VerifiedHTTPSHandler(urllib2.HTTPSHandler):
+class VerifiedHTTPSHandler(HTTPSHandler):
     def __init__(self, **kwargs):
-        urllib2.AbstractHTTPHandler.__init__(self)
+        AbstractHTTPHandler.__init__(self)
         self._connection_args = kwargs
 
     def https_open(self, req):
@@ -85,18 +93,18 @@ class VerifiedHTTPSHandler(urllib2.HTTPSHandler):
 
         try:
             return self.do_open(http_class_wrapper, req)
-        except urllib2.URLError, e:
+        except URLError, e:
             if type(e.reason) == ssl.SSLError and e.reason.args[0] == 1:
                 raise InvalidCertificateException(req.host, '',
                                                   e.reason.args[1])
             raise
 
-    https_request = urllib2.HTTPSHandler.do_request_
+    https_request = HTTPSHandler.do_request_
 
 # end of copy-paste code
 
 
-class GZIPHandler(urllib2.BaseHandler):
+class GZIPHandler(BaseHandler):
     def http_request(self, req):
         req.add_unredirected_header('Accept-Encoding', 'gzip')
         return req
@@ -109,7 +117,7 @@ class GZIPHandler(urllib2.BaseHandler):
 
                 fp = StringIO(data)
                 old_resp = resp
-                resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+                resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
                 resp.msg = old_resp.msg
 
         return resp
@@ -133,7 +141,7 @@ def detect_encoding(data, con=None):
     return None
 
 
-class EncodingFixHandler(urllib2.BaseHandler):
+class EncodingFixHandler(BaseHandler):
     def http_response(self, req, resp):
         if 200 <= resp.code < 300 and resp.info().maintype == 'text':
             data = resp.read()
@@ -145,7 +153,7 @@ class EncodingFixHandler(urllib2.BaseHandler):
 
             fp = StringIO(data)
             old_resp = resp
-            resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+            resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
             resp.msg = old_resp.msg
 
         return resp
@@ -153,7 +161,7 @@ class EncodingFixHandler(urllib2.BaseHandler):
     https_response = http_response
 
 
-class UAHandler(urllib2.BaseHandler):
+class UAHandler(BaseHandler):
     def __init__(self, useragent=None):
         self.useragent = useragent
 
@@ -165,7 +173,7 @@ class UAHandler(urllib2.BaseHandler):
     https_request = http_request
 
 
-class AutoRefererHandler(urllib2.BaseHandler):
+class AutoRefererHandler(BaseHandler):
     def http_request(self, req):
         if req.get_host() != 'feeds.feedburner.com':
             req.add_unredirected_header('Referer', 'http://%s' % req.get_host())
@@ -174,7 +182,7 @@ class AutoRefererHandler(urllib2.BaseHandler):
     https_request = http_request
 
 
-class ContentNegociationHandler(urllib2.BaseHandler): #FIXME
+class ContentNegociationHandler(BaseHandler): #FIXME
     def __init__(self, accept=None, strict=False):
         self.accept = accept
         self.strict = strict
@@ -211,7 +219,7 @@ class ContentNegociationHandler(urllib2.BaseHandler): #FIXME
     https_request = http_request
 
 
-class MetaRedirectHandler(urllib2.BaseHandler):
+class MetaRedirectHandler(BaseHandler):
     def http_response(self, req, resp):
         if 200 <= resp.code < 300 and resp.info().maintype == 'text':
             if resp.info().type in MIMETYPE['html']:
@@ -221,7 +229,7 @@ class MetaRedirectHandler(urllib2.BaseHandler):
                     new_url = match.groups()[0]
                     new_headers = dict((k, v) for k, v in list(req.headers.items())
                                        if k.lower() not in ('content-length', 'content-type'))
-                    new = urllib2.Request(new_url,
+                    new = Request(new_url,
                                           headers=new_headers,
                                           origin_req_host=req.get_origin_req_host(),
                                           unverifiable=True)
@@ -230,7 +238,7 @@ class MetaRedirectHandler(urllib2.BaseHandler):
                 else:
                     fp = StringIO(data)
                     old_resp = resp
-                    resp = urllib2.addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+                    resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
                     resp.msg = old_resp.msg
 
         return resp
@@ -238,7 +246,7 @@ class MetaRedirectHandler(urllib2.BaseHandler):
     https_response = http_response
 
 
-class EtagHandler(urllib2.BaseHandler):
+class EtagHandler(BaseHandler):
     def __init__(self, cache="", etag=None, lastmodified=None):
         self.cache = cache
         self.etag = etag
@@ -258,7 +266,7 @@ class EtagHandler(urllib2.BaseHandler):
             headers.addheader('etag', self.etag)
         if self.lastmodified:
             headers.addheader('last-modified', self.lastmodified)
-        resp = urllib2.addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
+        resp = addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
         return resp
 
     https_request = http_request
