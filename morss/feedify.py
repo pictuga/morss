@@ -2,15 +2,21 @@
 
 import re
 import json
-import urlparse
-import urllib2
 
-from ConfigParser import ConfigParser
 from fnmatch import fnmatch
 import lxml.html
 
 from . import feeds
 from . import crawler
+
+try:
+    from ConfigParser import ConfigParser
+    from urlparse import urlparse, urljoin
+    from urllib2 import urlopen
+except ImportError:
+    from configparser import ConfigParser
+    from urllib.parse import urlparse, urljoin
+    from urllib.request import urlopen
 
 
 def to_class(query):
@@ -82,7 +88,7 @@ def format_string(string, getter, error=False):
 
 
 def pre_worker(url, cache):
-    if urlparse.urlparse(url).netloc == 'itunes.apple.com':
+    if urlparse(url).netloc == 'itunes.apple.com':
         match = re.search('/id([0-9]+)(\?.*)?$', url)
         if match:
             iid = match.groups()[0]
@@ -96,7 +102,7 @@ class Builder(object):
         self.cache = cache
 
         if data is None:
-            data = urllib2.urlopen(link).read()
+            data = urlopen(link).read()
         self.data = data
 
         self.rule = get_rule(link)
@@ -172,7 +178,7 @@ class Builder(object):
                         feed_item['title'] = self.string(item, 'item_title')
                     if 'item_link' in self.rule:
                         url = self.string(item, 'item_link')
-                        url = urlparse.urljoin(self.link, url)
+                        url = urljoin(self.link, url)
                         feed_item['link'] = url
                     if 'item_desc' in self.rule:
                         feed_item['desc'] = self.string(item, 'item_desc')
