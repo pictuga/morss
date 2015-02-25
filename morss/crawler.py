@@ -8,7 +8,7 @@ try:
     from urllib2 import URLError
     from urllib2 import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
     from httplib import HTTPException, HTTPConnection, HTTPS_PORT
-except:
+except ImportError:
     from io import StringIO
     from urllib.error import URLError
     from urllib.request import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
