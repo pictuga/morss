@@ -4,7 +4,6 @@ import os
 import os.path
 import time
 
-import Queue
 import threading
 
 from fnmatch import fnmatch
@@ -18,16 +17,26 @@ from . import feeds
 from . import feedify
 from . import crawler
 
-import httplib
-import urllib
-import urllib2
-import urlparse
-
 import wsgiref.simple_server
 import wsgiref.handlers
 
 from readability import readability
 from html2text import HTML2Text
+
+try:
+    from Queue import Queue
+    from httplib import HTTPConnection, HTTPException
+    from urllib2 import build_opener
+    from urllib2 import HTTPError
+    from urllib import quote_plus
+    from urlparse import urlparse, urljoin, parse_qs
+except ImportError:
+    from queue import Queue
+    from http.client import HTTPConnection, HTTPException
+    from urllib.request import build_opener
+    from urllib.error import HTTPError
+    from urllib.parse import quote_plus
+    from urllib.parse import urlparse, urljoin, parse_qs
 
 LIM_ITEM = 100  # deletes what's beyond
 LIM_TIME = 7  # deletes what's after
@@ -49,7 +58,7 @@ MIMETYPE = {
 PROTOCOL = ['http', 'https', 'ftp']
 
 if 'SCRIPT_NAME' in os.environ:
-    httplib.HTTPConnection.debuglevel = 1
+    HTTPConnection.debuglevel = 1
 
     import cgitb
 
@@ -145,7 +154,7 @@ class Cache:
             return
 
         maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4  # ".tmp"
-        self._hash = urllib.quote_plus(self._key)[:maxsize]
+        self._hash = quote_plus(self._key)[:maxsize]
 
         self._file = self._dir + '/' + self._hash
         self._file_tmp = self._file + '.tmp'
@@ -256,26 +265,26 @@ def Fix(item, feedurl='/'):
             log(item.link)
 
     # check relative urls
-    item.link = urlparse.urljoin(feedurl, item.link)
+    item.link = urljoin(feedurl, item.link)
 
     # google translate
     if fnmatch(item.link, 'http://translate.google.*/translate*u=*'):
-        item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['u'][0]
+        item.link = parse_qs(urlparse(item.link).query)['u'][0]
         log(item.link)
 
     # google
     if fnmatch(item.link, 'http://www.google.*/url?q=*'):
-        item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['q'][0]
+        item.link = parse_qs(urlparse(item.link).query)['q'][0]
         log(item.link)
 
     # google news
     if fnmatch(item.link, 'http://news.google.com/news/url*url=*'):
-        item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['url'][0]
+        item.link = parse_qs(urlparse(item.link).query)['url'][0]
         log(item.link)
 
     # facebook
     if fnmatch(item.link, 'https://www.facebook.com/l.php?u=*'):
-        item.link = urlparse.parse_qs(urlparse.urlparse(item.link).query)['u'][0]
+        item.link = parse_qs(urlparse(item.link).query)['u'][0]
         log(item.link)
 
     # feedburner
@@ -294,7 +303,7 @@ def Fix(item, feedurl='/'):
         log(item.link)
 
     # reddit
-    if urlparse.urlparse(feedurl).netloc == 'www.reddit.com':
+    if urlparse(feedurl).netloc == 'www.reddit.com':
         match = lxml.html.fromstring(item.desc).xpath('//a[text()="[link]"]/@href')
         if len(match):
             item.link = match[0]
@@ -331,7 +340,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
     link = item.link
 
     # twitter
-    if urlparse.urlparse(feedurl).netloc == 'twitter.com':
+    if urlparse(feedurl).netloc == 'twitter.com':
         match = lxml.html.fromstring(item.content).xpath('//a/@data-expanded-url')
         if len(match):
             link = match[0]
@@ -340,9 +349,9 @@ def Fill(item, cache, options, feedurl='/', fast=False):
             link = None
 
     # facebook
-    if urlparse.urlparse(feedurl).netloc == 'graph.facebook.com':
+    if urlparse(feedurl).netloc == 'graph.facebook.com':
         match = lxml.html.fromstring(item.content).xpath('//a/@href')
-        if len(match) and urlparse.urlparse(match[0]).netloc != 'www.facebook.com':
+        if len(match) and urlparse(match[0]).netloc != 'www.facebook.com':
             link = match[0]
             log(link)
         else:
@@ -375,9 +384,9 @@ def Fill(item, cache, options, feedurl='/', fast=False):
     # download
     try:
         url = link.encode('utf-8')
-        con = urllib2.build_opener(*accept_handler(('html', 'text/*'), True)).open(url, timeout=TIMEOUT)
+        con = build_opener(*accept_handler(('html', 'text/*'), True)).open(url, timeout=TIMEOUT)
         data = con.read()
-    except (IOError, httplib.HTTPException) as e:
+    except (IOError, HTTPException) as e:
         log('http error:  %s' % e.message)
         cache.set(link, 'error-http')
         return True
@@ -407,7 +416,7 @@ def Init(url, cache_path, options):
     if url is None:
         raise MorssException('No url provided')
 
-    if urlparse.urlparse(url).scheme not in PROTOCOL:
+    if urlparse(url).scheme not in PROTOCOL:
         url = 'http://' + url
         log(url)
 
@@ -437,13 +446,13 @@ def Fetch(url, cache, options):
     else:
         try:
             opener = etag_handler(('xml', 'html'), False, cache.get(url), cache.get('etag'), cache.get('lastmodified'))
-            con = urllib2.build_opener(*opener).open(url, timeout=TIMEOUT * 2)
+            con = build_opener(*opener).open(url, timeout=TIMEOUT * 2)
             xml = con.read()
-        except (urllib2.HTTPError) as e:
+        except (HTTPError) as e:
             raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
         except (crawler.InvalidCertificateException) as e:
             raise MorssException('Error downloading feed (Invalid SSL Certificate)')
-        except (IOError, httplib.HTTPException):
+        except (IOError, HTTPException):
             raise MorssException('Error downloading feed')
 
         cache.set('xml', xml)
@@ -481,7 +490,7 @@ def Fetch(url, cache, options):
         match = lxml.html.fromstring(xml).xpath(
             "//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
         if len(match):
-            link = urlparse.urljoin(url, match[0])
+            link = urljoin(url, match[0])
             log('rss redirect: %s' % link)
             return Fetch(link, cache.new(link), options)
         else:
@@ -539,7 +548,7 @@ def Gather(rss, url, cache, options):
             if not options.proxy:
                 Fill(item, cache, options, url)
 
-    queue = Queue.Queue()
+    queue = Queue()
 
     for i in xrange(threads):
         t = threading.Thread(target=runner, args=(queue,))
