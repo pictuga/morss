@@ -47,7 +47,7 @@ def tag_NS(tag, nsmap=NSMAP):
     match = re.search(r'^\{([^\}]+)\}(.*)$', tag)
     if match:
         match = match.groups()
-        for (key, url) in nsmap.iteritems():
+        for (key, url) in nsmap.items():
             if url == match[0]:
                 return "%s:%s" % (key, match[1].lower())
     else:

@@ -219,7 +219,7 @@ class MetaRedirectHandler(urllib2.BaseHandler):
                 match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
                 if match:
                     new_url = match.groups()[0]
-                    new_headers = dict((k, v) for k, v in req.headers.items()
+                    new_headers = dict((k, v) for k, v in list(req.headers.items())
                                        if k.lower() not in ('content-length', 'content-type'))
                     new = urllib2.Request(new_url,
                                           headers=new_headers,

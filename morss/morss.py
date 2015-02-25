@@ -185,7 +185,7 @@ class Cache:
         if not os.path.exists(self._dir):
             os.makedirs(self._dir)
 
-        for i in self._cache.keys():
+        for i in list(self._cache.keys()):
             if time.time() - self._cache[i]['last'] > self._lifespan > -1:
                 del self._cache[i]
 
@@ -685,7 +685,7 @@ def cgi_app(environ, start_response):
         options['last'] = int(environ['HTTP_IF_NONE_MATCH'][1:-1])
         if not options.force and time.time() - options.last < DELAY:
             headers['status'] = '304 Not Modified'
-            start_response(headers['status'], headers.items())
+            start_response(headers['status'], list(headers.items()))
             log(url)
             log('etag good')
             return []
@@ -719,7 +719,7 @@ def cgi_app(environ, start_response):
     if headers['content-type'] == 'text/xml':
         headers['content-type'] = rss.mimetype
 
-    start_response(headers['status'], headers.items())
+    start_response(headers['status'], list(headers.items()))
 
     rss = Before(rss, options)
     rss = Gather(rss, url, cache, options)
@@ -752,11 +752,11 @@ def cgi_wrapper(environ, start_response):
         if os.path.isfile(url):
             headers['status'] = '200 OK'
             headers['content-type'] = files[url]
-            start_response(headers['status'], headers.items())
+            start_response(headers['status'], list(headers.items()))
             return open(url, 'rb').read()
         else:
             headers['status'] = '404 Not found'
-            start_response(headers['status'], headers.items())
+            start_response(headers['status'], list(headers.items()))
             return ''
 
     # actual morss use
@@ -766,7 +766,7 @@ def cgi_wrapper(environ, start_response):
         raise
     except Exception as e:
         headers = {'status': '500 Oops', 'content-type': 'text/plain'}
-        start_response(headers['status'], headers.items(), sys.exc_info())
+        start_response(headers['status'], list(headers.items()), sys.exc_info())
         log('ERROR <%s>: %s' % (url, e.message), force=True)
         return 'An error happened:\n%s' % e.message
 
