@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 from datetime import datetime
-from StringIO import StringIO
 
 import re
 import json
 import csv
-import urllib2
 
 from lxml import etree
 from dateutil import tz
@@ -23,8 +21,13 @@ json.encoder.c_make_encoder = None
 
 try:
     from collections import OrderedDict
+    from StringIO import StringIO
+    from urllib2 import urlopen
 except ImportError:
     from ordereddict import OrderedDict
+    from io import StringIO
+    from urllib.request import urlopen
+
 
 Element = etree.Element
 
@@ -39,7 +42,7 @@ NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
 
 
 def load(url):
-    d = urllib2.urlopen(url).read()
+    d = urlopen(url).read()
     return parse(d)
 
 
