@@ -181,8 +181,8 @@ class UAHandler(BaseHandler):
 
 class AutoRefererHandler(BaseHandler):
     def http_request(self, req):
-        if req.get_host() != 'feeds.feedburner.com':
-            req.add_unredirected_header('Referer', 'http://%s' % req.get_host())
+        if req.host != 'feeds.feedburner.com':
+            req.add_unredirected_header('Referer', 'http://%s' % req.host)
         return req
 
     https_request = http_request
