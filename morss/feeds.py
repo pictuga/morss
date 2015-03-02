@@ -21,10 +21,15 @@ json.encoder.c_make_encoder = None
 
 try:
     from collections import OrderedDict
+except ImportError:
+    # python < 2.7
+    from ordereddict import OrderedDict
+
+try:
     from StringIO import StringIO
     from urllib2 import urlopen
 except ImportError:
-    from ordereddict import OrderedDict
+    # python > 3
     from io import StringIO
     from urllib.request import urlopen
 
