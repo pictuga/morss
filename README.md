@@ -14,7 +14,7 @@ You can use this program online for free at **[morss.it](http://morss.it/)** (th
 You do need:
 - [python](http://www.python.org/) >= 2.6 < 3
 - [lxml](http://lxml.de/) for xml parsing
-- [this](https://github.com/buriy/python-readability) readability fork
+- [this](https://github.com/bookieio/breadability) readability fork
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
 - [html2text](http://www.aaronsw.com/2002/html2text/)
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python < 2.7

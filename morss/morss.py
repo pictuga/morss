@@ -20,7 +20,7 @@ from . import crawler
 import wsgiref.simple_server
 import wsgiref.handlers
 
-from readability import readability
+import breadability.readable
 from html2text import HTML2Text
 
 try:
@@ -397,7 +397,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         cache.set(link, 'error-type')
         return True
 
-    out = readability.Document(data, url=con.url).summary(True)
+    out = breadability.readable.Article(data, url=con.url).readable
 
     if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
