@@ -148,7 +148,8 @@ def detect_encoding(data, con=None):
 
 class EncodingFixHandler(BaseHandler):
     def http_response(self, req, resp):
-        if 200 <= resp.code < 300 and resp.info().maintype == 'text':
+        maintype = resp.info()['Content-Type'].split('/')[0]
+        if 200 <= resp.code < 300 and maintype == 'text':
             data = resp.read()
             enc = detect_encoding(data, resp)
 
@@ -226,8 +227,9 @@ class ContentNegociationHandler(BaseHandler): #FIXME
 
 class MetaRedirectHandler(BaseHandler):
     def http_response(self, req, resp):
-        if 200 <= resp.code < 300 and resp.info().maintype == 'text':
-            if resp.info().type in MIMETYPE['html']:
+        contenttype = resp.info()['Content-Type'].split(';')[0]
+        if 200 <= resp.code < 300 and contenttype.startswith('text/'):
+            if contenttype in MIMETYPE['html']:
                 data = resp.read()
                 match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
                 if match:

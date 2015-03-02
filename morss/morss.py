@@ -391,7 +391,8 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         cache.set(link, 'error-http')
         return True
 
-    if con.info().type not in MIMETYPE['html'] and con.info().type != 'text/plain':
+    contenttype = con.info()['Content-Type'].split(';')[0]
+    if contenttype not in MIMETYPE['html'] and contenttype != 'text/plain':
         log('non-text page')
         cache.set(link, 'error-type')
         return True
@@ -459,17 +460,19 @@ def Fetch(url, cache, options):
         cache.set('etag', con.headers.getheader('etag'))
         cache.set('lastmodified', con.headers.getheader('last-modified'))
 
+        contenttype = con.info()['Content-Type'].split(';')[0]
+
         if url.startswith('https://itunes.apple.com/lookup?id='):
             style = 'itunes'
-        elif xml.startswith('<?xml') or con.info().type in MIMETYPE['xml']:
+        elif xml.startswith('<?xml') or contenttype in MIMETYPE['xml']:
             style = 'normal'
         elif feedify.supported(url):
             style = 'feedify'
-        elif con.info().type in MIMETYPE['html']:
+        elif contenttype in MIMETYPE['html']:
             style = 'html'
         else:
             style = 'none'
-            log(con.info().type)
+            log(contenttype)
 
         cache.set('style', style)
 
