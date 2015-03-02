@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+
 from datetime import datetime
 
 import re
@@ -383,8 +385,10 @@ class FeedParser(FeedBase):
         out = StringIO()
         c = csv.writer(out, dialect=csv.excel)
         for item in self.items:
-            row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item] # str
-                   #isinstance(x[1], basestring)] # bytes or str
+            if sys.version > '3':
+                row = [x[1] for x in item]
+            else:
+                row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item]
             c.writerow(row)
         out.seek(0)
         return out.read()
