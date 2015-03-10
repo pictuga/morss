@@ -2,14 +2,13 @@ import ssl
 import socket
 
 from gzip import GzipFile
+from io import BytesIO
 
 try:
-    from StringIO import StringIO
     from urllib2 import URLError
     from urllib2 import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
     from httplib import HTTPException, HTTPConnection, HTTPS_PORT
 except ImportError:
-    from io import StringIO
     from urllib.error import URLError
     from urllib.request import HTTPSHandler, BaseHandler, AbstractHTTPHandler, Request, addinfourl
     from http.client import HTTPException, HTTPConnection, HTTPS_PORT
@@ -118,9 +117,9 @@ class GZIPHandler(BaseHandler):
         if 200 <= resp.code < 300:
             if resp.headers.get('Content-Encoding') == 'gzip':
                 data = resp.read()
-                data = GzipFile(fileobj=StringIO(data), mode='r').read()
+                data = GzipFile(fileobj=BytesIO(data), mode='r').read()
 
-                fp = StringIO(data)
+                fp = BytesIO(data)
                 old_resp = resp
                 resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
                 resp.msg = old_resp.msg
@@ -135,13 +134,13 @@ def detect_encoding(data, con=None):
     if con is not None and con.info().get('charset'):
         return con.info().get('charset')
 
-    match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data[:1000])
+    match = re.search(b'charset=["\']?([0-9a-zA-Z-]+)', data[:1000])
     if match:
-        return match.groups()[0]
+        return match.groups()[0].lower().decode()
 
-    match = re.search('encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
+    match = re.search(b'encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
     if match:
-        return match.groups()[0].lower()
+        return match.groups()[0].lower().decode()
 
     return None
 
@@ -157,7 +156,7 @@ class EncodingFixHandler(BaseHandler):
                 data = data.decode(enc, 'replace')
                 data = data.encode(enc)
 
-            fp = StringIO(data)
+            fp = BytesIO(data)
             old_resp = resp
             resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
             resp.msg = old_resp.msg
@@ -231,7 +230,7 @@ class MetaRedirectHandler(BaseHandler):
         if 200 <= resp.code < 300 and contenttype.startswith('text/'):
             if contenttype in MIMETYPE['html']:
                 data = resp.read()
-                match = re.search(r'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
+                match = re.search(b'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
                 if match:
                     new_url = match.groups()[0]
                     new_headers = dict((k, v) for k, v in list(req.headers.items())
@@ -243,7 +242,7 @@ class MetaRedirectHandler(BaseHandler):
 
                     return self.parent.open(new, timeout=req.timeout)
                 else:
-                    fp = StringIO(data)
+                    fp = BytesIO(data)
                     old_resp = resp
                     resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
                     resp.msg = old_resp.msg
@@ -273,7 +272,7 @@ class EtagHandler(BaseHandler):
             headers.addheader('etag', self.etag)
         if self.lastmodified:
             headers.addheader('last-modified', self.lastmodified)
-        resp = addinfourl(StringIO(self.cache), headers, req.get_full_url(), 200)
+        resp = addinfourl(BytesIO(self.cache), headers, req.get_full_url(), 200)
         return resp
 
     https_request = http_request

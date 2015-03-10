@@ -182,6 +182,9 @@ class Cache:
             return None
 
     def set(self, key, content):
+        if sys.version > '3' and isinstance(content, bytes):
+            content = content.decode('utf-8')
+
         self._cache[key] = {'last': time.time(), 'value': content}
 
     __getitem__ = get
@@ -383,8 +386,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
 
     # download
     try:
-        url = link.encode('utf-8')
-        con = build_opener(*accept_handler(('html', 'text/*'), True)).open(url, timeout=TIMEOUT)
+        con = build_opener(*accept_handler(('html', 'text/*'), True)).open(link, timeout=TIMEOUT)
         data = con.read()
     except (IOError, HTTPException) as e:
         log('http error:  %s' % e.message)
@@ -422,6 +424,9 @@ def Init(url, cache_path, options):
         log(url)
 
     url = url.replace(' ', '%20')
+
+    if isinstance(url, bytes):
+        url = url.decode()
 
     # cache
     cache = Cache(cache_path, url)
@@ -464,7 +469,7 @@ def Fetch(url, cache, options):
 
         if url.startswith('https://itunes.apple.com/lookup?id='):
             style = 'itunes'
-        elif xml.startswith('<?xml') or contenttype in MIMETYPE['xml']:
+        elif xml.startswith(b'<?xml') or contenttype in MIMETYPE['xml']:
             style = 'normal'
         elif feedify.supported(url):
             style = 'feedify'

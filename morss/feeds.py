@@ -88,9 +88,9 @@ class FeedException(Exception):
 
 def parse(data):
     # encoding
-    match = re.search('encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
+    match = re.search(b'encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
     if match:
-        enc = match.groups()[0].lower()
+        enc = match.groups()[0].lower().decode()
         if isinstance(data, bytes):
             data = data.decode(enc, 'ignore')
         data = data.encode(enc)
