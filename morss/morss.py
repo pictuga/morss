@@ -391,7 +391,7 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         cache.set(link, 'error-http')
         return True
 
-    contenttype = con.info()['Content-Type'].split(';')[0]
+    contenttype = con.info().get('Content-Type', '').split(';')[0]
     if contenttype not in MIMETYPE['html'] and contenttype != 'text/plain':
         log('non-text page')
         cache.set(link, 'error-type')
@@ -457,10 +457,10 @@ def Fetch(url, cache, options):
             raise MorssException('Error downloading feed')
 
         cache.set('xml', xml)
-        cache.set('etag', con.headers.getheader('etag'))
-        cache.set('lastmodified', con.headers.getheader('last-modified'))
+        cache.set('etag', con.info().get('etag'))
+        cache.set('lastmodified', con.info().get('last-modified'))
 
-        contenttype = con.info()['Content-Type'].split(';')[0]
+        contenttype = con.info().get('Content-Type', '').split(';')[0]
 
         if url.startswith('https://itunes.apple.com/lookup?id='):
             style = 'itunes'

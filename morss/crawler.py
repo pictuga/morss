@@ -132,8 +132,8 @@ class GZIPHandler(BaseHandler):
 
 
 def detect_encoding(data, con=None):
-    if con is not None and con.headers.getparam('charset'):
-        return con.headers.getparam('charset')
+    if con is not None and con.info().get('charset'):
+        return con.info().get('charset')
 
     match = re.search('charset=["\']?([0-9a-zA-Z-]+)', data[:1000])
     if match:
@@ -148,7 +148,7 @@ def detect_encoding(data, con=None):
 
 class EncodingFixHandler(BaseHandler):
     def http_response(self, req, resp):
-        maintype = resp.info()['Content-Type'].split('/')[0]
+        maintype = resp.info().get('Content-Type', '').split('/')[0]
         if 200 <= resp.code < 300 and maintype == 'text':
             data = resp.read()
             enc = detect_encoding(data, resp)
@@ -227,7 +227,7 @@ class ContentNegociationHandler(BaseHandler): #FIXME
 
 class MetaRedirectHandler(BaseHandler):
     def http_response(self, req, resp):
-        contenttype = resp.info()['Content-Type'].split(';')[0]
+        contenttype = resp.info().get('Content-Type', '').split(';')[0]
         if 200 <= resp.code < 300 and contenttype.startswith('text/'):
             if contenttype in MIMETYPE['html']:
                 data = resp.read()
