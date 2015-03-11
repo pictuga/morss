@@ -75,7 +75,7 @@ To achieve this, you will have to move the files of `/morss/` and of `/www/` int
 
 For this, you need to make sure your host allows python script execution. This method uses HTTP calls to fetch the RSS feeds, which will be handled through `mod_cgi` for example on Apache severs.
 
-Please pay attention to `/www/morss.py` permissions for it to be executable. Also ensure that the provided `/www/.htaccess` works well with your server.
+Please pay attention to `/www/main.py` permissions for it to be executable. Also ensure that the provided `/www/.htaccess` works well with your server.
 
 ####Using morss' internal HTTP server
 
@@ -93,16 +93,16 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 ###As a CLI application
 
-Run: **`[python2.7] -m morss.morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
-For example: `python2.7 morss.py debug http://feeds.bbci.co.uk/news/rss.xml`  
+Run: **`python[2.7] -m morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+For example: `python -m morss debug http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
 ###As a newsreader hook
 
 To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required (unless other newsreaders provide the same kind of feature), since custom scripts can be run on top of the RSS feed, using its [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
-To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/morss.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
-For example: `python2.7 PATH/TO/MORSS/morss.py http://feeds.bbci.co.uk/news/rss.xml`  
+To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/main.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
+For example: `python2.7 PATH/TO/MORSS/main.py http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
 ###As a python library
