@@ -12,6 +12,8 @@ from lxml import etree
 from dateutil import tz
 import dateutil.parser
 
+from . import crawler
+
 try:
     from wheezy.template.engine import Engine
     from wheezy.template.loader import DictLoader
@@ -88,12 +90,9 @@ class FeedException(Exception):
 
 def parse(data):
     # encoding
-    match = re.search(b'encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
-    if match:
-        enc = match.groups()[0].lower().decode()
-        if isinstance(data, bytes):
-            data = data.decode(enc, 'ignore')
-        data = data.encode(enc)
+    if isinstance(data, bytes):
+        enc = crawler.detect_encoding(data)
+        data = data.decode(enc, 'replace')
 
     # parse
     parser = etree.XMLParser(recover=True)
