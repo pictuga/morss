@@ -142,7 +142,7 @@ def detect_encoding(data, con=None):
     if match:
         return match.groups()[0].lower().decode()
 
-    return None
+    return 'utf-8'
 
 
 class EncodingFixHandler(BaseHandler):
