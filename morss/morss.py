@@ -47,6 +47,7 @@ TIMEOUT = 4  # http timeout (in sec)
 THREADS = 10  # number of threads (1 for single-threaded)
 
 DEBUG = False
+PORT = 8080
 
 CA_CERT = 'cacert.pem' # ca cert file
 DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
@@ -813,7 +814,8 @@ def main():
         wsgiref.handlers.CGIHandler().run(cgi_wrapper)
 
     elif len(sys.argv) <= 1:
-        httpd = wsgiref.simple_server.make_server('', 8080, cgi_wrapper)
+        print('Serving http://localhost:%s/'%PORT)
+        httpd = wsgiref.simple_server.make_server('', PORT, cgi_wrapper)
         httpd.serve_forever()
 
     else:
