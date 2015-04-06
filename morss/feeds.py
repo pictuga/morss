@@ -334,7 +334,7 @@ class FeedListDescriptor(object):
 class FeedParser(FeedBase):
     itemsClass = 'FeedItem'
     mimetype = 'application/xml'
-    base = '<?xml?>'
+    base = b'<?xml?>'
     dic = ('title', 'desc', 'items')
 
     def __init__(self, xml=None, tag='atom:feed'):
@@ -404,8 +404,8 @@ class FeedParserRSS(FeedParser):
     itemsClass = 'FeedItemRSS'
     mimetype = 'application/rss+xml'
     base = {
-        'rdf:rdf': '<?xml version="1.0" encoding="utf-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/"><channel rdf:about="http://example.org/rss.rdf"></channel></rdf:RDF>',
-        'channel': '<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel></channel></rss>'}
+        'rdf:rdf': b'<?xml version="1.0" encoding="utf-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/"><channel rdf:about="http://example.org/rss.rdf"></channel></rdf:RDF>',
+        'channel': b'<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel></channel></rss>'}
 
     def get_title(self):
         return self.xval('rssfake:title|title')
@@ -441,8 +441,8 @@ class FeedParserAtom(FeedParser):
     """
     itemsClass = 'FeedItemAtom'
     mimetype = 'application/atom+xml'
-    base = {'atom:feed': '<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>',
-            'atom03:feed': '<?xml version="1.0" encoding="utf-8"?><feed version="0.3" xmlns="http://purl.org/atom/ns#"></feed>'}
+    base = {'atom:feed': b'<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom"></feed>',
+            'atom03:feed': b'<?xml version="1.0" encoding="utf-8"?><feed version="0.3" xmlns="http://purl.org/atom/ns#"></feed>'}
 
     def get_title(self):
         return self.xval('atom:title|atom03:title')
