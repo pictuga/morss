@@ -191,8 +191,9 @@ class Builder(object):
                         feed_item['title'] = self.string(item, 'item_title')
                     if 'item_link' in self.rule:
                         url = self.string(item, 'item_link')
-                        url = urljoin(self.link, url)
-                        feed_item['link'] = url
+                        if url:
+                            url = urljoin(self.link, url)
+                            feed_item['link'] = url
                     if 'item_desc' in self.rule:
                         feed_item['desc'] = self.string(item, 'item_desc')
                     if 'item_content' in self.rule:
