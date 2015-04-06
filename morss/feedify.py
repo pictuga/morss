@@ -94,20 +94,20 @@ def format_string(string, getter, error=False):
         return out
 
 
-def pre_worker(url, cache):
+def pre_worker(url):
     if urlparse(url).netloc == 'itunes.apple.com':
         match = re.search('/id([0-9]+)(\?.*)?$', url)
         if match:
             iid = match.groups()[0]
             redirect = 'https://itunes.apple.com/lookup?id={id}'.format(id=iid)
-            cache.set('redirect', redirect)
+            return redirect
+
+    return None
 
 
 class Builder(object):
-    def __init__(self, link, data=None, cache=False):
+    def __init__(self, link, data=None):
         self.link = link
-        self.cache = cache
-
         self.data = data
 
         if self.data is None:

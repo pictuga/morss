@@ -140,112 +140,16 @@ def parseOptions(options):
     return out
 
 
-class Cache:
-    """ Light, error-prone caching system. """
-
-    def __init__(self, folder=None, key='cache', lifespan=10 * 24 * 3600):
-        self._key = key
-        self._dir = folder
-        self._lifespan = lifespan
-
-        self._cache = {}
-
-        if self._dir is None:
-            self._hash = "NO CACHE"
-            return
-
-        maxsize = os.statvfs('./').f_namemax - len(self._dir) - 1 - 4  # ".tmp"
-        self._hash = quote_plus(self._key)[:maxsize]
-
-        self._file = self._dir + '/' + self._hash
-        self._file_tmp = self._file + '.tmp'
-
-        try:
-            data = open(self._file).read()
-            if data:
-                self._cache = json.loads(data)
-        except IOError:
-            pass
-        except ValueError:
-            log('JSON cache parse fail')
-
-    def __del__(self):
-        self.save()
-
-    def __contains__(self, key):
-        return key in self._cache
-
-    def get(self, key):
-        if key in self._cache:
-            self._cache[key]['last'] = time.time()
-            return self._cache[key]['value']
-        else:
-            return None
-
-    def set(self, key, content):
-        if sys.version > '3' and isinstance(content, bytes):
-            content = content.decode('utf-8')
-
-        self._cache[key] = {'last': time.time(), 'value': content}
-
-    __getitem__ = get
-    __setitem__ = set
-
-    def save(self):
-        if len(self._cache) == 0 or self._dir is None:
-            return
-
-        if not os.path.exists(self._dir):
-            os.makedirs(self._dir)
-
-        for i in list(self._cache.keys()):
-            if time.time() - self._cache[i]['last'] > self._lifespan > -1:
-                del self._cache[i]
-
-        out = json.dumps(self._cache, indent=4)
-
-        try:
-            open(self._file_tmp, 'w+').write(out)
-            os.rename(self._file_tmp, self._file)
-        except IOError:
-            log('failed to write cache to tmp file')
-        except OSError:
-            log('failed to move cache to file')
-
-    def last(self, key):
-        if key not in self._cache:
-            return -1
-
-        return self._cache[key]['last']
-
-    def age(self, key):
-        if key not in self._cache:
-            return -1
-
-        return time.time() - self.last(key)
-
-    def new(self, *arg, **karg):
-        """ Returns a Cache object in the same directory """
-        if arg[0] != self._key:
-            return Cache(self._dir, *arg, **karg)
-        else:
-            return self
-
-
 default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
                     crawler.AutoRefererHandler(), crawler.HTTPEquivHandler(),
                     crawler.HTTPRefreshHandler(), crawler.EncodingFixHandler()]
 
-def accept_handler(*kargs):
+def custom_handler(accept, delay=DELAY):
     handlers = default_handlers[:]
-    handlers.append(crawler.ContentNegociationHandler(*kargs))
-    return handlers
+    handlers.append(crawler.ContentNegociationHandler(accept))
+    handlers.append(crawler.SQliteCacheHandler(delay))
 
-def etag_handler(accept, strict, cache, etag, lastmodified):
-    handlers = default_handlers[:]
-    handlers.append(crawler.ContentNegociationHandler(accept, strict))
-    handlers.append(crawler.EtagHandler(cache, etag, lastmodified))
-    return handlers
+    return build_opener(*handlers)
 
 
 def Fix(item, feedurl='/'):
@@ -315,7 +219,7 @@ def Fix(item, feedurl='/'):
     return item
 
 
-def Fill(item, cache, options, feedurl='/', fast=False):
+def Fill(item, options, feedurl='/', fast=False):
     """ Returns True when it has done its best """
 
     if not item.link:
@@ -364,58 +268,44 @@ def Fill(item, cache, options, feedurl='/', fast=False):
         log('no used link')
         return True
 
-    # check cache and previous errors
-    if link in cache:
-        content = cache.get(link)
-        match = re.search(r'^error-([a-z]{2,10})$', content)
-        if match:
-            if cache.age(link) < DELAY and not options.theforce:
-                log('cached error: %s' % match.groups()[0])
-                return True
-            else:
-                log('ignored old error: %s' % match.groups()[0])
-        else:
-            log('cached')
-            item.push_content(cache.get(link))
-            return True
+    # download
+    delay = -1
 
-    # super-fast mode
     if fast:
+        # super-fast mode
+        delay = -3
+
+    try:
+        con = custom_handler(('html', 'text/*'), delay).open(link, timeout=TIMEOUT)
+        data = con.read()
+
+    except crawler.NotInCache:
         log('skipped')
         return False
 
-    # download
-    try:
-        con = build_opener(*accept_handler(('html', 'text/*'), True)).open(link, timeout=TIMEOUT)
-        data = con.read()
     except (IOError, HTTPException) as e:
-        log('http error:  %s' % e.message)
-        cache.set(link, 'error-http')
+        log('http error')
         return True
 
     contenttype = con.info().get('Content-Type', '').split(';')[0]
     if contenttype not in MIMETYPE['html'] and contenttype != 'text/plain':
         log('non-text page')
-        cache.set(link, 'error-type')
         return True
 
     out = breadability.readable.Article(data, url=con.url).readable
 
     if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
-        cache.set(link, out)
+
     else:
         log('link not bigger enough')
-        cache.set(link, 'error-length')
         return True
 
     return True
 
 
-def Init(url, cache_path, options):
-    # url clean up
-    log(url)
-
+def Fetch(url, options):
+    # basic url clean-up
     if url is None:
         raise MorssException('No url provided')
 
@@ -428,91 +318,66 @@ def Init(url, cache_path, options):
     if isinstance(url, bytes):
         url = url.decode()
 
-    # cache
-    cache = Cache(cache_path, url)
-    log(cache._hash)
-
-    return (url, cache)
-
-
-def Fetch(url, cache, options):
     # do some useful facebook work
-    feedify.pre_worker(url, cache)
-
-    if 'redirect' in cache:
-        url = cache.get('redirect')
+    pre = feedify.pre_worker(url)
+    if pre:
+        url = pre
         log('url redirect')
         log(url)
 
     # fetch feed
-    if not options.theforce and 'xml' in cache and cache.age('xml') < DELAY and 'style' in cache:
-        log('xml cached')
-        xml = cache.get('xml')
-        style = cache.get('style')
-    else:
-        try:
-            opener = etag_handler(('xml', 'html'), False, cache.get(url), cache.get('etag'), cache.get('lastmodified'))
-            con = build_opener(*opener).open(url, timeout=TIMEOUT * 2)
-            xml = con.read()
-        except (HTTPError) as e:
-            raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
-        except (crawler.InvalidCertificateException) as e:
-            raise MorssException('Error downloading feed (Invalid SSL Certificate)')
-        except (IOError, HTTPException):
-            raise MorssException('Error downloading feed')
+    delay = DELAY
 
-        cache.set('xml', xml)
-        cache.set('etag', con.info().get('etag'))
-        cache.set('lastmodified', con.info().get('last-modified'))
+    if options.theforce:
+        delay = 0
 
-        contenttype = con.info().get('Content-Type', '').split(';')[0]
+    try:
+        con = custom_handler(('xml', 'html'), delay).open(url, timeout=TIMEOUT * 2)
+        xml = con.read()
 
-        if url.startswith('https://itunes.apple.com/lookup?id='):
-            style = 'itunes'
-        elif xml.startswith(b'<?xml') or contenttype in MIMETYPE['xml']:
-            style = 'normal'
-        elif feedify.supported(url):
-            style = 'feedify'
-        elif contenttype in MIMETYPE['html']:
-            style = 'html'
-        else:
-            style = 'none'
-            log(contenttype)
+    except (HTTPError) as e:
+        raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
 
-        cache.set('style', style)
+    except (crawler.InvalidCertificateException) as e:
+        raise MorssException('Error downloading feed (Invalid SSL Certificate)')
 
-    # decide what to do
-    log(style)
+    except (IOError, HTTPException):
+        raise MorssException('Error downloading feed')
 
-    if style == 'itunes':
-        link = json.loads(xml)['results'][0]['feedUrl']
+    contenttype = con.info().get('Content-Type', '').split(';')[0]
+
+    if url.startswith('https://itunes.apple.com/lookup?id='):
+        link = json.loads(xml.decode('utf-8', 'replace'))['results'][0]['feedUrl']
         log('itunes redirect: %s' % link)
-        return Fetch(link, cache.new(link), options)
-    elif style == 'normal':
+        return Fetch(link, options)
+
+    elif xml.startswith(b'<?xml') or contenttype in MIMETYPE['xml']:
         rss = feeds.parse(xml)
-    elif style == 'feedify':
-        feed = feedify.Builder(url, xml, cache)
+
+    elif feedify.supported(url):
+        feed = feedify.Builder(url, xml)
         feed.build()
         rss = feed.feed
-    elif style == 'html':
+
+    elif contenttype in MIMETYPE['html']:
         match = lxml.html.fromstring(xml).xpath(
             "//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
         if len(match):
             link = urljoin(url, match[0])
             log('rss redirect: %s' % link)
-            return Fetch(link, cache.new(link), options)
+            return Fetch(link, options)
         else:
             log('no-link html')
             raise MorssException('Link provided is an HTML page, which doesn\'t link to a feed')
     else:
         log('random page')
+        log(contenttype)
         raise MorssException('Link provided is not a valid feed')
 
-    cache.save()
     return rss
 
 
-def Gather(rss, url, cache, options):
+def Gather(rss, url, options):
     size = len(rss.items)
     start_time = time.time()
 
@@ -549,12 +414,12 @@ def Gather(rss, url, cache, options):
 
         if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
             if not options.proxy:
-                if Fill(item, cache, options, url, True) is False:
+                if Fill(item, options, url, True) is False:
                     item.remove()
                     return
         else:
             if not options.proxy:
-                Fill(item, cache, options, url)
+                Fill(item, options, url)
 
     queue = Queue()
 
@@ -567,7 +432,6 @@ def Gather(rss, url, cache, options):
         queue.put([i, item])
 
     queue.join()
-    cache.save()
 
     if options.ad:
         new = rss.items.append()
@@ -663,10 +527,10 @@ def process(url, cache=None, options=None):
         options = []
 
     options = Options(options)
-    url, cache = Init(url, cache, options)
-    rss = Fetch(url, cache, options)
+    if cache: crawler.sqlite_default = cache
+    rss = Fetch(url, options)
     rss = Before(rss, options)
-    rss = Gather(rss, url, cache, options)
+    rss = Gather(rss, url, options)
     rss = After(rss, options)
 
     return Format(rss, options)
@@ -728,10 +592,10 @@ def cgi_app(environ, start_response):
     else:
         headers['content-type'] = 'text/xml'
 
-    url, cache = Init(url, os.getcwd() + '/cache', options)
+    crawler.sqlite_default = os.getcwd() + '/morss-cache.db'
 
     # get the work done
-    rss = Fetch(url, cache, options)
+    rss = Fetch(url, options)
 
     if headers['content-type'] == 'text/xml':
         headers['content-type'] = rss.mimetype
@@ -739,7 +603,7 @@ def cgi_app(environ, start_response):
     start_response(headers['status'], list(headers.items()))
 
     rss = Before(rss, options)
-    rss = Gather(rss, url, cache, options)
+    rss = Gather(rss, url, options)
     rss = After(rss, options)
     out = Format(rss, options)
 
@@ -795,10 +659,11 @@ def cli_app():
     global DEBUG
     DEBUG = options.debug
 
-    url, cache = Init(url, os.path.expanduser('~/.cache/morss'), options)
-    rss = Fetch(url, cache, options)
+    crawler.sqlite_default = os.path.expanduser('~/.cache/morss-cache.db')
+
+    rss = Fetch(url, options)
     rss = Before(rss, options)
-    rss = Gather(rss, url, cache, options)
+    rss = Gather(rss, url, options)
     rss = After(rss, options)
     out = Format(rss, options)
 

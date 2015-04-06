@@ -1,20 +1,26 @@
+import sys
+
 import ssl
 import socket
 
 from gzip import GzipFile
-from io import BytesIO
+from io import BytesIO, StringIO
+import re
+import sqlite3
+import time
 
 try:
     from urllib2 import BaseHandler, addinfourl, parse_keqv_list, parse_http_list
+    import mimetools
 except ImportError:
     from urllib.request import BaseHandler, addinfourl, parse_keqv_list, parse_http_list
-
-import re
+    import email
 
 try:
     basestring
 except NameError:
-    basestring = str
+    basestring = unicode = str
+    buffer = memoryview
 
 
 MIMETYPE = {
@@ -186,27 +192,195 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
-class EtagHandler(BaseHandler):
-    def __init__(self, cache="", etag=None, lastmodified=None):
-        self.cache = cache
-        self.etag = etag
-        self.lastmodified = lastmodified
+class NotInCache(IOError):
+    pass
+
+
+class BaseCacheHandler(BaseHandler):
+    " Cache based on etags/last-modified. Inherit from this to implement actual storage "
+
+    private_cache = False # False to behave like a CDN (or if you just don't care), True like a PC
+    handler_order = 499
+
+    def __init__(self, force_min=None):
+        self.force_min = force_min # force_min (seconds) to bypass http headers, -1 forever, 0 never, -2 do nothing if not in cache, -3 is like -2 but raises an error
+
+    def _load(self, url):
+        out = list(self.load(url))
+
+        if sys.version > '3':
+            out[2] = email.message_from_string(out[2] or unicode()) # headers
+        else:
+            out[2] = mimetools.Message(StringIO(out[2] or unicode()))
+
+        out[3] = out[3] or bytes() # data
+        out[4] = out[4] or 0 # timestamp
+
+        return out
+
+    def load(self, url):
+        " Return the basic vars (code, msg, headers, data, timestamp) "
+        return (None, None, None, None, None)
+
+    def _save(self, url, code, msg, headers, data, timestamp):
+        headers = unicode(headers)
+        self.save(url, code, msg, headers, data, timestamp)
+
+    def save(self, url, code, msg, headers, data, timestamp):
+        " Save values to disk "
+        pass
 
     def http_request(self, req):
-        if self.cache:
-            if self.etag:
-                req.add_unredirected_header('If-None-Match', self.etag)
-            if self.lastmodified:
-                req.add_unredirected_header('If-Modified-Since', self.lastmodified)
+        (code, msg, headers, data, timestamp) = self._load(req.get_full_url())
+
+        if 'etag' in headers:
+            req.add_unredirected_header('If-None-Match', headers['etag'])
+
+        if 'last-modified' in headers:
+            req.add_unredirected_header('If-Modified-Since', headers.get('last-modified'))
 
         return req
 
+    def http_open(self, req):
+        (code, msg, headers, data, timestamp) = self._load(req.get_full_url())
+
+        # some info needed to process everything
+        cache_control = parse_http_list(headers.get('cache-control', ()))
+        cache_control += parse_http_list(headers.get('pragma', ()))
+
+        cc_list = [x for x in cache_control if '=' not in x]
+        cc_values = parse_keqv_list([x for x in cache_control if '=' in x])
+
+        cache_age = time.time() - timestamp
+
+        # list in a simple way what to do when
+        if self.force_min in (-2, -3):
+            if code is not None:
+                # already in cache, perfect, use cache
+                pass
+
+            else:
+                # ok then...
+                if self.force_min == -2:
+                    headers['morss'] = 'from_cache'
+                    resp = addinfourl(BytesIO(), headers, req.get_full_url(), 409)
+                    resp.msg = 'Conflict'
+                    return resp
+
+                elif self.force_min == -3:
+                    raise NotInCache()
+
+        elif code is None:
+            # cache empty, refresh
+            return None
+
+        elif self.force_min == -1:
+            # force use cache
+            pass
+
+        elif self.force_min == 0:
+            # force refresh
+            return None
+
+        elif  self.force_min is None and ('no-cache' in cc_list
+                                        or 'no-store' in cc_list
+                                        or ('private' in cc_list and not self.private)):
+            # kindly follow web servers indications, refresh
+            return None
+
+        elif 'max-age' in cc_values and int(cc_values['max-age']) > cache_age:
+            # server says it's still fine (and we trust him, if not, use force_min=0), use cache
+            pass
+
+        elif self.force_min is not None and self.force_min > cache_age:
+            # still recent enough for us, use cache
+            pass
+
+        else:
+            # according to the www, we have to refresh when nothing is said
+            return None
+
+        # return the cache as a response
+        headers['morss'] = 'from_cache' # TODO delete the morss header from incoming pages, to avoid websites messing up with us
+        resp = addinfourl(BytesIO(data), headers, req.get_full_url(), code)
+        resp.msg = msg
+
+        return resp
+
+    def http_response(self, req, resp):
+        # code for after-fetch, to know whether to save to hard-drive (if stiking to http headers' will)
+
+        if resp.code == 304:
+            return resp
+
+        if ('cache-control' in resp.headers or 'pragma' in resp.headers) and self.force_min is None:
+            cache_control = parse_http_list(resp.headers.get('cache-control', ()))
+            cache_control += parse_http_list(resp.headers.get('pragma', ()))
+
+            cc_list = [x for x in cache_control if '=' not in x]
+
+            if 'no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private):
+                # kindly follow web servers indications
+                return resp
+
+        if resp.headers.get('morss') == 'from_cache':
+            # it comes from cache, so no need to save it again
+            return resp
+
+        # save to disk
+        data = resp.read()
+        self._save(req.get_full_url(), resp.code, resp.msg, resp.headers, data, time.time())
+
+        fp = BytesIO(data)
+        old_resp = resp
+        resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+        resp.msg = old_resp.msg
+
+        return resp
+
     def http_error_304(self, req, fp, code, msg, headers):
-        if self.etag:
-            headers.addheader('etag', self.etag)
-        if self.lastmodified:
-            headers.addheader('last-modified', self.lastmodified)
-        resp = addinfourl(BytesIO(self.cache), headers, req.get_full_url(), 200)
+        (code, msg, headers, data, timestamp) = self._load(req.get_full_url())
+
+        resp = addinfourl(BytesIO(data), headers, req.get_full_url(), code)
+        resp.msg = msg
+
         return resp
 
     https_request = http_request
+    https_open = http_open
+    https_response = http_response
+
+
+sqlite_default = ':memory'
+
+
+class SQliteCacheHandler(BaseCacheHandler):
+    def __init__(self, force_min=-1, filename=None):
+        BaseCacheHandler.__init__(self, force_min)
+
+        self.con = sqlite3.connect(filename or sqlite_default, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
+        self.con.execute('create table if not exists data (url unicode PRIMARY KEY, code int, msg unicode, headers unicode, data bytes, timestamp int)')
+        self.con.commit()
+
+    def __del__(self):
+        self.con.close()
+
+    def load(self, url):
+        row = self.con.execute('select * from data where url=?', (url,)).fetchone()
+
+        if not row:
+            return (None, None, None, None, None)
+
+        return row[1:]
+
+    def save(self, url, code, msg, headers, data, timestamp):
+        data = buffer(data)
+
+        if self.con.execute('select code from data where url=?', (url,)).fetchone():
+            self.con.execute('update data set code=?, msg=?, headers=?, data=?, timestamp=? where url=?',
+                (code, msg, headers, data, timestamp, url))
+
+        else:
+            self.con.execute('insert into data values (?,?,?,?,?,?)', (url, code, msg, headers, data, timestamp))
+
+        self.con.commit()

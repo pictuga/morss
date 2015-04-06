@@ -119,7 +119,7 @@ Using cache and passing arguments:
 ```python
 >>> import morss
 >>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
->>> cache = '/tmp/morss-cache' # cache folder, needs write permission
+>>> cache = '/tmp/morss-cache.db' # sqlite cache location
 >>> options = {'csv':True, 'md':True}
 >>> xml_string = morss.process(url, cache, options)
 >>> xml_string[:50]
@@ -130,16 +130,15 @@ Using cache and passing arguments:
 
 Doing it step-by-step:
 ```python
-import morss
+import morss, morss.crawler
 
 url = 'http://newspaper.example/feed.xml'
 options = morss.Options(csv=True, md=True) # arguments
-cache_path = '/tmp/morss-cache' # cache folder, needs write permission
+morss.crawler.sqlite_default = '/tmp/morss-cache.db' # sqlite cache location
 
-url, cache = morss.Init(url, cache_path, options) # properly create folders and objects
-rss = morss.Fetch(url, cache, options) # this only grabs the RSS feed
+rss = morss.Fetch(url, options) # this only grabs the RSS feed
 rss = morss.Before(rss, options) # applies first round of options
-rss = morss.Gather(rss, url, cache, options) # this fills the feed and cleans it up
+rss = morss.Gather(rss, url, options) # this fills the feed and cleans it up
 rss = morss.After(rss, options) # applies second round of options
 
 output = morss.Format(rss, options) # formats final feed
