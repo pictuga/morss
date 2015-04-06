@@ -137,28 +137,49 @@ class ContentNegociationHandler(BaseHandler): #FIXME
     https_request = http_request
 
 
-class MetaRedirectHandler(BaseHandler):
+class HTTPEquivHandler(BaseHandler):
+    " Handler to support <meta http-equiv='...' content='...' />, since it defines HTTP headers "
+
+    handler_order = 600
+
     def http_response(self, req, resp):
         contenttype = resp.info().get('Content-Type', '').split(';')[0]
         if 200 <= resp.code < 300 and contenttype.startswith('text/'):
             if contenttype in MIMETYPE['html']:
                 data = resp.read()
-                match = re.search(b'(?i)<meta http-equiv=.refresh[^>]*?url=(http.*?)["\']', data)
-                if match:
-                    new_url = match.groups()[0]
-                    new_headers = dict((k, v) for k, v in list(req.headers.items())
-                                       if k.lower() not in ('content-length', 'content-type'))
-                    new = Request(new_url,
-                                          headers=new_headers,
-                                          origin_req_host=req.get_origin_req_host(),
-                                          unverifiable=True)
 
-                    return self.parent.open(new, timeout=req.timeout)
-                else:
-                    fp = BytesIO(data)
-                    old_resp = resp
-                    resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-                    resp.msg = old_resp.msg
+                regex = r'(?i)<meta\s+http-equiv=(["\'])(?P<key>[^"\']+)\1\s+content=(["\'])(?P<value>[^>]+)\3\s*/?>'
+                headers = [x.groupdict() for x in re.finditer(regex, data[:1000].decode('utf-8', 'replace'))]
+
+                for header in headers:
+                    resp.headers[header['key'].lower()] = header['value']
+
+                fp = BytesIO(data)
+                old_resp = resp
+                resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+                resp.msg = old_resp.msg
+
+        return resp
+
+    https_response = http_response
+
+
+class HTTPRefreshHandler(BaseHandler):
+    handler_order = 700 # HTTPErrorProcessor has a handler_order of 1000
+
+    def http_response(self, req, resp):
+        if 200 <= resp.code < 300:
+            if resp.headers.get('refresh'):
+                regex = r'(?i)^(?P<delay>[0-9]+)\s*;\s*url=(["\']?)(?P<url>.+)\2$'
+                match = re.search(regex, resp.headers.get('refresh'))
+
+                if match:
+                    url = match.groupdict()['url']
+
+                    if url:
+                        resp.code = 302
+                        resp.msg = 'Moved Temporarily'
+                        resp.headers['location'] = url
 
         return resp
 

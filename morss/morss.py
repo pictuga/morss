@@ -233,8 +233,8 @@ class Cache:
 
 
 default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
-                    crawler.AutoRefererHandler(), crawler.MetaRedirectHandler(),
-                    crawler.EncodingFixHandler()]
+                    crawler.AutoRefererHandler(), crawler.HTTPEquivHandler(),
+                    crawler.HTTPRefreshHandler(), crawler.EncodingFixHandler()]
 
 def accept_handler(*kargs):
     handlers = default_handlers[:]
