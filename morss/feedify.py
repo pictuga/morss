@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import os.path
+
 import re
 import json
 
@@ -32,7 +34,7 @@ def to_class(query):
 
 def get_rule(link):
     config = ConfigParser()
-    config.read('feedify.ini')
+    config.read(os.path.join(os.path.dirname(__file__), 'feedify.ini'))
 
     for section in config.sections():
         values = dict(config.items(section))
