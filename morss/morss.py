@@ -232,8 +232,7 @@ class Cache:
             return self
 
 
-default_handlers = [crawler.VerifiedHTTPSHandler(ca_certs=CA_CERT),
-                    crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
+default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
                     crawler.AutoRefererHandler(), crawler.MetaRedirectHandler(),
                     crawler.EncodingFixHandler()]
 
