@@ -668,7 +668,7 @@ def cli_app():
     out = Format(rss, options)
 
     if not options.silent:
-        print(out)
+        print(out.decode('utf-8', 'replace') if isinstance(out, bytes) else out)
 
     log('done')
 
