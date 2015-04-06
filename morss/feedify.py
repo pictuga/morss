@@ -108,18 +108,22 @@ class Builder(object):
         self.link = link
         self.cache = cache
 
-        if data is None:
-            data = urlopen(link).read()
         self.data = data
+
+        if self.data is None:
+            self.data = urlopen(link).read()
+
+        self.encoding = crawler.detect_encoding(self.data)
+
+        if isinstance(self.data, bytes):
+            self.data = self.data.decode(crawler.detect_encoding(self.data), 'replace')
 
         self.rule = get_rule(link)
 
         if self.rule['mode'] == 'xpath':
-            if isinstance(self.data, bytes):
-                self.data = self.data.decode(crawler.detect_encoding(self.data), 'replace')
             self.doc = lxml.html.fromstring(self.data)
         elif self.rule['mode'] == 'json':
-            self.doc = json.loads(data)
+            self.doc = json.loads(self.data)
 
         self.feed = feeds.FeedParserAtom()
 
@@ -133,7 +137,7 @@ class Builder(object):
             a = [html]
             b = []
             for x in expr.strip(".").split("."):
-                match = re.search(r'^([^\[]+)(?:\[([0-9]+)\])?$', x).groups()
+                match = re.search('^([^\[]+)(?:\[([0-9]+)\])?$', x).groups()
                 for elem in a:
                     if isinstance(elem, dict):
                         kids = elem.get(match[0])
@@ -166,10 +170,12 @@ class Builder(object):
                     out.append(match)
                 elif isinstance(match, lxml.html.HtmlElement):
                     out.append(lxml.html.tostring(match))
-            return out
 
         elif self.rule['mode'] == 'json':
-            return self.raw(html, expr)
+            out = self.raw(html, expr)
+
+        out = [x.decode(self.encoding) if isinstance(x, bytes) else x for x in out]
+        return out
 
     def string(self, html, expr):
         " Makes a formatted string out of the getter and rule "
