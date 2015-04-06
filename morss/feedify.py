@@ -122,6 +122,8 @@ class Builder(object):
         self.feed = feeds.FeedParserAtom()
 
     def raw(self, html, expr):
+        " Returns selected items, thru a stupid query "
+
         if self.rule['mode'] == 'xpath':
             return html.xpath(to_class(expr))
 
@@ -153,6 +155,8 @@ class Builder(object):
             return a
 
     def strings(self, html, expr):
+        " Turns the results into a nice array of strings (ie. sth useful) "
+
         if self.rule['mode'] == 'xpath':
             out = []
             for match in self.raw(html, expr):
@@ -166,10 +170,14 @@ class Builder(object):
             return self.raw(html, expr)
 
     def string(self, html, expr):
+        " Makes a formatted string out of the getter and rule "
+
         getter = lambda x: self.strings(html, x)
         return format_string(self.rule[expr], getter)
 
     def build(self):
+        " Builds the actual rss feed "
+
         if 'title' in self.rule:
             self.feed.title = self.string(self.doc, 'title')
 
