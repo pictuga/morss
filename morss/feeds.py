@@ -89,11 +89,6 @@ class FeedException(Exception):
 
 
 def parse(data):
-    # encoding
-    if isinstance(data, bytes):
-        enc = crawler.detect_encoding(data)
-        data = data.decode(enc, 'replace')
-
     # parse
     parser = etree.XMLParser(recover=True)
     doc = etree.fromstring(data, parser)
