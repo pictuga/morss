@@ -591,7 +591,7 @@ def cgi_app(environ, start_response):
     else:
         headers['content-type'] = 'text/xml'
 
-    crawler.sqlite_default = os.getcwd() + '/morss-cache.db'
+    crawler.sqlite_default = os.path.join(os.getcwd(), 'morss-cache.db')
 
     # get the work done
     rss = Fetch(url, options)
