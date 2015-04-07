@@ -417,9 +417,13 @@ def Gather(rss, url, options):
         t.start()
 
     for i, item in enumerate(list(rss.items)):
-        queue.put([i, item])
+        if threads == 1:
+            worker(*[i, item])
+        else:
+            queue.put([i, item])
 
-    queue.join()
+    if threads != 1:
+        queue.join()
 
     if options.ad:
         new = rss.items.append()
