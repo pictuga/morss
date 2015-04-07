@@ -24,14 +24,14 @@ from html2text import HTML2Text
 
 try:
     from Queue import Queue
-    from httplib import HTTPConnection, HTTPException
+    from httplib import HTTPException
     from urllib2 import build_opener
     from urllib2 import HTTPError
     from urllib import quote_plus
     from urlparse import urlparse, urljoin, parse_qs
 except ImportError:
     from queue import Queue
-    from http.client import HTTPConnection, HTTPException
+    from http.client import HTTPException
     from urllib.request import build_opener
     from urllib.error import HTTPError
     from urllib.parse import quote_plus
@@ -56,13 +56,6 @@ MIMETYPE = {
     'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
 PROTOCOL = ['http', 'https', 'ftp']
-
-if 'SCRIPT_NAME' in os.environ:
-    HTTPConnection.debuglevel = 1
-
-    import cgitb
-
-    cgitb.enable()
 
 
 def filterOptions(options):
