@@ -12,7 +12,7 @@ You can use this program online for free at **[morss.it](http://morss.it/)** (th
 ##Dependencies
 
 You do need:
-- [python](http://www.python.org/) >= 2.6 < 3
+- [python](http://www.python.org/) >= 2.6 (python 3 is supported)
 - [lxml](http://lxml.de/) for xml parsing
 - [this](https://github.com/bookieio/breadability) readability fork
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
