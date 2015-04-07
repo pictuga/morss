@@ -326,9 +326,6 @@ def Fetch(url, options):
     except (HTTPError) as e:
         raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
 
-    except (crawler.InvalidCertificateException) as e:
-        raise MorssException('Error downloading feed (Invalid SSL Certificate)')
-
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
 
