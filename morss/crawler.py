@@ -203,7 +203,7 @@ class BaseCacheHandler(BaseHandler):
     handler_order = 499
 
     def __init__(self, force_min=None):
-        self.force_min = force_min # force_min (seconds) to bypass http headers, -1 forever, 0 never, -2 do nothing if not in cache, -3 is like -2 but raises an error
+        self.force_min = force_min # force_min (seconds) to bypass http headers, -1 forever, 0 never, -2 do nothing if not in cache
 
     def _load(self, url):
         out = list(self.load(url))
@@ -254,21 +254,16 @@ class BaseCacheHandler(BaseHandler):
         cache_age = time.time() - timestamp
 
         # list in a simple way what to do when
-        if self.force_min in (-2, -3):
+        if self.force_min == -2:
             if code is not None:
                 # already in cache, perfect, use cache
                 pass
 
             else:
-                # ok then...
-                if self.force_min == -2:
-                    headers['morss'] = 'from_cache'
-                    resp = addinfourl(BytesIO(), headers, req.get_full_url(), 409)
-                    resp.msg = 'Conflict'
-                    return resp
-
-                elif self.force_min == -3:
-                    raise NotInCache()
+                headers['morss'] = 'from_cache'
+                resp = addinfourl(BytesIO(), headers, req.get_full_url(), 409)
+                resp.msg = 'Conflict'
+                return resp
 
         elif code is None:
             # cache empty, refresh

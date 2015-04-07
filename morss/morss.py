@@ -272,19 +272,15 @@ def Fill(item, options, feedurl='/', fast=False):
 
     if fast:
         # super-fast mode
-        delay = -3
+        delay = -2
 
     try:
         con = custom_handler(('html', 'text/*'), delay).open(link, timeout=TIMEOUT)
         data = con.read()
 
-    except crawler.NotInCache:
-        log('skipped')
-        return False
-
     except (IOError, HTTPException) as e:
         log('http error')
-        return True
+        return False # let's just delete errors stuff when in cache mode
 
     contenttype = con.info().get('Content-Type', '').split(';')[0]
     if contenttype not in MIMETYPE['html'] and contenttype != 'text/plain':
