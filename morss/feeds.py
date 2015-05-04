@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys
+import os.path
 
 from datetime import datetime
 
@@ -391,7 +392,8 @@ class FeedParser(FeedBase):
         if DictLoader is None:
             raise ImportError('dep wheezy.template needed')
 
-        loader = DictLoader({'reader': open('reader.html.template').read()})
+        path = os.path.join(os.path.dirname(__file__), 'reader.html.template')
+        loader = DictLoader({'reader': open(path).read()})
         engine = Engine(loader=loader, extensions=[CoreExtension()])
         template = engine.get_template('reader')
         return template.render({'feed': self}).encode('utf-8')
