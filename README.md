@@ -180,3 +180,4 @@ You can contribute to this project. If you're not sure what to do, you can pick 
 
 - Add ability to run morss.py as an update daemon
 - Rewrite the readability fork, for better performances, and make it more "pythonic" (Firefox for Android may have it's own implementation, most probably cleaner than `readability.js`')
+- Add ability to use custom xpath rule instead of readability
