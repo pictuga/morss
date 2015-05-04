@@ -10,10 +10,10 @@ import sqlite3
 import time
 
 try:
-    from urllib2 import BaseHandler, addinfourl, parse_keqv_list, parse_http_list
+    from urllib2 import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list
     import mimetools
 except ImportError:
-    from urllib.request import BaseHandler, addinfourl, parse_keqv_list, parse_http_list
+    from urllib.request import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list
     import email
 
 try:
@@ -254,13 +254,17 @@ class BaseCacheHandler(BaseHandler):
         cache_age = time.time() - timestamp
 
         # list in a simple way what to do when
-        if self.force_min == -2:
+        if req.get_header('Morss') == 'from_304': # for whatever reason, we need an uppercase
+            # we're just in the middle of a dirty trick, use cache
+            pass
+
+        elif self.force_min == -2:
             if code is not None:
                 # already in cache, perfect, use cache
                 pass
 
             else:
-                headers['morss'] = 'from_cache'
+                headers['Morss'] = 'from_cache'
                 resp = addinfourl(BytesIO(), headers, req.get_full_url(), 409)
                 resp.msg = 'Conflict'
                 return resp
@@ -318,7 +322,7 @@ class BaseCacheHandler(BaseHandler):
                 # kindly follow web servers indications
                 return resp
 
-        if resp.headers.get('morss') == 'from_cache':
+        if resp.headers.get('Morss') == 'from_cache':
             # it comes from cache, so no need to save it again
             return resp
 
@@ -334,12 +338,21 @@ class BaseCacheHandler(BaseHandler):
         return resp
 
     def http_error_304(self, req, fp, code, msg, headers):
-        (code, msg, headers, data, timestamp) = self._load(req.get_full_url())
+        cache = list(self._load(req.get_full_url()))
 
-        resp = addinfourl(BytesIO(data), headers, req.get_full_url(), code)
-        resp.msg = msg
+        if cache[0]:
+            cache[-1] = time.time()
+            self._save(req.get_full_url(), *cache)
 
-        return resp
+            new = Request(req.get_full_url(),
+                           headers=req.headers,
+                           unverifiable=True)
+
+            new.add_unredirected_header('Morss', 'from_304')
+
+            return self.parent.open(new, timeout=req.timeout)
+
+        return None
 
     https_request = http_request
     https_open = http_open
