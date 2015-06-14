@@ -196,9 +196,12 @@ def Fix(item, feedurl='/'):
     match = re.search('/([0-9a-zA-Z]{20,})/story01.htm$', item.link)
     if match:
         url = match.groups()[0].split('0')
-        t = {'A': '0', 'B': '.', 'C': '/', 'D': '?', 'E': '-', 'H': ',', 'I': '_', 'L': 'http://', 'S': 'www.',
-             'N': '.com', 'O': '.co.uk'}
-        item.link = ''.join([(t[s[0]] if s[0] in t else '=') + s[1:] for s in url[1:]])
+        t = {'A': '0', 'B': '.', 'C': '/', 'D': '?', 'E': '-', 'F': '=',
+             'G': '&', 'H': ',', 'I': '_', 'J': '%', 'K': '+', 'L': 'http://',
+             'M': 'https://', 'N': '.com', 'O': '.co.uk', 'P': ';', 'Q': '|',
+             'R': ':', 'S': 'www.', , 'T': '#', 'U': '$', 'V': '~', 'W': '!',
+             'X': '(', 'Y': ')', 'Z': 'Z'}
+        item.link = ''.join([(t[s[0]] if s[0] in t else s[0]) + s[1:] for s in url[1:]])
         log(item.link)
 
     # reddit
