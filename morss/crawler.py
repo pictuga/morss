@@ -208,7 +208,7 @@ class BaseCacheHandler(BaseHandler):
     def _load(self, url):
         out = list(self.load(url))
 
-        if sys.version > '3':
+        if sys.version_info[0] > '3':
             out[2] = email.message_from_string(out[2] or unicode()) # headers
         else:
             out[2] = mimetools.Message(StringIO(out[2] or unicode()))

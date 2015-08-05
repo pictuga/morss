@@ -380,7 +380,7 @@ class FeedParser(FeedBase):
         out = StringIO()
         c = csv.writer(out, dialect=csv.excel)
         for item in self.items:
-            if sys.version > '3':
+            if sys.version_info[0] > '3':
                 row = [x[1] for x in item]
             else:
                 row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item]
