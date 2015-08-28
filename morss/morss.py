@@ -621,6 +621,12 @@ def cgi_wrapper(environ, start_response):
         if url == '':
             url = 'index.html'
 
+        if '--root' in sys.argv[1:]:
+            path = os.path.join(sys.argv[-1], url)
+
+        else:
+            path = url
+
         try:
             body = open(path, 'rb').read()
 
@@ -680,7 +686,7 @@ def main():
         # mod_cgi
         wsgiref.handlers.CGIHandler().run(cgi_wrapper)
 
-    elif len(sys.argv) <= 1 or isInt(sys.argv[1]):
+    elif len(sys.argv) <= 1 or isInt(sys.argv[1]) or '--root' in sys.argv[1:]:
         # start internal (basic) http server
 
         if isInt(sys.argv[1]):
