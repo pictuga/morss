@@ -669,14 +669,17 @@ def cli_app():
 
 def main():
     if 'REQUEST_URI' in os.environ:
+        # mod_cgi
         wsgiref.handlers.CGIHandler().run(cgi_wrapper)
 
     elif len(sys.argv) <= 1:
+        # start internal (basic) http server
         print('Serving http://localhost:%s/'%PORT)
         httpd = wsgiref.simple_server.make_server('', PORT, cgi_wrapper)
         httpd.serve_forever()
 
     else:
+        # as a CLI app
         try:
             cli_app()
         except (KeyboardInterrupt, SystemExit):
