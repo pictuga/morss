@@ -621,12 +621,15 @@ def cgi_wrapper(environ, start_response):
         if url == '':
             url = 'index.html'
 
-        if os.path.isfile(url):
+        try:
+            body = open(path, 'rb').read()
+
             headers['status'] = '200 OK'
             headers['content-type'] = files[url]
             start_response(headers['status'], list(headers.items()))
-            return open(url, 'rb').read()
-        else:
+            return body
+
+        except IOError:
             headers['status'] = '404 Not found'
             start_response(headers['status'], list(headers.items()))
             return ''
