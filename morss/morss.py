@@ -667,15 +667,34 @@ def cli_app():
     log('done')
 
 
+def isInt(string):
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
+
+
 def main():
     if 'REQUEST_URI' in os.environ:
         # mod_cgi
         wsgiref.handlers.CGIHandler().run(cgi_wrapper)
 
-    elif len(sys.argv) <= 1:
+    elif len(sys.argv) <= 1 or isInt(sys.argv[1]):
         # start internal (basic) http server
-        print('Serving http://localhost:%s/'%PORT)
-        httpd = wsgiref.simple_server.make_server('', PORT, cgi_wrapper)
+
+        if isInt(sys.argv[1]):
+            argPort = int(sys.argv[1])
+            if argPort > 0:
+                port = argPort
+            else:
+                raise MorssException('Port must be positive integer')
+
+        else:
+            port = PORT
+
+        print('Serving http://localhost:%s/'%port)
+        httpd = wsgiref.simple_server.make_server('', port, cgi_wrapper)
         httpd.serve_forever()
 
     else:
