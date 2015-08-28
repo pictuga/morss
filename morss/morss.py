@@ -632,7 +632,7 @@ def cgi_wrapper(environ, start_response):
         except IOError:
             headers['status'] = '404 Not found'
             start_response(headers['status'], list(headers.items()))
-            return ''
+            return 'Error %s' % headers['status']
 
     # actual morss use
     try:
