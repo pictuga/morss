@@ -17,7 +17,7 @@ You do need:
 - [this](https://github.com/bookieio/breadability) readability fork
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
 - [html2text](http://www.aaronsw.com/2002/html2text/)
-- [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python < 2.7
+- [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python &lt; 2.7
 
 Simplest way to get these:
   `pip install -r requirements.txt`
