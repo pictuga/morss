@@ -466,7 +466,7 @@ def After(rss, options):
             item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
             del item.desc
 
-        if not options.keep:
+        if not options.keep and not options.proxy:
             del item.desc
 
         if options.nolink and item.content:
