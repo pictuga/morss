@@ -30,7 +30,7 @@ You do need:
 
 - [python](http://www.python.org/) >= 2.6 (python 3 is supported)
 - [lxml](http://lxml.de/) for xml parsing
-- [this](https://github.com/bookieio/breadability) readability fork
+- [this](https://github.com/bookieio/breadability) or [this](https://github.com/buriy/python-readability) readability fork
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
 - [html2text](http://www.aaronsw.com/2002/html2text/)
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python &lt; 2.7

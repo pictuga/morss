@@ -19,7 +19,6 @@ from . import crawler
 import wsgiref.simple_server
 import wsgiref.handlers
 
-import breadability.readable
 from html2text import HTML2Text
 
 try:
@@ -78,6 +77,18 @@ def log(txt, force=False):
             open('morss.log', 'a').write("%s\n" % repr(txt))
         else:
             print(repr(txt))
+
+
+try:
+    from readability.readability import Document
+
+    def readability(html, url=None):
+        return Document(html, url=url).summary()
+except ImportError:
+    import breadability.readable
+
+    def readability(html, url=None):
+        return breadability.readable.Article(html, url=url).readable
 
 
 def len_html(txt):
@@ -282,7 +293,7 @@ def Fill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = breadability.readable.Article(data, url=con.url).readable
+    out = readability(data, con.url)
 
     if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
