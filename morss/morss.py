@@ -701,7 +701,7 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception as e:
-            print('ERROR: %s' % e.message)
+            print('ERROR\nmessage: ' + e.message +  '\ntype: ' + str(type(e)) + '\nargs: ' + str(e.args) + '\nexception: ' + str(e))
 
 if __name__ == '__main__':
     main()
