@@ -3,8 +3,12 @@ import lxml.html
 import re
 
 
-def parse(data):
-    parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True)
+def parse(data, encoding=None):
+    if encoding:
+        parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True, encoding=encoding)
+    else:
+        parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True)
+
     return lxml.html.fromstring(data, parser=parser)
 
 
@@ -149,5 +153,5 @@ def br2p(root):
             gdparent.insert(gdparent.index(parent)+1, new_item)
 
 
-def get_article(data):
-    return lxml.etree.tostring(get_best_node(parse(data)))
+def get_article(data, encoding=None):
+    return lxml.etree.tostring(get_best_node(parse(data, encoding)))

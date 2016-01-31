@@ -72,11 +72,14 @@ def detect_encoding(data, con=None):
 
 
 class EncodingFixHandler(BaseHandler):
+    def __init__(self, encoding=None):
+        self.encoding = encoding
+
     def http_response(self, req, resp):
         maintype = resp.info().get('Content-Type', '').split('/')[0]
         if 200 <= resp.code < 300 and maintype == 'text':
             data = resp.read()
-            enc = detect_encoding(data, resp)
+            enc = detect_encoding(data, resp) if not self.encoding else self.encoding
 
             if enc:
                 data = data.decode(enc, 'replace')

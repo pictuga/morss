@@ -129,10 +129,11 @@ def parseOptions(options):
 
 default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
                     crawler.AutoRefererHandler(), crawler.HTTPEquivHandler(),
-                    crawler.HTTPRefreshHandler(), crawler.EncodingFixHandler()]
+                    crawler.HTTPRefreshHandler()]
 
-def custom_handler(accept, delay=DELAY):
+def custom_handler(accept, delay=DELAY, encoding=None):
     handlers = default_handlers[:]
+    handlers.append(crawler.EncodingFixHandler(encoding))
     handlers.append(crawler.ContentNegociationHandler(crawler.MIMETYPE[accept]))
     handlers.append(crawler.SQliteCacheHandler(delay))
 
@@ -266,7 +267,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = -2
 
     try:
-        con = custom_handler('html', delay).open(link, timeout=TIMEOUT)
+        con = custom_handler('html', delay, options.encoding).open(link, timeout=TIMEOUT)
         data = con.read()
 
     except (IOError, HTTPException) as e:
@@ -278,7 +279,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = readabilite.get_article(data)
+    out = readabilite.get_article(data, options.encoding)
 
     if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
@@ -367,7 +368,7 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = custom_handler('xml', delay).open(url, timeout=TIMEOUT * 2)
+        con = custom_handler('xml', delay, options.encoding).open(url, timeout=TIMEOUT * 2)
         xml = con.read()
 
     except (HTTPError) as e:
