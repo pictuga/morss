@@ -450,11 +450,6 @@ def Gather(rss, url, options):
 
 def Before(rss, options):
     for i, item in enumerate(list(rss.items)):
-        if options.smart and options.last:
-            if item.time < feeds.parse_time(options.last) and i > 2:
-                item.remove()
-                continue
-
         if options.empty:
             item.remove()
             continue
@@ -564,18 +559,9 @@ def cgi_app(environ, start_response):
     global DEBUG
     DEBUG = options.debug
 
-    if 'HTTP_IF_NONE_MATCH' in environ:
-        options['last'] = int(environ['HTTP_IF_NONE_MATCH'][1:-1])
-        if not options.force and time.time() - options.last < DELAY:
-            headers['status'] = '304 Not Modified'
-            start_response(headers['status'], list(headers.items()))
-            log(url)
-            log('etag good')
-            return []
-
     # headers
     headers['status'] = '200 OK'
-    headers['etag'] = '"%s"' % int(time.time())
+    headers['cache-control'] = 'max-age=%s' % DELAY
 
     if options.cors:
         headers['access-control-allow-origin'] = '*'
