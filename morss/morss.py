@@ -700,7 +700,7 @@ def main():
     elif len(sys.argv) <= 1 or isInt(sys.argv[1]) or '--root' in sys.argv[1:]:
         # start internal (basic) http server
 
-        if isInt(sys.argv[1]):
+        if len(sys.argv) > 1 and isInt(sys.argv[1]):
             argPort = int(sys.argv[1])
             if argPort > 0:
                 port = argPort
