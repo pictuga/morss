@@ -79,16 +79,10 @@ def log(txt, force=False):
             print(repr(txt))
 
 
-try:
-    from readability.readability import Document
+from . import readabilite
+def readability(html, url):
+    return readabilite.get_article(html)
 
-    def readability(html, url=None):
-        return Document(html, url=url).summary()
-except ImportError:
-    import breadability.readable
-
-    def readability(html, url=None):
-        return breadability.readable.Article(html, url=url).readable
 
 
 def len_html(txt):
