@@ -31,16 +31,17 @@ def count_words(string):
     return count
 
 
-regex_bad = re.compile('|'.join(['combx', 'comment', 'community', 'disqus',
-     'extra', 'foot', 'header', 'menu', 'remark', 'rss', 'shoutbox', 'sidebar',
-     'sponsor', 'ad-break', 'agegate', 'pagination', 'pager', 'popup', 'tweet',
-     'twitter', 'com-', 'contact', 'footnote', 'masthead', 'media', 'meta',
-     'outbrain', 'promo', 'related', 'scroll', 'shoutbox', 'sidebar', 'sponsor',
-     'shopping', 'tags', 'tool', 'widget']), re.I)
+regex_bad = re.compile('|'.join(['robots-nocontent', 'combx', 'comment',
+    'community', 'disqus', 'extra', 'foot', 'header', 'menu', 'remark', 'rss',
+    'shoutbox', 'sidebar', 'sponsor', 'ad-break', 'agegate', 'pagination',
+    'pager', 'popup', 'tweet', 'twitter', 'com-', 'sharing', 'share', 'social',
+    'contact', 'footnote', 'masthead', 'media', 'meta', 'outbrain', 'promo',
+    'related', 'scroll', 'shoutbox', 'sidebar', 'sponsor', 'shopping', 'tags',
+    'tool', 'widget']), re.I)
 
 regex_good = re.compile('|'.join(['and', 'article', 'body', 'column',
-      'main', 'shadow', 'content', 'entry', 'hentry', 'main', 'page',
-      'pagination', 'post', 'text', 'blog', 'story', 'par']), re.I)
+    'main', 'shadow', 'content', 'entry', 'hentry', 'main', 'page',
+    'pagination', 'post', 'text', 'blog', 'story', 'par']), re.I)
 
 tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed', 'layer', 'applet', 'style']
 
