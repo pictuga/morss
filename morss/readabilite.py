@@ -117,5 +117,34 @@ def clean_html(root):
                 del item.attrib[attrib]
 
 
+def br2p(root):
+    for item in root.iterfind('.//br'):
+        parent = item.getparent()
+        if parent is None:
+            continue
+
+        gdparent = parent.getparent()
+        if gdparent is None:
+            continue
+
+        if item.tail is None:
+            # if <br/> is at the end of a div (to avoid having <p/>)
+            continue
+
+        else:
+            # set up new item
+            new_item = lxml.html.Element(parent.tag)
+            new_item.text = item.tail
+
+            for child in item.itersiblings():
+                new_item.append(child)
+
+            # delete br
+            item.tail = None
+            parent.remove(item)
+
+            gdparent.insert(gdparent.index(parent)+1, new_item)
+
+
 def get_article(data):
     return lxml.etree.tostring(get_best_node(parse(data)))
