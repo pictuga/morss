@@ -37,6 +37,7 @@ class GZIPHandler(BaseHandler):
             if resp.headers.get('Content-Encoding') == 'gzip':
                 data = resp.read()
                 data = GzipFile(fileobj=BytesIO(data), mode='r').read()
+                resp.headers['Content-Encoding'] = 'identity'
 
                 fp = BytesIO(data)
                 old_resp = resp
