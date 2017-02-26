@@ -343,7 +343,7 @@ def Fetch(url, options):
         log('itunes redirect: %s' % link)
         return Fetch(link, options)
 
-    elif xml.startswith(b'<?xml') or contenttype in MIMETYPE['xml']:
+    elif re.match(b'\s*<?xml', xml) is not None or contenttype in MIMETYPE['xml']:
         rss = feeds.parse(xml)
 
     elif feedify.supported(url):
