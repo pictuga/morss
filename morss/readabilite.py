@@ -65,7 +65,7 @@ def score_node(node):
     score += len(regex_good.findall(class_id) * 4)
     score -= len(regex_bad.findall(class_id) * 3)
 
-    score += count_words(''.join([node.text or ''] + [x.tail or '' for x in node])) / 10.
+    score += count_words(''.join([node.text or ''] + [x.tail or '' for x in node])) / 10. # the .tail part is to include *everything* in that node
 
     return score
 
