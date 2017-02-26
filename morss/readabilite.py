@@ -45,6 +45,9 @@ regex_good = re.compile('|'.join(['and', 'article', 'body', 'column',
 
 tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed', 'layer', 'applet', 'style']
 
+attributes_fine = ['title', 'src', 'href', 'type', 'name', 'for', 'value']
+
+
 def score_node(node):
     score = 0
 
@@ -91,6 +94,27 @@ def score_all(root):
 
 def get_best_node(root):
     return sorted(score_all(root).items(), key=lambda x: x[1], reverse=True)[0][0]
+
+
+def clean_html(root):
+    for item in root.iter():
+        # Step 1. Do we keep the node?
+
+        if item.tag in tags_junk:
+            item.getparent().remove(item)
+
+        class_id = item.get('class', '') + item.get('id', '')
+        if regex_bad.match(class_id):
+            item.getparent().remove(item)
+
+        if isinstance(item, lxml.html.HtmlComment):
+            item.getparent().remove(item)
+
+        # Step 2. Clean the node's attributes
+
+        for attrib in item.attrib:
+            if attrib not in attributes_fine:
+                del item.attrib[attrib]
 
 
 def get_article(data):
