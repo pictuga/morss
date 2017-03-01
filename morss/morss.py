@@ -143,7 +143,7 @@ def custom_handler(accept, delay=DELAY):
     return build_opener(*handlers)
 
 
-def Fix(item, feedurl='/'):
+def ItemFix(item, feedurl='/'):
     """ Improves feed items (absolute links, resolve feedburner links, etc) """
 
     # check unwanted uppercase title
@@ -213,7 +213,7 @@ def Fix(item, feedurl='/'):
     return item
 
 
-def Fill(item, options, feedurl='/', fast=False):
+def ItemFill(item, options, feedurl='/', fast=False):
     """ Returns True when it has done its best """
 
     if not item.link:
@@ -294,7 +294,7 @@ def Fill(item, options, feedurl='/', fast=False):
     return True
 
 
-def Fetch(url, options):
+def FeedFetch(url, options):
     # basic url clean-up
     if url is None:
         raise MorssException('No url provided')
@@ -336,7 +336,7 @@ def Fetch(url, options):
     if url.startswith('https://itunes.apple.com/lookup?id='):
         link = json.loads(xml.decode('utf-8', 'replace'))['results'][0]['feedUrl']
         log('itunes redirect: %s' % link)
-        return Fetch(link, options)
+        return FeedFetch(link, options)
 
     elif re.match(b'\s*<?xml', xml) is not None or contenttype in MIMETYPE['xml']:
         rss = feeds.parse(xml)
@@ -352,7 +352,7 @@ def Fetch(url, options):
         if len(match):
             link = urljoin(url, match[0])
             log('rss redirect: %s' % link)
-            return Fetch(link, options)
+            return FeedFetch(link, options)
         else:
             log('no-link html')
             raise MorssException('Link provided is an HTML page, which doesn\'t link to a feed')
@@ -364,7 +364,7 @@ def Fetch(url, options):
     return rss
 
 
-def Gather(rss, url, options):
+def FeedGather(rss, url, options):
     size = len(rss.items)
     start_time = time.time()
 
@@ -397,16 +397,16 @@ def Gather(rss, url, options):
             item.remove()
             return
 
-        item = Fix(item, url)
+        item = ItemFix(item, url)
 
         if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
             if not options.proxy:
-                if Fill(item, options, url, True) is False:
+                if ItemFill(item, options, url, True) is False:
                     item.remove()
                     return
         else:
             if not options.proxy:
-                Fill(item, options, url)
+                ItemFill(item, options, url)
 
     queue = Queue()
 
@@ -437,7 +437,7 @@ def Gather(rss, url, options):
     return rss
 
 
-def Before(rss, options):
+def FeedBefore(rss, options):
     for i, item in enumerate(list(rss.items)):
         if options.empty:
             item.remove()
@@ -451,7 +451,7 @@ def Before(rss, options):
     return rss
 
 
-def After(rss, options):
+def FeedAfter(rss, options):
     for i, item in enumerate(list(rss.items)):
         if options.strip:
             del item.desc
@@ -486,7 +486,7 @@ def After(rss, options):
     return rss
 
 
-def Format(rss, options):
+def FeedFormat(rss, options):
     if options.callback:
         if re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
             return '%s(%s)' % (options.callback, rss.tojson())
@@ -514,12 +514,12 @@ def process(url, cache=None, options=None):
 
     options = Options(options)
     if cache: crawler.sqlite_default = cache
-    rss = Fetch(url, options)
-    rss = Before(rss, options)
-    rss = Gather(rss, url, options)
-    rss = After(rss, options)
+    rss = FeedFetch(url, options)
+    rss = FeedBefore(rss, options)
+    rss = FeedGather(rss, url, options)
+    rss = FeedAfter(rss, options)
 
-    return Format(rss, options)
+    return FeedFormat(rss, options)
 
 
 def cgi_app(environ, start_response):
@@ -572,17 +572,17 @@ def cgi_app(environ, start_response):
     crawler.sqlite_default = os.path.join(os.getcwd(), 'morss-cache.db')
 
     # get the work done
-    rss = Fetch(url, options)
+    rss = FeedFetch(url, options)
 
     if headers['content-type'] == 'text/xml':
         headers['content-type'] = rss.mimetype
 
     start_response(headers['status'], list(headers.items()))
 
-    rss = Before(rss, options)
-    rss = Gather(rss, url, options)
-    rss = After(rss, options)
-    out = Format(rss, options)
+    rss = FeedBefore(rss, options)
+    rss = FeedGather(rss, url, options)
+    rss = FeedAfter(rss, options)
+    out = FeedFormat(rss, options)
 
     if not options.silent:
         return out
@@ -647,11 +647,11 @@ def cli_app():
 
     crawler.sqlite_default = os.path.expanduser('~/.cache/morss-cache.db')
 
-    rss = Fetch(url, options)
-    rss = Before(rss, options)
-    rss = Gather(rss, url, options)
-    rss = After(rss, options)
-    out = Format(rss, options)
+    rss = FeedFetch(url, options)
+    rss = FeedBefore(rss, options)
+    rss = FeedGather(rss, url, options)
+    rss = FeedAfter(rss, options)
+    out = FeedFormat(rss, options)
 
     if not options.silent:
         print(out.decode('utf-8', 'replace') if isinstance(out, bytes) else out)
