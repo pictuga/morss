@@ -1,5 +1,4 @@
 lxml
-git+git://github.com/bookieio/breadability.git
 python-dateutil <= 1.5
 html2text
 ordereddict

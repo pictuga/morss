@@ -30,7 +30,6 @@ You do need:
 
 - [python](http://www.python.org/) >= 2.6 (python 3 is supported)
 - [lxml](http://lxml.de/) for xml parsing
-- [this](https://github.com/bookieio/breadability) or [this](https://github.com/buriy/python-readability) readability fork
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
 - [html2text](http://www.aaronsw.com/2002/html2text/)
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python &lt; 2.7
@@ -269,5 +268,4 @@ You can contribute to this project. If you're not sure what to do, you can pick
 from this list:
 
 - Add ability to run morss.py as an update daemon
-- Rewrite the readability fork, for better performances, and make it more "pythonic" (Firefox for Android may have it's own implementation, most probably cleaner than `readability.js`')
 - Add ability to use custom xpath rule instead of readability
