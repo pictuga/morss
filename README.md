@@ -244,8 +244,7 @@ different values at the top of the script.
 
 ###Content matching
 
-The content of articles is grabbed with a
-[**readability** fork](https://github.com/buriy/python-readability). This means
+The content of articles is grabbed with our own readability fork. This means
 that most of the time the right content is matched. However sometimes it fails,
 therefore some tweaking is required. Most of the time, what has to be done is to
 add some "rules" in the main script file in *readability* (not in morss).
