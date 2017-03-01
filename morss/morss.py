@@ -294,6 +294,55 @@ def ItemFill(item, options, feedurl='/', fast=False):
     return True
 
 
+def ItemBefore(item, options):
+    # return None if item deleted
+
+    if options.empty:
+        item.remove()
+        return None
+
+    if options.search:
+        if options.search not in item.title:
+            item.remove()
+            return None
+
+    return item
+
+
+def ItemAfter(item, options):
+    if options.strip:
+        del item.desc
+        del item.content
+
+    if options.clip and item.desc and item.content:
+        item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
+        del item.desc
+
+    if not options.keep and not options.proxy:
+        del item.desc
+
+    if options.nolink and item.content:
+        content = lxml.html.fromstring(item.content)
+        for link in content.xpath('//a'):
+            log(link.text_content())
+            link.drop_tag()
+        item.content = lxml.etree.tostring(content)
+
+    if options.noref:
+        item.link = ''
+
+    if options.md:
+        conv = HTML2Text(baseurl=item.link)
+        conv.unicode_snob = True
+
+        if item.desc:
+            item.desc = conv.handle(item.desc)
+        if item.content:
+            item.content = conv.handle(item.content)
+
+    return item
+
+
 def FeedFetch(url, options):
     # basic url clean-up
     if url is None:
@@ -397,6 +446,11 @@ def FeedGather(rss, url, options):
             item.remove()
             return
 
+        item = ItemBefore(item, options)
+
+        if item is None:
+            return
+
         item = ItemFix(item, url)
 
         if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
@@ -404,9 +458,12 @@ def FeedGather(rss, url, options):
                 if ItemFill(item, options, url, True) is False:
                     item.remove()
                     return
+
         else:
             if not options.proxy:
                 ItemFill(item, options, url)
+
+        item = ItemAfter(item, options)
 
     queue = Queue()
 
@@ -433,55 +490,6 @@ def FeedGather(rss, url, options):
 
     log(len(rss.items))
     log(time.time() - start_time)
-
-    return rss
-
-
-def FeedBefore(rss, options):
-    for i, item in enumerate(list(rss.items)):
-        if options.empty:
-            item.remove()
-            continue
-
-        if options.search:
-            if options.search not in item.title:
-                item.remove()
-                continue
-
-    return rss
-
-
-def FeedAfter(rss, options):
-    for i, item in enumerate(list(rss.items)):
-        if options.strip:
-            del item.desc
-            del item.content
-
-        if options.clip and item.desc and item.content:
-            item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
-            del item.desc
-
-        if not options.keep and not options.proxy:
-            del item.desc
-
-        if options.nolink and item.content:
-            content = lxml.html.fromstring(item.content)
-            for link in content.xpath('//a'):
-                log(link.text_content())
-                link.drop_tag()
-            item.content = lxml.etree.tostring(content)
-
-        if options.noref:
-            item.link = ''
-
-        if options.md:
-            conv = HTML2Text(baseurl=item.link)
-            conv.unicode_snob = True
-
-            if item.desc:
-                item.desc = conv.handle(item.desc)
-            if item.content:
-                item.content = conv.handle(item.content)
 
     return rss
 
@@ -515,9 +523,7 @@ def process(url, cache=None, options=None):
     options = Options(options)
     if cache: crawler.sqlite_default = cache
     rss = FeedFetch(url, options)
-    rss = FeedBefore(rss, options)
     rss = FeedGather(rss, url, options)
-    rss = FeedAfter(rss, options)
 
     return FeedFormat(rss, options)
 
@@ -579,9 +585,7 @@ def cgi_app(environ, start_response):
 
     start_response(headers['status'], list(headers.items()))
 
-    rss = FeedBefore(rss, options)
     rss = FeedGather(rss, url, options)
-    rss = FeedAfter(rss, options)
     out = FeedFormat(rss, options)
 
     if not options.silent:
@@ -648,9 +652,7 @@ def cli_app():
     crawler.sqlite_default = os.path.expanduser('~/.cache/morss-cache.db')
 
     rss = FeedFetch(url, options)
-    rss = FeedBefore(rss, options)
     rss = FeedGather(rss, url, options)
-    rss = FeedAfter(rss, options)
     out = FeedFormat(rss, options)
 
     if not options.silent:
