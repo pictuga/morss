@@ -15,6 +15,7 @@ import lxml.html
 from . import feeds
 from . import feedify
 from . import crawler
+from . import readabilite
 
 import wsgiref.simple_server
 import wsgiref.handlers
@@ -77,12 +78,6 @@ def log(txt, force=False):
             open('morss.log', 'a').write("%s\n" % repr(txt))
         else:
             print(repr(txt))
-
-
-from . import readabilite
-def readability(html, url):
-    return readabilite.get_article(html)
-
 
 
 def len_html(txt):
@@ -287,7 +282,7 @@ def Fill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = readability(data, con.url)
+    out = readabilite.get_article(data)
 
     if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
