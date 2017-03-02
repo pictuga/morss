@@ -63,6 +63,9 @@ def score_node(node):
     if node.tag in ['h1', 'h2', 'article']:
         score += 8
 
+    if node.tag in ['p']:
+        score += 3
+
     class_id = node.get('class', '') + node.get('id', '')
 
     score += len(regex_good.findall(class_id) * 4)
