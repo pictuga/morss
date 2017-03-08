@@ -6,6 +6,7 @@ import socket
 from gzip import GzipFile
 from io import BytesIO, StringIO
 import re
+import chardet
 import sqlite3
 import time
 
@@ -58,9 +59,13 @@ def detect_encoding(data, con=None):
     if match:
         return match.groups()[0].lower().decode()
 
-    match = re.search(b'encoding=["\']?([0-9a-zA-Z-]+)', data[:100])
+    match = re.search(b'encoding=["\']?([0-9a-zA-Z-]+)', data[:1000])
     if match:
         return match.groups()[0].lower().decode()
+
+    enc = chardet.detect(data[:1000])['encoding']
+    if enc:
+            return enc
 
     return 'utf-8'
 
