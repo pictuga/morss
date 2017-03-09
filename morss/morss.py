@@ -131,10 +131,10 @@ default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
                     crawler.AutoRefererHandler(), crawler.HTTPEquivHandler(),
                     crawler.HTTPRefreshHandler()]
 
-def custom_handler(accept, delay=DELAY, encoding=None):
+def custom_handler(accept, strict=False, delay=DELAY, encoding=None):
     handlers = default_handlers[:]
     handlers.append(crawler.EncodingFixHandler(encoding))
-    handlers.append(crawler.ContentNegociationHandler(crawler.MIMETYPE[accept]))
+    handlers.append(crawler.ContentNegociationHandler(crawler.MIMETYPE[accept], strict))
     handlers.append(crawler.SQliteCacheHandler(delay))
 
     return build_opener(*handlers)
@@ -267,7 +267,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = -2
 
     try:
-        con = custom_handler('html', delay, options.encoding).open(link, timeout=TIMEOUT)
+        con = custom_handler('html', False, delay, options.encoding).open(link, timeout=TIMEOUT)
         data = con.read()
 
     except (IOError, HTTPException) as e:
@@ -368,7 +368,7 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = custom_handler('xml', delay, options.encoding).open(url, timeout=TIMEOUT * 2)
+        con = custom_handler('xml', True, delay, options.encoding).open(url, timeout=TIMEOUT * 2)
         xml = con.read()
 
     except (HTTPError) as e:
