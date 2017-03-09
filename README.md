@@ -102,24 +102,15 @@ into something like this.
 │   ├── morss
 │   │   ├── __init__.py
 │   │   ├── __main__.py
-│   │   ├── crawler.py
-│   │   ├── feedify.ini
-│   │   ├── feedify.py
-│   │   ├── feeds.py
-│   │   ├── morss.ini
 │   │   ├── morss.py
-│   │   └── reader.html.template
+│   │   └── ...
 │   │
-│   ├── breadability
 │   ├── dateutil
-│   ├── html2text.py
-│   ├── ordereddict.py
-│   └── wheezy
-│       └── template
+│   └── ...
 │
 ├── .htaccess
-├── facebook.php
-└── index.html
+├── index.html
+└── ...
 ```
 
 For this, you need to make sure your host allows python script execution. This
