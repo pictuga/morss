@@ -209,10 +209,6 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
-class NotInCache(IOError):
-    pass
-
-
 class BaseCacheHandler(BaseHandler):
     " Cache based on etags/last-modified. Inherit from this to implement actual storage "
 
