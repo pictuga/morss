@@ -113,7 +113,9 @@ class AutoRefererHandler(BaseHandler):
     https_request = http_request
 
 
-class ContentNegociationHandler(BaseHandler): #FIXME
+class ContentNegociationHandler(BaseHandler):
+    " Handler for content negociation. Also parses <link rel='alternate' type='application/rss+xml' href='...' /> "
+
     def __init__(self, accept=None, strict=False):
         self.accept = accept
         self.strict = strict
@@ -123,31 +125,38 @@ class ContentNegociationHandler(BaseHandler): #FIXME
             if isinstance(self.accept, basestring):
                 self.accept = (self.accept,)
 
-            out = {}
-            rank = 1.1
-            for group in self.accept:
-                rank -= 0.1
+            string = ','.join(self.accept)
 
-                if isinstance(group, basestring):
-                    if group in MIMETYPE:
-                        group = MIMETYPE[group]
-                    else:
-                        out[group] = rank
-                        continue
+            if self.strict:
+                string += ',*/*;q=0.9'
 
-                for mime in group:
-                    if mime not in out:
-                        out[mime] = rank
-
-            if not self.strict:
-                out['*/*'] = rank - 0.1
-
-            string = ','.join([x + ';q={0:.1}'.format(out[x]) if out[x] != 1 else x for x in out])
             req.add_unredirected_header('Accept', string)
 
         return req
 
+    def http_response(self, req, resp):
+        contenttype = resp.info().get('Content-Type', '').split(';')[0]
+        if 200 <= resp.code < 300 and self.strict and contenttype in MIMETYPE['html'] and contenttype not in self.accept:
+            # opps, not what we were looking for, let's see if the html page suggests an alternative page of the right types
+
+            data = resp.read()
+            links = lxml.html.fromstring(data[:10000]).findall('.//link[@rel="alternate"]')
+
+            for link in links:
+                if link.get('type', '') in self.accept:
+                    resp.code = 302
+                    resp.msg = 'Moved Temporarily'
+                    resp.headers['location'] = link.get('href')
+
+            fp = BytesIO(data)
+            old_resp = resp
+            resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+            resp.msg = old_resp.msg
+
+        return resp
+
     https_request = http_request
+    https_response = http_response
 
 
 class HTTPEquivHandler(BaseHandler):

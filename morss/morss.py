@@ -50,10 +50,6 @@ PORT = 8080
 
 DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
-MIMETYPE = {
-    'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
-    'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
-
 PROTOCOL = ['http', 'https', 'ftp']
 
 
@@ -137,7 +133,7 @@ default_handlers = [crawler.GZIPHandler(), crawler.UAHandler(DEFAULT_UA),
 
 def custom_handler(accept, delay=DELAY):
     handlers = default_handlers[:]
-    handlers.append(crawler.ContentNegociationHandler(accept))
+    handlers.append(crawler.ContentNegociationHandler(crawler.MIMETYPE[accept]))
     handlers.append(crawler.SQliteCacheHandler(delay))
 
     return build_opener(*handlers)
@@ -270,7 +266,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = -2
 
     try:
-        con = custom_handler(('html', 'text/*'), delay).open(link, timeout=TIMEOUT)
+        con = custom_handler('html', delay).open(link, timeout=TIMEOUT)
         data = con.read()
 
     except (IOError, HTTPException) as e:
@@ -278,7 +274,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         return False # let's just delete errors stuff when in cache mode
 
     contenttype = con.info().get('Content-Type', '').split(';')[0]
-    if contenttype not in MIMETYPE['html'] and contenttype != 'text/plain':
+    if contenttype not in crawler.MIMETYPE['html'] and contenttype != 'text/plain':
         log('non-text page')
         return True
 
@@ -371,7 +367,7 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = custom_handler(('xml', 'html'), delay).open(url, timeout=TIMEOUT * 2)
+        con = custom_handler('xml', delay).open(url, timeout=TIMEOUT * 2)
         xml = con.read()
 
     except (HTTPError) as e:
@@ -387,7 +383,7 @@ def FeedFetch(url, options):
         log('itunes redirect: %s' % link)
         return FeedFetch(link, options)
 
-    elif re.match(b'\s*<?xml', xml) is not None or contenttype in MIMETYPE['xml']:
+    elif re.match(b'\s*<?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
         rss = feeds.parse(xml)
 
     elif feedify.supported(url):
@@ -395,16 +391,6 @@ def FeedFetch(url, options):
         feed.build()
         rss = feed.feed
 
-    elif contenttype in MIMETYPE['html']:
-        match = lxml.html.fromstring(xml).xpath(
-            "//link[@rel='alternate'][@type='application/rss+xml' or @type='application/atom+xml']/@href")
-        if len(match):
-            link = urljoin(url, match[0])
-            log('rss redirect: %s' % link)
-            return FeedFetch(link, options)
-        else:
-            log('no-link html')
-            raise MorssException('Link provided is an HTML page, which doesn\'t link to a feed')
     else:
         log('random page')
         log(contenttype)
