@@ -33,6 +33,7 @@ You do need:
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
 - [html2text](http://www.aaronsw.com/2002/html2text/)
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python &lt; 2.7
+- [wheezy.template](https://pypi.python.org/pypi/wheezy.template) to generate HTML pages
 - [chardet](https://pypi.python.org/pypi/chardet)
 
 Simplest way to get these:
