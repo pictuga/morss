@@ -308,6 +308,11 @@ class BaseCacheHandler(BaseHandler):
             # still recent enough for us, use cache
             pass
 
+        elif code == 301 and cache_age < 7*24*3600:
+            # "301 Moved Permanently" has to be cached...as long as we want (awesome HTTP specs), let's say a week (why not?)
+            # use force_min=0 if you want to bypass this (needed for a proper refresh)
+            pass
+
         else:
             # according to the www, we have to refresh when nothing is said
             return None
