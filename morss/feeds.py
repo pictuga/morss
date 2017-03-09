@@ -15,12 +15,9 @@ import dateutil.parser
 
 from . import crawler
 
-try:
-    from wheezy.template.engine import Engine
-    from wheezy.template.loader import DictLoader
-    from wheezy.template.ext.core import CoreExtension
-except ImportError:
-    Engine = DictLoader = CoreExtension = None
+from wheezy.template.engine import Engine
+from wheezy.template.loader import DictLoader
+from wheezy.template.ext.core import CoreExtension
 
 json.encoder.c_make_encoder = None
 
@@ -389,9 +386,6 @@ class FeedParser(FeedBase):
         return out.read()
 
     def tohtml(self):
-        if DictLoader is None:
-            raise ImportError('dep wheezy.template needed')
-
         path = os.path.join(os.path.dirname(__file__), 'reader.html.template')
         loader = DictLoader({'reader': open(path).read()})
         engine = Engine(loader=loader, extensions=[CoreExtension()])
