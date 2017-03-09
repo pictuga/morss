@@ -79,7 +79,6 @@ The arguments are:
 	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
 	- `txt`: changes the http content-type to txt (for faster "`view-source:`")
-	- `force`: avoid using your browser cache (do not support 304 errors)
 - Completely useless
 	- `strip`: remove all description and content from feed items
 	- `empty`: remove all feed items
