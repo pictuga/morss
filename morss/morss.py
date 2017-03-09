@@ -507,7 +507,10 @@ def process(url, cache=None, options=None):
         options = []
 
     options = Options(options)
-    if cache: crawler.sqlite_default = cache
+
+    if cache:
+        crawler.sqlite_default = cache
+
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
 
