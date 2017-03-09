@@ -7,6 +7,7 @@ from gzip import GzipFile
 from io import BytesIO, StringIO
 import re
 import chardet
+import lxml.html
 import sqlite3
 import time
 
@@ -156,20 +157,18 @@ class HTTPEquivHandler(BaseHandler):
 
     def http_response(self, req, resp):
         contenttype = resp.info().get('Content-Type', '').split(';')[0]
-        if 200 <= resp.code < 300 and contenttype.startswith('text/'):
-            if contenttype in MIMETYPE['html']:
-                data = resp.read()
+        if 200 <= resp.code < 300 and contenttype in MIMETYPE['html']:
+            data = resp.read()
 
-                regex = r'(?i)<meta\s+http-equiv=(["\'])(?P<key>[^"\']+)\1\s+content=(["\'])(?P<value>[^>]+)\3\s*/?>'
-                headers = [x.groupdict() for x in re.finditer(regex, data[:1000].decode('utf-8', 'replace'))]
+            headers = lxml.html.fromstring(data[:10000]).findall('.//meta[@http-equiv]')
 
-                for header in headers:
-                    resp.headers[header['key'].lower()] = header['value']
+            for header in headers:
+                resp.headers[header.get('http-equiv').lower()] = header.get('content')
 
-                fp = BytesIO(data)
-                old_resp = resp
-                resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-                resp.msg = old_resp.msg
+            fp = BytesIO(data)
+            old_resp = resp
+            resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+            resp.msg = old_resp.msg
 
         return resp
 
