@@ -207,10 +207,8 @@ url = 'http://newspaper.example/feed.xml'
 options = morss.Options(csv=True, md=True) # arguments
 morss.crawler.sqlite_default = '/tmp/morss-cache.db' # sqlite cache location
 
-rss = morss.Fetch(url, options) # this only grabs the RSS feed
-rss = morss.Before(rss, options) # applies first round of options
-rss = morss.Gather(rss, url, options) # this fills the feed and cleans it up
-rss = morss.After(rss, options) # applies second round of options
+rss = morss.FeedFetch(url, options) # this only grabs the RSS feed
+rss = morss.FeedGather(rss, url, options) # this fills the feed and cleans it up
 
 output = morss.Format(rss, options) # formats final feed
 ```
