@@ -279,7 +279,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = readabilite.get_article(data, options.encoding)
+    out = readabilite.get_article(data, options.encoding or crawler.detect_encoding(data, con))
 
     if options.hungry or count_words(out) > max(count_content, count_desc):
         item.push_content(out)
