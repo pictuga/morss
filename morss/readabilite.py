@@ -88,13 +88,13 @@ def score_all(root):
 
         grades[item] = score
 
-        parent = item.getparent()
-        if parent is not None:
-            grades[parent] += score / 2.
-
-            gdparent = parent.getparent()
-            if gdparent is not None:
-                grades[gdparent] += score / 4.
+        factor = 2
+        for ancestor in item.iterancestors():
+            if score / factor > 1:
+                grades[ancestor] += score / factor
+                factor *= 2
+            else:
+                break
 
     return grades
 
