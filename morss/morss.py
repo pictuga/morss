@@ -25,13 +25,11 @@ from html2text import HTML2Text
 try:
     from Queue import Queue
     from httplib import HTTPException
-    from urllib2 import HTTPError
     from urllib import quote_plus
     from urlparse import urlparse, urljoin, parse_qs
 except ImportError:
     from queue import Queue
     from http.client import HTTPException
-    from urllib.error import HTTPError
     from urllib.parse import quote_plus
     from urllib.parse import urlparse, urljoin, parse_qs
 
@@ -353,9 +351,6 @@ def FeedFetch(url, options):
     try:
         con = crawler.custom_handler('xml', True, delay, options.encoding).open(url, timeout=TIMEOUT * 2)
         xml = con.read()
-
-    except (HTTPError) as e:
-        raise MorssException('Error downloading feed (HTTP Error %s)' % e.code)
 
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
