@@ -39,9 +39,9 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
     handlers.append(GZIPHandler())
     handlers.append(HTTPEquivHandler())
     handlers.append(HTTPRefreshHandler())
+    handlers.append(UAHandler(DEFAULT_UA))
 
     if not basic:
-        handlers.append(UAHandler(DEFAULT_UA))
         handlers.append(AutoRefererHandler())
 
     handlers.append(EncodingFixHandler(encoding))
