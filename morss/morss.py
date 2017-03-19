@@ -348,7 +348,7 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = crawler.custom_handler('xml', True, delay, options.encoding).open(url, timeout=TIMEOUT * 2)
+        con = crawler.custom_handler('xml', True, delay, options.encoding, not feedify.supported(url)).open(url, timeout=TIMEOUT * 2) # feedify.supported(url) to use full crawler if using feedify
         xml = con.read()
 
     except (IOError, HTTPException):
