@@ -26,7 +26,7 @@ except NameError:
 
 
 MIMETYPE = {
-    'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
+    'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml'],
     'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
 
