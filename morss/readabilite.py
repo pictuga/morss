@@ -55,27 +55,30 @@ attributes_fine = ['title', 'src', 'href', 'type', 'name', 'for', 'value']
 def score_node(node):
     score = 0
 
-    if node.tag in tags_junk:
-        return 0
-
     if isinstance(node, lxml.html.HtmlComment):
         return 0
 
-    if node.tag in ['a']:
-        score -= 1
+    wc = count_words(''.join([node.text or ''] + [x.tail or '' for x in node]))
+    # the .tail part is to include *everything* in that node
 
-    if node.tag in ['h1', 'h2', 'article']:
+    if wc < 5:
+        return 0
+
+    if node.tag in ['h1', 'h2', 'h3', 'article']:
         score += 8
 
-    if node.tag in ['p']:
+    if node.tag in ['p', 'cite', 'section']:
         score += 3
 
     class_id = node.get('class', '') + node.get('id', '')
 
-    score += len(regex_good.findall(class_id) * 4)
+    score += len(regex_good.findall(class_id) * 5)
     score -= len(regex_bad.findall(class_id) * 3)
 
-    score += count_words(''.join([node.text or ''] + [x.tail or '' for x in node])) / 10. # the .tail part is to include *everything* in that node
+    score += wc / 5.
+
+    if node.tag in tags_junk or node.tag in ['a']:
+        score *= -1
 
     return score
 
@@ -99,8 +102,9 @@ def score_all(root):
     return grades
 
 
-def get_best_node(root):
-    return sorted(score_all(root).items(), key=lambda x: x[1], reverse=True)[0][0]
+def write_score_all(root, grades):
+    for item in root.iter():
+        item.attrib['score'] = str(int(grades[item]))
 
 
 def clean_html(root):
@@ -156,5 +160,51 @@ def br2p(root):
             gdparent.insert(gdparent.index(parent)+1, new_item)
 
 
-def get_article(data, encoding=None):
-    return lxml.etree.tostring(get_best_node(parse(data, encoding)))
+def lowest_common_ancestor(nodeA, nodeB, max_depth=None):
+    ancestorsA = list(nodeA.iterancestors())
+    ancestorsB = list(nodeB.iterancestors())
+
+    if max_depth is not None:
+        ancestorsA = ancestorsA[:max_depth]
+        ancestorsB = ancestorsB[:max_depth]
+
+    ancestorsA.insert(0, nodeA)
+    ancestorsB.insert(0, nodeB)
+
+    for ancestorA in ancestorsA:
+        if ancestorA in ancestorsB:
+            return ancestorA
+
+    return nodeA # should always find one tho, at least <html/>
+
+
+def rank_nodes(grades):
+    return sorted(grades.items(), key=lambda x: x[1], reverse=True)
+
+
+def get_best_node(grades):
+    top = rank_nodes(grades)
+
+    if top[0][1] < top[1][1] * 1.6:
+        # we might still want to include the 2nd best node (great for articles split with images)
+
+        cmn_ancestor = lowest_common_ancestor(top[0][0], top[1][0], 3)
+        return cmn_ancestor
+
+    else:
+        return top[0][0]
+
+
+def get_article(data, url=None, encoding=None):
+    html = parse(data, encoding)
+    br2p(html)
+
+    scores = score_all(html)
+    best = get_best_node(scores)
+
+    clean_html(best)
+
+    if url:
+        best.make_links_absolute(url)
+
+    return lxml.etree.tostring(best)
