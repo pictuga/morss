@@ -64,9 +64,9 @@ def detect_encoding(data, con=None):
     if match:
         return match.groups()[0].lower().decode()
 
-    enc = chardet.detect(data[:1000])['encoding']
-    if enc:
-            return enc
+    enc = chardet.detect(data)['encoding']
+    if enc and enc != 'ascii':
+        return enc
 
     return 'utf-8'
 
