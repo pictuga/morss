@@ -1,4 +1,4 @@
-#Morss - Get full-text RSS feeds
+# Morss - Get full-text RSS feeds
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds,
 commonly available on internet. Indeed most newspapers only make a small
@@ -24,7 +24,7 @@ rss feeds in html pages' `<meta>`.
 You can use this program online for free at **[morss.it](http://morss.it/)**
 (there's also a [test](http://test.morss.it/) version).
 
-##Dependencies
+## Dependencies
 
 You do need:
 
@@ -47,7 +47,7 @@ You may also need:
 
 GPL3 code.
 
-##Arguments
+## Arguments
 
 morss accepts some arguments, to lightly alter the output of morss. Arguments
 may need to have a value (usually a string or a number). In the different "Use
@@ -83,12 +83,12 @@ The arguments are:
 	- `strip`: remove all description and content from feed items
 	- `empty`: remove all feed items
 
-##Use cases
+## Use cases
 
 morss will auto-detect what "mode" to use.
 
-###Running on a server
-####Via mod_cgi/FastCGI with Apache/nginx
+### Running on a server
+#### Via mod_cgi/FastCGI with Apache/nginx
 
 For this, you'll want to change a bit the architecture of the files, for example
 into something like this.
@@ -120,7 +120,7 @@ method uses HTTP calls to fetch the RSS feeds, which will be handled through
 Please pay attention to `main.py` permissions for it to be executable. Also
 ensure that the provided `/www/.htaccess` works well with your server.
 
-####Using uWSGI
+#### Using uWSGI
 
 Running this command should do:
 
@@ -131,14 +131,14 @@ isn't in the same directory. Therefore you can add this at the end of the
 command to point to another directory `--pyargv '--root ../../www/'`.
 
 
-####Using morss' internal HTTP server
+#### Using morss' internal HTTP server
 
 Morss can run its own HTTP server. The later should start when you run morss
 without any argument, on port 8080.
 
 You can change the port and the location of the `www/` folder like this `python -m morss 9000 --root ../../www`.
 
-####Passing arguments
+#### Passing arguments
 
 Then visit: **`http://PATH/TO/MORSS/[main.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
 For example: `http://morss.example/:clip/https://twitter.com/pictuga`  
@@ -148,13 +148,13 @@ The `main.py` part is only needed if your server doesn't support the Apache redi
 
 Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki), and most probably other clients.
 
-###As a CLI application
+### As a CLI application
 
 Run: **`python[2.7] -m morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
 For example: `python -m morss debug http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
-###As a newsreader hook
+### As a newsreader hook
 
 To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required
 (unless other newsreaders provide the same kind of feature), since custom
@@ -165,7 +165,7 @@ To use this script, you have to enable "(Unix) command" in liferea feed settings
 For example: `python2.7 PATH/TO/MORSS/main.py http://feeds.bbci.co.uk/news/rss.xml`  
 *(Brackets indicate optional text)*
 
-###As a python library
+### As a python library
 
 Quickly get a full-text feed:
 ```python
@@ -204,7 +204,7 @@ rss = morss.FeedGather(rss, url, options) # this fills the feed and cleans it up
 output = morss.Format(rss, options) # formats final feed
 ```
 
-##Cache information
+## Cache information
 
 morss uses a small cache directory to make the loading faster. Given the way
 it's designed, the cache doesn't need to be purged each while and then, unless
@@ -213,8 +213,8 @@ you might want to delete the cache files corresponding to the bygone feeds. If
 morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`,
 and in `$HOME/.cache/morss` otherwise.
 
-##Configuration
-###Length limitation
+## Configuration
+### Length limitation
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of
 time to parse it, or might even run into a memory overflow on some shared
@@ -226,13 +226,13 @@ different values at the top of the script.
 - `LIM_TIME` sets the maximum amount of time spent working on the feed (whether or not it's already cached). Articles beyond that limit will be dropped from the feed. `-1` for unlimited.
 - `LIM_ITEM` sets the maximum number of article checked, limiting both the number of articles fetched and taken from cache. Articles beyond that limit will be dropped from the feed, even if they're cached. `-1` for unlimited.
 
-###Other settings
+### Other settings
 
 - `DELAY` sets the browser cache delay, only for HTTP clients
 - `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
 - `THREADS` sets the number of threads to use. `1` makes no use of multithreading.
 
-###Content matching
+### Content matching
 
 The content of articles is grabbed with our own readability fork. This means
 that most of the time the right content is matched. However sometimes it fails,
@@ -251,7 +251,7 @@ detection is very simple, and only works if the actual content is put in the
 
 ***
 
-##Todo
+## Todo
 
 You can contribute to this project. If you're not sure what to do, you can pick
 from this list:
