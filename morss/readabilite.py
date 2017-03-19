@@ -37,17 +37,17 @@ def count_words(string):
 
 regex_bad = re.compile('|'.join(['robots-nocontent', 'combx', 'comment',
     'community', 'disqus', 'extra', 'foot', 'header', 'menu', 'remark', 'rss',
-    'shoutbox', 'sidebar', 'sponsor', 'ad-break', 'agegate', 'pagination',
+    'shoutbox', 'sidebar', 'sponsor', 'ad-', 'agegate', 'pagination',
     'pager', 'popup', 'tweet', 'twitter', 'com-', 'sharing', 'share', 'social',
     'contact', 'footnote', 'masthead', 'media', 'meta', 'outbrain', 'promo',
     'related', 'scroll', 'shoutbox', 'sidebar', 'sponsor', 'shopping', 'tags',
-    'tool', 'widget']), re.I)
+    'tool', 'widget', 'hide']), re.I)
 
 regex_good = re.compile('|'.join(['and', 'article', 'body', 'column',
     'main', 'shadow', 'content', 'entry', 'hentry', 'main', 'page',
-    'pagination', 'post', 'text', 'blog', 'story', 'par']), re.I)
+    'pagination', 'post', 'text', 'blog', 'story', 'par', 'editorial']), re.I)
 
-tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed', 'layer', 'applet', 'style']
+tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed', 'layer', 'applet', 'style', 'form', 'input', 'textarea']
 
 attributes_fine = ['title', 'src', 'href', 'type', 'name', 'for', 'value']
 
