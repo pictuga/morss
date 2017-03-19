@@ -45,7 +45,10 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
         handlers.append(AutoRefererHandler())
 
     handlers.append(EncodingFixHandler(encoding))
-    handlers.append(ContentNegociationHandler(MIMETYPE[accept], strict))
+
+    if accept:
+        handlers.append(ContentNegociationHandler(MIMETYPE[accept], strict))
+
     handlers.append(SQliteCacheHandler(delay))
 
     return build_opener(*handlers)
@@ -164,7 +167,7 @@ class ContentNegociationHandler(BaseHandler):
 
     def http_response(self, req, resp):
         contenttype = resp.info().get('Content-Type', '').split(';')[0]
-        if 200 <= resp.code < 300 and self.strict and contenttype in MIMETYPE['html'] and contenttype not in self.accept:
+        if 200 <= resp.code < 300 and self.accept is not None and self.strict and contenttype in MIMETYPE['html'] and contenttype not in self.accept:
             # opps, not what we were looking for, let's see if the html page suggests an alternative page of the right types
 
             data = resp.read()
