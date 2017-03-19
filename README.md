@@ -258,3 +258,4 @@ from this list:
 
 - Add ability to run morss.py as an update daemon
 - Add ability to use custom xpath rule instead of readability
+- More ideas here <https://github.com/pictuga/morss/issues/15>
