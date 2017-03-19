@@ -111,7 +111,7 @@ def clean_html(root):
             item.getparent().remove(item)
 
         class_id = item.get('class', '') + item.get('id', '')
-        if regex_bad.match(class_id):
+        if regex_bad.match(class_id) is not None:
             item.getparent().remove(item)
 
         if isinstance(item, lxml.html.HtmlComment):
