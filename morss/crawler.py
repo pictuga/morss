@@ -29,6 +29,28 @@ MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
     'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
+
+DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
+
+
+def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=False):
+    handlers = []
+
+    handlers.append(GZIPHandler())
+    handlers.append(HTTPEquivHandler())
+    handlers.append(HTTPRefreshHandler())
+
+    if not basic:
+        handlers.append(UAHandler(DEFAULT_UA))
+        handlers.append(AutoRefererHandler())
+
+    handlers.append(EncodingFixHandler(encoding))
+    handlers.append(ContentNegociationHandler(MIMETYPE[accept], strict))
+    handlers.append(SQliteCacheHandler(delay))
+
+    return build_opener(*handlers)
+
+
 class GZIPHandler(BaseHandler):
     def http_request(self, req):
         req.add_unredirected_header('Accept-Encoding', 'gzip')
