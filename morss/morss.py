@@ -7,7 +7,6 @@ import threading
 
 from fnmatch import fnmatch
 import re
-import json
 
 import lxml.etree
 import lxml.html
@@ -335,7 +334,7 @@ def FeedFetch(url, options):
     if isinstance(url, bytes):
         url = url.decode()
 
-    # do some useful facebook work
+    # allow for code execution for feedify
     pre = feedify.pre_worker(url)
     if pre:
         url = pre
@@ -357,12 +356,7 @@ def FeedFetch(url, options):
 
     contenttype = con.info().get('Content-Type', '').split(';')[0]
 
-    if url.startswith('https://itunes.apple.com/lookup?id='):
-        link = json.loads(xml.decode('utf-8', 'replace'))['results'][0]['feedUrl']
-        log('itunes redirect: %s' % link)
-        return FeedFetch(link, options)
-
-    elif re.match(b'\s*<?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
+    if re.match(b'\s*<?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
         rss = feeds.parse(xml)
 
     elif feedify.supported(url):

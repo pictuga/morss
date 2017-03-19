@@ -15,10 +15,12 @@ try:
     from ConfigParser import ConfigParser
     from urlparse import urlparse, urljoin
     from urllib2 import urlopen
+    from httplib import HTTPException
 except ImportError:
     from configparser import ConfigParser
     from urllib.parse import urlparse, urljoin
     from urllib.request import urlopen
+    from http.client import HTTPException
 
 try:
     basestring
@@ -95,12 +97,20 @@ def format_string(string, getter, error=False):
 
 
 def pre_worker(url):
-    if urlparse(url).netloc == 'itunes.apple.com':
+    if url.startswith('http://itunes.apple.com/') or url.startswith('https://itunes.apple.com/'):
         match = re.search('/id([0-9]+)(\?.*)?$', url)
         if match:
             iid = match.groups()[0]
-            redirect = 'https://itunes.apple.com/lookup?id={id}'.format(id=iid)
-            return redirect
+            redirect = 'https://itunes.apple.com/lookup?id=%s' % iid
+
+            try:
+                con = crawler.custom_handler(basic=True).open(redirect, timeout=4)
+                data = con.read()
+
+            except (IOError, HTTPException):
+                raise
+
+            return json.loads(data.decode('utf-8', 'replace'))['results'][0]['feedUrl']
 
     return None
 
