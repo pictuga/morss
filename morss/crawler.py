@@ -12,10 +12,10 @@ import sqlite3
 import time
 
 try:
-    from urllib2 import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list
+    from urllib2 import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     import mimetools
 except ImportError:
-    from urllib.request import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list
+    from urllib.request import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     import email
 
 try:
