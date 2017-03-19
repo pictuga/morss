@@ -294,6 +294,12 @@ class BaseCacheHandler(BaseHandler):
             # force refresh
             return None
 
+        elif code == 301 and cache_age < 7*24*3600:
+            print('301 so cached')
+            # "301 Moved Permanently" has to be cached...as long as we want (awesome HTTP specs), let's say a week (why not?)
+            # use force_min=0 if you want to bypass this (needed for a proper refresh)
+            pass
+
         elif  self.force_min is None and ('no-cache' in cc_list
                                         or 'no-store' in cc_list
                                         or ('private' in cc_list and not self.private)):
@@ -306,11 +312,6 @@ class BaseCacheHandler(BaseHandler):
 
         elif self.force_min is not None and self.force_min > cache_age:
             # still recent enough for us, use cache
-            pass
-
-        elif code == 301 and cache_age < 7*24*3600:
-            # "301 Moved Permanently" has to be cached...as long as we want (awesome HTTP specs), let's say a week (why not?)
-            # use force_min=0 if you want to bypass this (needed for a proper refresh)
             pass
 
         else:
