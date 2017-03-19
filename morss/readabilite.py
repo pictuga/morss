@@ -104,18 +104,21 @@ def get_best_node(root):
 
 
 def clean_html(root):
-    for item in root.iter():
+    for item in list(root.iter()): # list() needed to be able to remove elements while iterating
         # Step 1. Do we keep the node?
 
         if item.tag in tags_junk:
             item.getparent().remove(item)
+            continue
 
         class_id = item.get('class', '') + item.get('id', '')
         if regex_bad.match(class_id) is not None:
             item.getparent().remove(item)
+            continue
 
         if isinstance(item, lxml.html.HtmlComment):
             item.getparent().remove(item)
+            continue
 
         # Step 2. Clean the node's attributes
 
@@ -125,7 +128,7 @@ def clean_html(root):
 
 
 def br2p(root):
-    for item in root.iterfind('.//br'):
+    for item in list(root.iterfind('.//br')):
         parent = item.getparent()
         if parent is None:
             continue
