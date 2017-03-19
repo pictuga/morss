@@ -79,7 +79,11 @@ class EncodingFixHandler(BaseHandler):
         maintype = resp.info().get('Content-Type', '').split('/')[0]
         if 200 <= resp.code < 300 and maintype == 'text':
             data = resp.read()
-            enc = detect_encoding(data, resp) if not self.encoding else self.encoding
+
+            if not self.encoding:
+                enc = detect_encoding(data, resp)
+            else:
+                enc = self.encoding
 
             if enc:
                 data = data.decode(enc, 'replace')
