@@ -497,6 +497,9 @@ def cgi_app(environ, start_response):
     else:
         url = environ['PATH_INFO'][1:]
 
+        if environ['QUERY_STRING']:
+            url += '?' + environ['QUERY_STRING']
+
     url = re.sub(r'^/?(morss.py|main.py|cgi/main.py)/', '', url)
 
     if url.startswith(':'):
