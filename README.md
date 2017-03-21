@@ -79,6 +79,12 @@ The arguments are:
 	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
 	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
 	- `txt`: changes the http content-type to txt (for faster "`view-source:`")
+- Custom feeds: you can turn any HTML page into a RSS feed using morss, using xpath rules. The article content will be fetched as usual (with readabilite)
+	- `items`: (**mandatory** to activate the custom feeds function) xpath rule to match all the RSS entries
+	- `item_link`: xpath rule relative to `items` to point to the entry's link
+	- `item_title`: entry's title
+	- `item_content`: entry's description
+	- `item_time`: entry's date & time (accepts a wide range of time formats)
 - Completely useless
 	- `strip`: remove all description and content from feed items
 	- `empty`: remove all feed items
