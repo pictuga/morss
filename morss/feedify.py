@@ -171,7 +171,7 @@ class Builder(object):
             return a
 
     def strings(self, html, expr):
-        " Turns the results into a nice array of strings (ie. sth useful) "
+        " Turns the results of raw() into a nice array of strings (ie. sth useful) "
 
         if self.rule['mode'] == 'xpath':
             out = []
@@ -188,7 +188,7 @@ class Builder(object):
         return out
 
     def string(self, html, expr):
-        " Makes a formatted string out of the getter and rule "
+        " Makes a formatted string, using our custom template format, out of the getter and rule "
 
         getter = lambda x: self.strings(html, x)
         return format_string(self.rule[expr], getter)
