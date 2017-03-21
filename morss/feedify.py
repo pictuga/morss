@@ -13,13 +13,11 @@ from . import crawler
 
 try:
     from ConfigParser import ConfigParser
-    from urlparse import urlparse, urljoin
-    from urllib2 import urlopen
+    from urlparse import urljoin
     from httplib import HTTPException
 except ImportError:
     from configparser import ConfigParser
-    from urllib.parse import urlparse, urljoin
-    from urllib.request import urlopen
+    from urllib.parse import urljoin
     from http.client import HTTPException
 
 try:
@@ -116,12 +114,10 @@ def pre_worker(url):
 
 
 class Builder(object):
-    def __init__(self, link, data=None):
+    def __init__(self, link, data):
         self.link = link
         self.data = data
-
-        if self.data is None:
-            self.data = urlopen(link).read()
+        self.rule = rule
 
         self.encoding = crawler.detect_encoding(self.data)
 
