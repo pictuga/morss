@@ -114,7 +114,8 @@ def pre_worker(url):
 
 
 class Builder(object):
-    def __init__(self, link, data):
+    def __init__(self, link, data, rule=None):
+
         self.link = link
         self.data = data
         self.rule = rule
@@ -124,7 +125,8 @@ class Builder(object):
         if isinstance(self.data, bytes):
             self.data = self.data.decode(crawler.detect_encoding(self.data), 'replace')
 
-        self.rule = get_rule(link)
+        if self.rule is None:
+            self.rule = get_rule(link)
 
         if self.rule['mode'] == 'xpath':
             self.doc = lxml.html.fromstring(self.data)

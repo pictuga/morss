@@ -348,7 +348,9 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = crawler.custom_handler('xml', True, delay, options.encoding, not feedify.supported(url)).open(url, timeout=TIMEOUT * 2) # feedify.supported(url) to use full crawler if using feedify
+        con = crawler.custom_handler('xml', True, delay, options.encoding,
+            not feedify.supported(url) or not options.items).open(url, timeout=TIMEOUT * 2)
+            # feedify.supported(url) to use full crawler if using feedify
         xml = con.read()
 
     except (IOError, HTTPException):
@@ -360,7 +362,26 @@ def FeedFetch(url, options):
         rss = feeds.parse(xml)
 
     elif feedify.supported(url):
+        # using config file-based feedify
         feed = feedify.Builder(url, xml)
+        feed.build()
+        rss = feed.feed
+
+    elif options.items:
+        # using argument-based feedify
+        rule = {'items': options.items}
+        rule['mode'] = 'xpath'
+
+        if options.item_title:
+            rule['item_title'] = options.item_title
+        if options.item_link:
+            rule['item_link'] = options.item_link
+        if options.item_content:
+            rule['item_content'] = options.item_content
+        if options.item_time:
+            rule['item_time'] = options.item_time
+
+        feed = feedify.Builder(url, xml, rule)
         feed.build()
         rss = feed.feed
 
@@ -504,11 +525,14 @@ def cgi_app(environ, start_response):
 
     if url.startswith(':'):
         split = url.split('/', 1)
-        options = split[0].split(':')[1:]
+
+        options = split[0].replace('|', '/').split(':')[1:]
+
         if len(split) > 1:
             url = split[1]
         else:
             url = ''
+
     else:
         options = []
 
