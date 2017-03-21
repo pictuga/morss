@@ -500,7 +500,7 @@ def cgi_app(environ, start_response):
         if environ['QUERY_STRING']:
             url += '?' + environ['QUERY_STRING']
 
-    url = re.sub(r'^/?(morss.py|main.py|cgi/main.py)/', '', url)
+    url = re.sub(r'^/?(cgi/)?(morss.py|main.py)/', '', url)
 
     if url.startswith(':'):
         split = url.split('/', 1)
