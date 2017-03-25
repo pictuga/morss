@@ -199,22 +199,6 @@ def ItemFill(item, options, feedurl='/', fast=False):
 
     log(item.link)
 
-    # content already provided?
-    count_content = count_words(item.content)
-    count_desc = count_words(item.desc)
-
-    if not options.hungry and max(count_content, count_desc) > 500:
-        if count_desc > count_content:
-            item.content = item.desc
-            del item.desc
-            log('reversed sizes')
-        log('long enough')
-        return True
-
-    if not options.hungry and count_content > 5 * count_desc > 0 and count_content > 50:
-        log('content bigger enough')
-        return True
-
     link = item.link
 
     # twitter
@@ -261,12 +245,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
 
     out = readabilite.get_article(data, options.encoding or crawler.detect_encoding(data, con))
 
-    if options.hungry or count_words(out) > max(count_content, count_desc):
-        item.push_content(out)
-
-    else:
-        log('link not bigger enough')
-        return True
+    item.content = out
 
     return True
 
