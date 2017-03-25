@@ -208,12 +208,12 @@ def get_best_node(grades):
 
 def get_article(data, url=None, encoding=None):
     html = parse(data, encoding)
+
+    clean_html(html)
     br2p(html)
 
     scores = score_all(html)
     best = get_best_node(scores)
-
-    clean_html(best)
 
     if url:
         best.make_links_absolute(url)
