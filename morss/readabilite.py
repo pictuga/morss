@@ -112,6 +112,7 @@ def clean_html(root):
         # Step 1. Do we keep the node?
 
         if item.tag in tags_junk:
+            # remove shitty tags
             item.getparent().remove(item)
             continue
 
@@ -119,15 +120,18 @@ def clean_html(root):
             and len(list(item.iterchildren())) <= 1 \
             and not (item.text or '').strip() \
             and not (item.tail or '').strip():
+            # remove div with only one item inside
             item.drop_tag()
             continue
 
         class_id = item.get('class', '') + item.get('id', '')
         if regex_bad.match(class_id) is not None:
+            # remove shitty class/id
             item.getparent().remove(item)
             continue
 
         if isinstance(item, lxml.html.HtmlComment):
+            # remove comments
             item.getparent().remove(item)
             continue
 
