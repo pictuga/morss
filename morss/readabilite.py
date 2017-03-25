@@ -41,7 +41,7 @@ regex_bad = re.compile('|'.join(['robots-nocontent', 'combx', 'comment',
     'pager', 'popup', 'tweet', 'twitter', 'com-', 'sharing', 'share', 'social',
     'contact', 'footnote', 'masthead', 'media', 'meta', 'outbrain', 'promo',
     'related', 'scroll', 'shoutbox', 'shopping', 'tags',
-    'tool', 'widget', 'hide']), re.I)
+    'tool', 'widget', 'hide', 'author', 'about']), re.I)
 
 regex_good = re.compile('|'.join(['and', 'article', 'body', 'column',
     'main', 'shadow', 'content', 'entry', 'hentry', 'main', 'page',
