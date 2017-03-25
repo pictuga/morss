@@ -115,6 +115,13 @@ def clean_html(root):
             item.getparent().remove(item)
             continue
 
+        if item.tag in ['div'] \
+            and len(list(item.iterchildren())) <= 1 \
+            and not (item.text or '').strip() \
+            and not (item.tail or '').strip():
+            item.drop_tag()
+            continue
+
         class_id = item.get('class', '') + item.get('id', '')
         if regex_bad.match(class_id) is not None:
             item.getparent().remove(item)
