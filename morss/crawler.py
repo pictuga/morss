@@ -12,10 +12,10 @@ import sqlite3
 import time
 
 try:
-    from urllib2 import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
+    from urllib2 import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     import mimetools
 except ImportError:
-    from urllib.request import BaseHandler, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
+    from urllib.request import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     import email
 
 try:
@@ -36,6 +36,15 @@ DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25
 def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=False):
     handlers = []
 
+    # as per urllib2 source code, these Handelers are added first
+    # *unless* one of the custom handlers inherits from one of them
+    #
+    # [ProxyHandler, UnknownHandler, HTTPHandler,
+    # HTTPDefaultErrorHandler, HTTPRedirectHandler,
+    # FTPHandler, FileHandler, HTTPErrorProcessor]
+    # & HTTPSHandler
+
+    handlers.append(HTTPCookieProcessor())
     handlers.append(GZIPHandler())
     handlers.append(HTTPEquivHandler())
     handlers.append(HTTPRefreshHandler())
