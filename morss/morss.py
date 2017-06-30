@@ -363,7 +363,10 @@ def FeedFetch(url, options):
         feed = feedify.Builder(url, xml, rule)
         feed.build()
         rss = feed.feed
-
+        
+    elseif ('contenttype == text/xml, charset=UTF-8'):
+        rss = feeds.parse(xml)
+        
     else:
         log('random page')
         log(contenttype)
