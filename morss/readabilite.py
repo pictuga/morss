@@ -155,8 +155,8 @@ def clean_html(root):
 
 
 def br2p(root):
-    for item in list(root.iterfind('.//br')):
-        parent = item.getparent()
+    for node in list(root.iterfind('.//br')):
+        parent = node.getparent()
         if parent is None:
             continue
 
@@ -164,23 +164,23 @@ def br2p(root):
         if gdparent is None:
             continue
 
-        if item.tail is None:
+        if node.tail is None:
             # if <br/> is at the end of a div (to avoid having <p/>)
             continue
 
         else:
-            # set up new item
-            new_item = lxml.html.Element(parent.tag)
-            new_item.text = item.tail
+            # set up new node
+            new_node = lxml.html.Element(parent.tag)
+            new_node.text = node.tail
 
-            for child in item.itersiblings():
-                new_item.append(child)
+            for child in node.itersiblings():
+                new_node.append(child)
 
             # delete br
-            item.tail = None
-            parent.remove(item)
+            node.tail = None
+            parent.remove(node)
 
-            gdparent.insert(gdparent.index(parent)+1, new_item)
+            gdparent.insert(gdparent.index(parent)+1, new_node)
 
 
 def lowest_common_ancestor(nodeA, nodeB, max_depth=None):
