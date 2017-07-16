@@ -198,7 +198,7 @@ def lowest_common_ancestor(nodeA, nodeB, max_depth=None):
         if ancestorA in ancestorsB:
             return ancestorA
 
-    return nodeA # should always find one tho, at least <html/>
+    return nodeA # should always find one tho, at least <html/>, but needed for max_depth
 
 
 def rank_nodes(grades):
