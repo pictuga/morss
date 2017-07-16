@@ -98,7 +98,7 @@ def detect_encoding(data, con=None):
     if match:
         return match.groups()[0].lower().decode()
 
-    enc = chardet.detect(data)['encoding']
+    enc = chardet.detect(data[-2000:])['encoding']
     if enc and enc != 'ascii':
         return enc
 
