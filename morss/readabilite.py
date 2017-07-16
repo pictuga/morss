@@ -207,15 +207,10 @@ def rank_nodes(grades):
 
 def get_best_node(grades):
     top = rank_nodes(grades)
+    lowest = lowest_common_ancestor(top[0][0], top[1][0], 3)
 
-    if top[0][1] < top[1][1] * 1.6:
-        # we might still want to include the 2nd best node (great for articles split with images)
 
-        cmn_ancestor = lowest_common_ancestor(top[0][0], top[1][0], 3)
-        return cmn_ancestor
-
-    else:
-        return top[0][0]
+    return lowest
 
 
 def get_article(data, url=None, encoding=None):
