@@ -35,19 +35,29 @@ def count_words(string):
     return count
 
 
-regex_bad = re.compile('|'.join(['robots-nocontent', 'combx', 'comment',
-    'community', 'disqus', 'extra', 'foot', 'header', 'menu', 'remark', 'rss',
-    'shoutbox', 'sidebar', 'sponsor', 'ad-', 'agegate', 'pagination',
-    'pager', 'popup', 'tweet', 'twitter', 'com-', 'sharing', 'share', 'social',
-    'contact', 'footnote', 'masthead', 'media', 'meta', 'outbrain', 'promo',
-    'related', 'scroll', 'shoutbox', 'shopping', 'tags',
-    'tool', 'widget', 'hide', 'author', 'about']), re.I)
+regex_bad = re.compile('|'.join(['comment', 'community', 'extra', 'foot',
+    'sponsor', 'pagination', 'pager', 'tweet', 'twitter', 'com-', 'masthead',
+    'media', 'meta', 'related', 'shopping', 'tags', 'tool', 'author', 'about']),
+    re.I)
 
-regex_good = re.compile('|'.join(['and', 'article', 'body', 'column',
-    'main', 'shadow', 'content', 'entry', 'hentry', 'main', 'page',
-    'pagination', 'post', 'text', 'blog', 'story', 'par', 'editorial']), re.I)
+regex_junk = re.compile('|'.join(['robots-nocontent', 'combx', 'disqus',
+    'header', 'menu', 'remark', 'rss', 'shoutbox', 'sidebar', 'ad-', 'agegate',
+    'popup', 'sharing', 'share', 'social', 'contact', 'footnote', 'outbrain',
+    'promo', 'scroll', 'hidden', 'widget', 'hide']), re.I)
 
-tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed', 'layer', 'applet', 'style', 'form', 'input', 'textarea', 'button']
+regex_good = re.compile('|'.join(['and', 'article', 'body', 'column', 'main',
+    'shadow', 'content', 'entry', 'hentry', 'main', 'page', 'pagination',
+    'post', 'text', 'blog', 'story', 'par', 'editorial']), re.I)
+
+
+tags_bad = ['a']
+
+tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed',
+    'layer', 'applet', 'style', 'form', 'input', 'textarea', 'button', 'footer']
+
+tags_good = ['h1', 'h2', 'h3', 'article', 'p', 'cite', 'section', 'img',
+    'figcaption', 'figure']
+
 
 attributes_fine = ['title', 'src', 'href', 'type', 'name', 'for', 'value']
 
@@ -58,27 +68,29 @@ def score_node(node):
     if isinstance(node, lxml.html.HtmlComment):
         return 0
 
+    class_id = node.get('class', '') + node.get('id', '')
+
+    score -= len(regex_bad.findall(class_id))
+    score -= len(regex_junk.findall(class_id))
+    score += len(regex_good.findall(class_id))
+
     wc = count_words(''.join([node.text or ''] + [x.tail or '' for x in node]))
     # the .tail part is to include *everything* in that node
 
-    if wc < 5:
-        return 0
+    if wc > 10:
+        score += 1
 
-    if node.tag in ['h1', 'h2', 'h3', 'article']:
-        score += 8
+    if wc > 20:
+        score += 1
 
-    if node.tag in ['p', 'cite', 'section']:
+    if wc > 30:
+        score += 1
+
+    if node.tag in tags_bad or node.tag in tags_junk:
+        score = -1 * abs(score)
+
+    if node.tag in tags_good:
         score += 3
-
-    class_id = node.get('class', '') + node.get('id', '')
-
-    score += len(regex_good.findall(class_id) * 5)
-    score -= len(regex_bad.findall(class_id) * 3)
-
-    score += wc / 5.
-
-    if node.tag in tags_junk or node.tag in ['a']:
-        score *= -1
 
     return score
 
