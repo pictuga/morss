@@ -98,20 +98,46 @@ def score_node(node):
 def score_all(root):
     grades = {}
 
-    for item in root.iter():
-        score = score_node(item)
+    for node in list(root.iter()):
+        score = score_node(node)
 
-        grades[item] = score
+        parent = node.getparent()
+        clean_node(node)
 
-        factor = 2
-        for ancestor in item.iterancestors():
-            if score / factor > 1:
-                grades[ancestor] += score / factor
-                factor *= 2
+        if parent is not None and node.getparent() is None:
+            # if the node got deleted/dropped (else, nothing to do)
+            # maybe now the parent only contains 1 item and needs to be flattened?
+
+            gdparent = parent.getparent()
+            clean_node(parent)
+
+            if gdparent is not None and parent.getparent() is None:
+                # if the parent got deleted/dropped
+                spread_score(gdparent, score + grades[parent], grades)
+
             else:
-                break
+                # if the parent was kept
+                spread_score(parent, score, grades)
+
+        else:
+            # if the node was kept
+            spread_score(node, score, grades)
 
     return grades
+
+
+def spread_score(node, score, grades):
+    for ancestor in [node,] + list(node.iterancestors()):
+        if score >= 1 or ancestor is node:
+            try:
+                grades[ancestor] += score
+            except KeyError:
+                grades[ancestor] = score
+
+            score /= 2
+
+        else:
+            break
 
 
 def write_score_all(root, grades):
@@ -119,39 +145,48 @@ def write_score_all(root, grades):
         node.attrib['score'] = str(int(grades[node]))
 
 
-def clean_html(root):
-    for item in list(root.iter()): # list() needed to be able to remove elements while iterating
-        # Step 1. Do we keep the node?
+def clean_node(node):
+    # Step 1. Do we keep the node?
 
-        if item.tag in tags_junk:
-            # remove shitty tags
-            item.getparent().remove(item)
-            continue
+    if node.getparent() is None:
+        # this is <html/>
+        return
 
-        if item.tag in ['div'] \
-            and len(list(item.iterchildren())) <= 1 \
-            and not (item.text or '').strip() \
-            and not (item.tail or '').strip():
-            # remove div with only one item inside
-            item.drop_tag()
-            continue
+    if node.tag in tags_junk:
+        # remove shitty tags
+        node.getparent().remove(node)
+        return
 
-        class_id = item.get('class', '') + item.get('id', '')
-        if regex_bad.match(class_id) is not None:
-            # remove shitty class/id
-            item.getparent().remove(item)
-            continue
+    # Turn <div><p>Bla bla bla</p></div> into <p>Bla bla bla</p>
 
-        if isinstance(item, lxml.html.HtmlComment):
-            # remove comments
-            item.getparent().remove(item)
-            continue
+    if node.tag in ['div'] \
+        and len(list(node.iterchildren())) <= 1 \
+        and not (node.text or '').strip() \
+        and not (node.tail or '').strip():
+        node.drop_tag()
+        return
 
-        # Step 2. Clean the node's attributes
+    class_id = node.get('class', '') + node.get('id', '')
+    if len(regex_junk.findall(class_id)) >= 2:
+        # remove shitty class/id
+        node.getparent().remove(node)
+        return
 
-        for attrib in item.attrib:
-            if attrib not in attributes_fine:
-                del item.attrib[attrib]
+    if node.tag == 'a' and len(list(node.iter())) > 3:
+        # shitty link
+        node.getparent().remove(node)
+        return
+
+    if isinstance(node, lxml.html.HtmlComment):
+        # remove comments
+        node.getparent().remove(node)
+        return
+
+    # Step 2. Clean the node's attributes
+
+    for attrib in node.attrib:
+        if attrib not in attributes_fine:
+            del node.attrib[attrib]
 
 
 def br2p(root):
@@ -219,10 +254,7 @@ def get_best_node(grades, highlight=False):
 
 def get_article(data, url=None, encoding=None):
     html = parse(data, encoding)
-
-    clean_html(html)
     br2p(html)
-
     scores = score_all(html)
     best = get_best_node(scores)
 
