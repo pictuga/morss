@@ -205,10 +205,14 @@ def rank_nodes(grades):
     return sorted(grades.items(), key=lambda x: x[1], reverse=True)
 
 
-def get_best_node(grades):
+def get_best_node(grades, highlight=False):
     top = rank_nodes(grades)
     lowest = lowest_common_ancestor(top[0][0], top[1][0], 3)
 
+    if highlight:
+        top[0][0].attrib['style'] = 'border: 2px solid blue'
+        top[1][0].attrib['style'] = 'border: 2px solid green'
+        lowest.attrib['style'] = 'outline: 2px solid red'
 
     return lowest
 
