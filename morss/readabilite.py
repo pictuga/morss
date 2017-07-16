@@ -115,8 +115,8 @@ def score_all(root):
 
 
 def write_score_all(root, grades):
-    for item in root.iter():
-        item.attrib['score'] = str(int(grades[item]))
+    for node in root.iter():
+        node.attrib['score'] = str(int(grades[node]))
 
 
 def clean_html(root):
