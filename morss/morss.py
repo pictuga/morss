@@ -243,7 +243,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = readabilite.get_article(data, options.encoding or crawler.detect_encoding(data, con))
+    out = readabilite.get_article(data, link, options.encoding or crawler.detect_encoding(data, con))
 
     item.content = out
 
