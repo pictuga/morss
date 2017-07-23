@@ -4,14 +4,6 @@ ErrorDocument 403 "Access forbidden"
 ErrorDocument 404 /cgi/main.py
 ErrorDocument 500 "A very nasty bug found his way onto this very server"
 
-Order Deny,Allow
-
 <Files ~ "\.(py|pyc|db|log)$">
 	deny from all
-</Files>
-
-<Files main.py>
-	allow from all
-	AddHandler cgi-script .py
-	Options +ExecCGI
 </Files>
