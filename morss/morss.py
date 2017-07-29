@@ -624,7 +624,18 @@ def cli_app():
     out = FeedFormat(rss, options)
 
     if not options.silent:
-        print(out.decode('utf-8', 'replace') if isinstance(out, bytes) else out)
+        if sys.version_info[0] > '3':
+            # for Python 3
+            if isinstance(out, bytes):
+                print(out.decode('utf-8', 'replace'))
+            else:
+                print(out)
+        else:
+            # for Python 2
+            if isinstance(out, unicode):
+                print(out.decode('utf-8', 'replace'))
+            else:
+                print(out)
 
     log('done')
 
@@ -666,7 +677,7 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception as e:
-            print('ERROR: %s' % e.message)
+            print('ERROR\nmessage: ' + e.message +  '\ntype: ' + str(type(e)) + '\nargs: ' + str(e.args) + '\nexception: ' + str(e))
 
 if __name__ == '__main__':
     main()
