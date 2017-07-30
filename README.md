@@ -35,6 +35,7 @@ You do need:
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python &lt; 2.7
 - [wheezy.template](https://pypi.python.org/pypi/wheezy.template) to generate HTML pages
 - [chardet](https://pypi.python.org/pypi/chardet)
+- [six](https://pypi.python.org/pypi/six), a dependency of chardet
 
 Simplest way to get these:
 
