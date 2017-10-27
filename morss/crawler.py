@@ -7,6 +7,7 @@ from gzip import GzipFile
 from io import BytesIO, StringIO
 import re
 import chardet
+from cgi import parse_header
 import lxml.html
 import sqlite3
 import time
@@ -145,9 +146,15 @@ class GZIPHandler(BaseHandler):
     https_request = http_request
 
 
-def detect_encoding(data, con=None):
-    if con is not None and con.info().get('charset'):
-        return con.info().get('charset')
+def detect_encoding(data, resp=None):
+    if resp is not None:
+        enc = resp.headers.get('charset')
+        if enc is not None:
+            return enc
+
+        enc = parse_header(resp.headers.get('content-type', ''))[1].get('charset')
+        if enc is not None:
+            return enc
 
     match = re.search(b'charset=["\']?([0-9a-zA-Z-]+)', data[:1000])
     if match:
