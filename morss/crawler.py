@@ -44,6 +44,7 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
     # FTPHandler, FileHandler, HTTPErrorProcessor]
     # & HTTPSHandler
 
+    #handlers.append(DebugHandler())
     handlers.append(HTTPCookieProcessor())
     handlers.append(GZIPHandler())
     handlers.append(HTTPEquivHandler())
@@ -61,6 +62,21 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
     handlers.append(SQliteCacheHandler(delay))
 
     return build_opener(*handlers)
+
+
+class DebugHandler(BaseHandler):
+    handler_order = 2000
+
+    def http_request(self, req):
+        print(repr(req.header_items()))
+        return req
+
+    def http_response(self, req, resp):
+        print(resp.headers.__dict__)
+        return resp
+
+    https_request = http_request
+    https_response = http_response
 
 
 class GZIPHandler(BaseHandler):
