@@ -45,6 +45,7 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
     # & HTTPSHandler
 
     #handlers.append(DebugHandler())
+    handlers.append(SizeLimitHandler(500*1024)) # 500KiB
     handlers.append(HTTPCookieProcessor())
     handlers.append(GZIPHandler())
     handlers.append(HTTPEquivHandler())
@@ -79,6 +80,45 @@ class DebugHandler(BaseHandler):
     https_response = http_response
 
 
+class SizeLimitHandler(BaseHandler):
+    """ Limit file size, defaults to 5MiB """
+
+    handler_order = 450
+
+    def __init__(self, limit=5*1024^2):
+        self.limit = limit
+
+    def http_response(self, req, resp):
+        data = resp.read(self.limit)
+
+        fp = BytesIO(data)
+        old_resp = resp
+        resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+        resp.msg = old_resp.msg
+
+        return resp
+
+    https_response = http_response
+
+
+import contextlib
+
+@contextlib.contextmanager
+def patch_gzip_for_partial():
+    """
+    Context manager that replaces gzip.GzipFile._read_eof with a no-op.
+
+    This is useful when decompressing partial files, something that won't
+    work if GzipFile does it's checksum comparison.
+
+    from https://stackoverflow.com/a/18602286
+    """
+    _read_eof = GzipFile._read_eof
+    GzipFile._read_eof = lambda *args, **kwargs: None
+    yield
+    GzipFile._read_eof = _read_eof
+
+
 class GZIPHandler(BaseHandler):
     def http_request(self, req):
         req.add_unredirected_header('Accept-Encoding', 'gzip')
@@ -88,7 +128,10 @@ class GZIPHandler(BaseHandler):
         if 200 <= resp.code < 300:
             if resp.headers.get('Content-Encoding') == 'gzip':
                 data = resp.read()
-                data = GzipFile(fileobj=BytesIO(data), mode='r').read()
+
+                with patch_gzip_for_partial():
+                    data = GzipFile(fileobj=BytesIO(data), mode='r').read()
+
                 resp.headers['Content-Encoding'] = 'identity'
 
                 fp = BytesIO(data)
