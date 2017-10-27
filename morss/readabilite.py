@@ -258,6 +258,12 @@ def get_article(data, url=None, encoding=None):
     scores = score_all(html)
     best = get_best_node(scores)
 
+    wc = count_words(best.text_content())
+    wca = count_words(' '.join([x.text_content() for x in best.findall('.//a')]))
+
+    if wc - wca < 50 or float(wca) / wc > 0.3:
+        return None
+
     if url:
         best.make_links_absolute(url)
 

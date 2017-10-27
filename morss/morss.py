@@ -245,7 +245,8 @@ def ItemFill(item, options, feedurl='/', fast=False):
 
     out = readabilite.get_article(data, link, options.encoding or crawler.detect_encoding(data, con))
 
-    item.content = out
+    if out is not None:
+        item.content = out
 
     return True
 
