@@ -480,7 +480,7 @@ class BaseCacheHandler(BaseHandler):
     https_response = http_response
 
 
-sqlite_default = ':memory'
+sqlite_default = ':memory:'
 
 
 class SQliteCacheHandler(BaseCacheHandler):
