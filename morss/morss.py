@@ -338,7 +338,7 @@ def FeedFetch(url, options):
 
     contenttype = con.info().get('Content-Type', '').split(';')[0]
 
-    if re.match(b'\s*<?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
+    if re.match(b'\s*<\?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
         rss = feeds.parse(xml)
 
     elif feedify.supported(url):
