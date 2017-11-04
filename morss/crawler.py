@@ -22,7 +22,6 @@ try:
     basestring
 except NameError:
     basestring = unicode = str
-    buffer = memoryview
 
 
 MIMETYPE = {
@@ -337,7 +336,7 @@ class CacheHandler(BaseHandler):
         return out
 
     def save(self, url, code, msg, headers, data, timestamp):
-        self.cache[url] = (code, msg, unicode(headers), buffer(data), timestamp)
+        self.cache[url] = (code, msg, unicode(headers), data, timestamp)
 
     def http_request(self, req):
         (code, msg, headers, data, timestamp) = self.load(req.get_full_url())
@@ -481,7 +480,7 @@ class SQLiteCache:
         self.con = sqlite3.connect(filename or sqlite_default, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
         with self.con:
-            self.con.execute('CREATE TABLE IF NOT EXISTS data (url UNICODE PRIMARY KEY, code INT, msg UNICODE, headers UNICODE, data BYTES, timestamp INT)')
+            self.con.execute('CREATE TABLE IF NOT EXISTS data (url UNICODE PRIMARY KEY, code INT, msg UNICODE, headers UNICODE, data BLOB, timestamp INT)')
             self.con.execute('pragma journal_mode=WAL')
 
     def __del__(self):
