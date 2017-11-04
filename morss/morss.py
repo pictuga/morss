@@ -592,23 +592,23 @@ def cgi_wrapper(environ, start_response):
             headers['status'] = '200 OK'
             headers['content-type'] = files[url]
             start_response(headers['status'], list(headers.items()))
-            return body
+            return [body]
 
         except IOError:
             headers['status'] = '404 Not found'
             start_response(headers['status'], list(headers.items()))
-            return 'Error %s' % headers['status']
+            return ['Error %s' % headers['status']]
 
     # actual morss use
     try:
-        return cgi_app(environ, start_response) or []
+        return [cgi_app(environ, start_response)] or []
     except (KeyboardInterrupt, SystemExit):
         raise
     except Exception as e:
         headers = {'status': '500 Oops', 'content-type': 'text/plain'}
         start_response(headers['status'], list(headers.items()), sys.exc_info())
         log('ERROR <%s>: %s' % (url, e.message), force=True)
-        return 'An error happened:\n%s' % e.message
+        return ['An error happened:\n%s' % e.message]
 
 
 def cli_app():
