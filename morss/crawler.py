@@ -472,10 +472,22 @@ class CacheHandler(BaseHandler):
     https_response = http_response
 
 
+class BaseCache:
+    def __contains__(self, url):
+        try:
+            self[url]
+
+        except KeyError:
+            return False
+
+        else:
+            return True
+
+
 import sqlite3
 
 
-class SQLiteCache:
+class SQLiteCache(BaseCache):
     def __init__(self, filename=':memory:'):
         self.con = sqlite3.connect(filename or sqlite_default, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
@@ -495,7 +507,7 @@ class SQLiteCache:
         return row[1:]
 
     def __setitem__(self, url, value): # value = (code, msg, headers, data, timestamp)
-        if self.con.execute('SELECT code FROM data WHERE url=?', (url,)).fetchone():
+        if url in self:
             with self.con:
                 self.con.execute('UPDATE data SET code=?, msg=?, headers=?, data=?, timestamp=? WHERE url=?',
                     value + (url,))
