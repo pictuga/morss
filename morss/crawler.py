@@ -102,22 +102,22 @@ class SizeLimitHandler(BaseHandler):
     https_response = http_response
 
 
-import contextlib
+def UnGzip(cprss, CHUNKSIZE=64*1024): # the bigger the CHUNKSIZE, the faster
+    " Supports truncated files "
+    gz = GzipFile(fileobj=cprss, mode='rb')
 
-@contextlib.contextmanager
-def patch_gzip_for_partial():
-    """
-    Context manager that replaces gzip.GzipFile._read_eof with a no-op.
+    data = b''
+    chunk = gz.read(CHUNKSIZE)
 
-    This is useful when decompressing partial files, something that won't
-    work if GzipFile does it's checksum comparison.
+    try:
+        while chunk:
+            data += chunk
+            chunk = gz.read(CHUNKSIZE)
 
-    from https://stackoverflow.com/a/18602286
-    """
-    _read_eof = GzipFile._read_eof
-    GzipFile._read_eof = lambda *args, **kwargs: None
-    yield
-    GzipFile._read_eof = _read_eof
+    except (IOError, EOFError):
+        pass
+
+    return data
 
 
 class GZIPHandler(BaseHandler):
@@ -130,8 +130,7 @@ class GZIPHandler(BaseHandler):
             if resp.headers.get('Content-Encoding') == 'gzip':
                 data = resp.read()
 
-                with patch_gzip_for_partial():
-                    data = GzipFile(fileobj=BytesIO(data), mode='r').read()
+                data = UnGzip(BytesIO(data))
 
                 resp.headers['Content-Encoding'] = 'identity'
 
