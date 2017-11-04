@@ -36,6 +36,7 @@ You do need:
 - [wheezy.template](https://pypi.python.org/pypi/wheezy.template) to generate HTML pages
 - [chardet](https://pypi.python.org/pypi/chardet)
 - [six](https://pypi.python.org/pypi/six), a dependency of chardet
+- pymysql
 
 Simplest way to get these:
 
