@@ -483,7 +483,7 @@ def process(url, cache=None, options=None):
     options = Options(options)
 
     if cache:
-        crawler.sqlite_default = cache
+        crawler.default_cache = crawler.SQLiteCache(cache)
 
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
@@ -544,7 +544,7 @@ def cgi_app(environ, start_response):
     else:
         headers['content-type'] = 'text/xml'
 
-    crawler.sqlite_default = os.path.join(os.getcwd(), 'morss-cache.db')
+    crawler.default_cache = crawler.SQLiteCache(os.path.join(os.getcwd(), 'morss-cache.db'))
 
     # get the work done
     rss = FeedFetch(url, options)
@@ -618,7 +618,7 @@ def cli_app():
     global DEBUG
     DEBUG = options.debug
 
-    crawler.sqlite_default = os.path.expanduser('~/.cache/morss-cache.db')
+    crawler.default_cache = crawler.SQLiteCache(os.path.expanduser('~/.cache/morss-cache.db'))
 
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)

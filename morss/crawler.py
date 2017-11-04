@@ -9,7 +9,6 @@ import re
 import chardet
 from cgi import parse_header
 import lxml.html
-import sqlite3
 import time
 
 try:
@@ -61,7 +60,7 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
     if accept:
         handlers.append(ContentNegociationHandler(MIMETYPE[accept], strict))
 
-    handlers.append(SQliteCacheHandler(delay))
+    handlers.append(CacheHandler(force_min=delay))
 
     return build_opener(*handlers)
 
@@ -311,42 +310,37 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
-class BaseCacheHandler(BaseHandler):
-    " Cache based on etags/last-modified. Inherit from this to implement actual storage "
+default_cache = {}
+
+
+class CacheHandler(BaseHandler):
+    " Cache based on etags/last-modified "
 
     private_cache = False # False to behave like a CDN (or if you just don't care), True like a PC
     handler_order = 499
 
-    def __init__(self, force_min=None):
+    def __init__(self, cache=None, force_min=None):
+        self.cache = cache or default_cache
         self.force_min = force_min # force_min (seconds) to bypass http headers, -1 forever, 0 never, -2 do nothing if not in cache
 
-    def _load(self, url):
-        out = list(self.load(url))
+    def load(self, url):
+        try:
+            out = list(self.cache[url])
+        except KeyError:
+            out = [None, None, unicode(), bytes(), 0]
 
         if sys.version_info[0] >= 3:
             out[2] = email.message_from_string(out[2] or unicode()) # headers
         else:
             out[2] = mimetools.Message(StringIO(out[2] or unicode()))
 
-        out[3] = out[3] or bytes() # data
-        out[4] = out[4] or 0 # timestamp
-
         return out
 
-    def load(self, url):
-        " Return the basic vars (code, msg, headers, data, timestamp) "
-        return (None, None, None, None, None)
-
-    def _save(self, url, code, msg, headers, data, timestamp):
-        headers = unicode(headers)
-        self.save(url, code, msg, headers, data, timestamp)
-
     def save(self, url, code, msg, headers, data, timestamp):
-        " Save values to disk "
-        pass
+        self.cache[url] = (code, msg, unicode(headers), buffer(data), timestamp)
 
     def http_request(self, req):
-        (code, msg, headers, data, timestamp) = self._load(req.get_full_url())
+        (code, msg, headers, data, timestamp) = self.load(req.get_full_url())
 
         if 'etag' in headers:
             req.add_unredirected_header('If-None-Match', headers['etag'])
@@ -357,7 +351,7 @@ class BaseCacheHandler(BaseHandler):
         return req
 
     def http_open(self, req):
-        (code, msg, headers, data, timestamp) = self._load(req.get_full_url())
+        (code, msg, headers, data, timestamp) = self.load(req.get_full_url())
 
         # some info needed to process everything
         cache_control = parse_http_list(headers.get('cache-control', ()))
@@ -448,7 +442,7 @@ class BaseCacheHandler(BaseHandler):
 
         # save to disk
         data = resp.read()
-        self._save(req.get_full_url(), resp.code, resp.msg, resp.headers, data, time.time())
+        self.save(req.get_full_url(), resp.code, resp.msg, resp.headers, data, time.time())
 
         fp = BytesIO(data)
         old_resp = resp
@@ -458,11 +452,11 @@ class BaseCacheHandler(BaseHandler):
         return resp
 
     def http_error_304(self, req, fp, code, msg, headers):
-        cache = list(self._load(req.get_full_url()))
+        cache = list(self.load(req.get_full_url()))
 
         if cache[0]:
             cache[-1] = time.time()
-            self._save(req.get_full_url(), *cache)
+            self.save(req.get_full_url(), *cache)
 
             new = Request(req.get_full_url(),
                            headers=req.headers,
@@ -479,13 +473,11 @@ class BaseCacheHandler(BaseHandler):
     https_response = http_response
 
 
-sqlite_default = ':memory:'
+import sqlite3
 
 
-class SQliteCacheHandler(BaseCacheHandler):
-    def __init__(self, force_min=-1, filename=None):
-        BaseCacheHandler.__init__(self, force_min)
-
+class SQLiteCache:
+    def __init__(self, filename=':memory:'):
         self.con = sqlite3.connect(filename or sqlite_default, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
         with self.con:
@@ -499,20 +491,18 @@ class SQliteCacheHandler(BaseCacheHandler):
         row = self.con.execute('SELECT * FROM data WHERE url=?', (url,)).fetchone()
 
         if not row:
-            return (None, None, None, None, None)
+            raise KeyError
 
         return row[1:]
 
-    def save(self, url, code, msg, headers, data, timestamp):
-        data = buffer(data)
-
+    def __setitem__(self, url, value): # value = (code, msg, headers, data, timestamp)
         if self.con.execute('SELECT code FROM data WHERE url=?', (url,)).fetchone():
             with self.con:
                 self.con.execute('UPDATE data SET code=?, msg=?, headers=?, data=?, timestamp=? WHERE url=?',
-                    (code, msg, headers, data, timestamp, url))
+                    value + (url,))
 
         else:
             with self.con:
-                self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?)', (url, code, msg, headers, data, timestamp))
+                self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?)', (url,) + value)
 
 
