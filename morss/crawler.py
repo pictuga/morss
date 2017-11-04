@@ -489,14 +489,14 @@ class SQliteCacheHandler(BaseCacheHandler):
         self.con = sqlite3.connect(filename or sqlite_default, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
         with self.con:
-            self.con.execute('create table if not exists data (url unicode PRIMARY KEY, code int, msg unicode, headers unicode, data bytes, timestamp int)')
+            self.con.execute('CREATE TABLE IF NOT EXISTS data (url UNICODE PRIMARY KEY, code INT, msg UNICODE, headers UNICODE, data BYTES, timestamp INT)')
             self.con.execute('pragma journal_mode=WAL')
 
     def __del__(self):
         self.con.close()
 
-    def load(self, url):
-        row = self.con.execute('select * from data where url=?', (url,)).fetchone()
+    def __getitem__(self, url):
+        row = self.con.execute('SELECT * FROM data WHERE url=?', (url,)).fetchone()
 
         if not row:
             return (None, None, None, None, None)
@@ -506,13 +506,13 @@ class SQliteCacheHandler(BaseCacheHandler):
     def save(self, url, code, msg, headers, data, timestamp):
         data = buffer(data)
 
-        if self.con.execute('select code from data where url=?', (url,)).fetchone():
+        if self.con.execute('SELECT code FROM data WHERE url=?', (url,)).fetchone():
             with self.con:
-                self.con.execute('update data set code=?, msg=?, headers=?, data=?, timestamp=? where url=?',
+                self.con.execute('UPDATE data SET code=?, msg=?, headers=?, data=?, timestamp=? WHERE url=?',
                     (code, msg, headers, data, timestamp, url))
 
         else:
             with self.con:
-                self.con.execute('insert into data values (?,?,?,?,?,?)', (url, code, msg, headers, data, timestamp))
+                self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?)', (url, code, msg, headers, data, timestamp))
 
 
