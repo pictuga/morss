@@ -494,6 +494,10 @@ class SQLiteCache(BaseCache):
         return row[1:]
 
     def __setitem__(self, url, value): # value = (code, msg, headers, data, timestamp)
+        value = list(value)
+        value[3] = sqlite3.Binary(value[3]) # data
+        value = tuple(value)
+
         if url in self:
             with self.con:
                 self.con.execute('UPDATE data SET code=?, msg=?, headers=?, data=?, timestamp=? WHERE url=?',
