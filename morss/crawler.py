@@ -3,7 +3,7 @@ import sys
 import ssl
 import socket
 
-from gzip import GzipFile
+import zlib
 from io import BytesIO, StringIO
 import re
 import chardet
@@ -100,22 +100,9 @@ class SizeLimitHandler(BaseHandler):
     https_response = http_response
 
 
-def UnGzip(cprss, CHUNKSIZE=64*1024): # the bigger the CHUNKSIZE, the faster
+def UnGzip(data):
     " Supports truncated files "
-    gz = GzipFile(fileobj=cprss, mode='rb')
-
-    data = b''
-    chunk = gz.read(CHUNKSIZE)
-
-    try:
-        while chunk:
-            data += chunk
-            chunk = gz.read(CHUNKSIZE)
-
-    except (IOError, EOFError):
-        pass
-
-    return data
+    return zlib.decompressobj(zlib.MAX_WBITS | 32).decompress(data)
 
 
 class GZIPHandler(BaseHandler):
@@ -128,7 +115,7 @@ class GZIPHandler(BaseHandler):
             if resp.headers.get('Content-Encoding') == 'gzip':
                 data = resp.read()
 
-                data = UnGzip(BytesIO(data))
+                data = UnGzip(data)
 
                 resp.headers['Content-Encoding'] = 'identity'
 
