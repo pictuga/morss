@@ -21,8 +21,7 @@ html structure changes on the target website.
 Additionally morss can grab the source xml feed of iTunes podcast, and detect
 rss feeds in html pages' `<meta>`.
 
-You can use this program online for free at **[morss.it](http://morss.it/)**
-(there's also a [test](http://test.morss.it/) version).
+You can use this program online for free at **[morss.it](https://morss.it/)**.
 
 ## Dependencies
 
