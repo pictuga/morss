@@ -23,6 +23,19 @@ rss feeds in html pages' `<meta>`.
 
 You can use this program online for free at **[morss.it](https://morss.it/)**.
 
+Some features of morss:
+- Read RSS/Atom feeds
+- Create RSS feeds from json/html pages
+- Convert iTunes podcast links into xml links
+- Export feeds as RSS/JSON/CSV/HTML
+- Fetch full-text content of feed items
+- Follow 301/meta redirects
+- Recover xml feeds with corrupt encoding
+- Supports gzip-compressed http content
+- HTTP caching with 3 different backends (in-memory/sqlite/mysql)
+- Works as server/cli tool
+- Deobfuscate various tracking links
+
 ## Dependencies
 
 You do need:
