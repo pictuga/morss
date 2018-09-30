@@ -532,7 +532,7 @@ def cgi_app(environ, start_response):
 
     if options.html or options.reader:
         headers['content-type'] = 'text/html'
-    elif options.txt:
+    elif options.txt or options.silent:
         headers['content-type'] = 'text/plain'
     elif options.json:
         headers['content-type'] = 'application/json'
@@ -601,7 +601,7 @@ def cgi_wrapper(environ, start_response):
 
     # actual morss use
     try:
-        return [cgi_app(environ, start_response)] or []
+        return [cgi_app(environ, start_response) or '(empty)']
     except (KeyboardInterrupt, SystemExit):
         raise
     except Exception as e:
