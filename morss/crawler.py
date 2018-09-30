@@ -512,7 +512,7 @@ import pymysql.cursors
 
 
 class MySQLCacheHandler(BaseCache):
-    " NB. Requires mono-threading, as pymysql doesn't isn't thread-safe "
+    " NB. Requires mono-threading, as pymysql isn't thread-safe "
     def __init__(self, user, password, database, host='localhost'):
         self.con = pymysql.connect(host=host, user=user, password=password, database=database, charset='utf8', autocommit=True)
 
