@@ -506,7 +506,7 @@ def cgi_app(environ, start_response):
     if url.startswith(':'):
         split = url.split('/', 1)
 
-        options = split[0].replace('|', '/').split(':')[1:]
+        options = split[0].replace('|', '/').replace('\\\'', '\'').split(':')[1:]
 
         if len(split) > 1:
             url = split[1]
