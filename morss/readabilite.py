@@ -19,12 +19,15 @@ def count_words(string):
     And so in about every language (sorry chinese).
     Basically skips spaces in the count. """
 
+    if string is None:
+        return 0
+
     i = 0
     count = 0
 
     try:
         while True:
-            if string[i] not in '\n\t ':
+            if string[i] not in "\r\n\t ":
                 count += 1
                 i += 6
             else:
