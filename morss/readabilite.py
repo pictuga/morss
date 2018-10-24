@@ -201,20 +201,14 @@ def clean_node(node):
         if attrib not in attributes_fine:
             del node.attrib[attrib]
 
-
-def br2p(root):
-    for node in list(root.iterfind('.//br')):
-        parent = node.getparent()
-        if parent is None:
-            continue
-
-        gdparent = parent.getparent()
+    # br2p
+    if node.tag == 'br':
         if gdparent is None:
-            continue
+            return
 
-        if node.tail is None:
+        if not count_words(node.tail):
             # if <br/> is at the end of a div (to avoid having <p/>)
-            continue
+            return
 
         else:
             # set up new node
@@ -267,7 +261,6 @@ def get_best_node(grades):
 
 def get_article(data, url=None, encoding=None):
     html = parse(data, encoding)
-    br2p(html)
     scores = score_all(html)
 
     if not len(scores):
