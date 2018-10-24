@@ -276,4 +276,4 @@ def get_article(data, url=None, encoding=None):
     if url:
         best.make_links_absolute(url)
 
-    return lxml.etree.tostring(best)
+    return lxml.etree.tostring(best, pretty_print=True)
