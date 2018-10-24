@@ -75,11 +75,11 @@ def tag_NS(tag, nsmap=NSMAP):
 
 
 def inner_html(xml):
-    return (xml.text or '') + ''.join([etree.tostring(child) for child in xml.iterchildren()])
+    return (xml.text or '') + ''.join([etree.tostring(child) for child in xml])
 
 
 def clean_node(xml):
-    [xml.remove(child) for child in xml.iterchildren()]
+    [xml.remove(child) for child in xml]
 
 
 class FeedException(Exception):
