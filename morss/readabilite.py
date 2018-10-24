@@ -130,6 +130,9 @@ def score_all(root):
 
 
 def spread_score(node, score, grades):
+    " Spread the node's score to its parents, on a linear way "
+
+    delta = score / 2
     for ancestor in [node,] + list(node.iterancestors()):
         if score >= 1 or ancestor is node:
             try:
@@ -137,7 +140,7 @@ def spread_score(node, score, grades):
             except KeyError:
                 grades[ancestor] = score
 
-            score /= 2
+            score -= delta
 
         else:
             break
@@ -145,7 +148,7 @@ def spread_score(node, score, grades):
 
 def write_score_all(root, grades):
     for node in root.iter():
-        node.attrib['score'] = str(int(grades[node]))
+        node.attrib['score'] = str(int(grades.get(node, 0)))
 
 
 def clean_node(node):
@@ -243,14 +246,14 @@ def rank_nodes(grades):
     return sorted(grades.items(), key=lambda x: x[1], reverse=True)
 
 
-def get_best_node(grades, highlight=False):
+def get_best_node(grades):
+    " To pick the best (raw) node. Another function will clean it "
+
+    if len(grades) == 1:
+        return grades[0]
+
     top = rank_nodes(grades)
     lowest = lowest_common_ancestor(top[0][0], top[1][0], 3)
-
-    if highlight:
-        top[0][0].attrib['style'] = 'border: 2px solid blue'
-        top[1][0].attrib['style'] = 'border: 2px solid green'
-        lowest.attrib['style'] = 'outline: 2px solid red'
 
     return lowest
 
@@ -259,8 +262,11 @@ def get_article(data, url=None, encoding=None):
     html = parse(data, encoding)
     br2p(html)
     scores = score_all(html)
-    best = get_best_node(scores)
 
+    if not len(scores):
+        return None
+
+    best = get_best_node(scores)
     wc = count_words(best.text_content())
     wca = count_words(' '.join([x.text_content() for x in best.findall('.//a')]))
 
