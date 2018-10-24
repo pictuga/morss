@@ -12,15 +12,19 @@ import lxml.html
 import time
 
 try:
+    # python 2
     from urllib2 import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     import mimetools
 except ImportError:
+    # python 3
     from urllib.request import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     import email
 
 try:
+    # python 2
     basestring
 except NameError:
+    # python 3
     basestring = unicode = str
 
 
