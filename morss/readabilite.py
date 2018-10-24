@@ -66,34 +66,29 @@ attributes_fine = ['title', 'src', 'href', 'type', 'name', 'for', 'value']
 
 
 def score_node(node):
+    " Score individual node "
+
     score = 0
-
-    if isinstance(node, lxml.html.HtmlComment):
-        return 0
-
     class_id = node.get('class', '') + node.get('id', '')
 
-    score -= len(regex_bad.findall(class_id))
-    score -= len(regex_junk.findall(class_id))
-    score += len(regex_good.findall(class_id))
-
-    wc = count_words(''.join([node.text or ''] + [x.tail or '' for x in node]))
-    # the .tail part is to include *everything* in that node
-
-    if wc > 10:
-        score += 1
-
-    if wc > 20:
-        score += 1
-
-    if wc > 30:
-        score += 1
-
-    if node.tag in tags_bad or node.tag in tags_junk:
-        score = -1 * abs(score)
+    if (isinstance(node, lxml.html.HtmlComment)
+            or node.tag in tags_bad
+            or regex_bad.search(class_id)):
+        return 0
 
     if node.tag in tags_good:
+        score += 4
+
+    if regex_good.search(class_id):
         score += 3
+
+    wc = count_words(node.text_content())
+
+    score += min(int(wc/10), 3) # give 1pt bonus for every 10 words, max of 3
+
+    if wc != 0:
+        wca = count_words(' '.join([x.text_content() for x in node.findall('.//a')]))
+        score = score * ( 1 - float(wca)/wc )
 
     return score
 
