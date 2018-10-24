@@ -93,33 +93,19 @@ def score_node(node):
     return score
 
 
-def score_all(root):
-    grades = {}
+def score_all(node, grades=None):
+    " Fairly dumb loop to score all worthwhile nodes. Tries to be fast "
 
-    for node in list(root.iter()):
-        score = score_node(node)
+    if grades is None:
+        grades = {}
 
-        parent = node.getparent()
-        clean_node(node)
+    for child in node:
+        score = score_node(child)
+        child.attrib['seen'] = 'yes, ' + str(int(score))
 
-        if parent is not None and node.getparent() is None:
-            # if the node got deleted/dropped (else, nothing to do)
-            # maybe now the parent only contains 1 item and needs to be flattened?
-
-            gdparent = parent.getparent()
-            clean_node(parent)
-
-            if gdparent is not None and parent.getparent() is None:
-                # if the parent got deleted/dropped
-                spread_score(gdparent, score + grades[parent], grades)
-
-            else:
-                # if the parent was kept
-                spread_score(parent, score, grades)
-
-        else:
-            # if the node was kept
-            spread_score(node, score, grades)
+        if score > 0:
+            spread_score(child, score, grades)
+            score_all(child, grades)
 
     return grades
 
