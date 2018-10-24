@@ -132,6 +132,12 @@ def write_score_all(root, grades):
         node.attrib['score'] = str(int(grades.get(node, 0)))
 
 
+def clean_root(root):
+    for node in list(root):
+        clean_root(node)
+        clean_node(node)
+
+
 def clean_node(node):
     parent = node.getparent()
 
@@ -276,5 +282,7 @@ def get_article(data, url=None, encoding=None):
 
     if url:
         best.make_links_absolute(url)
+
+    clean_root(best)
 
     return lxml.etree.tostring(best, pretty_print=True)
