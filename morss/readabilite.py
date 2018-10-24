@@ -38,6 +38,11 @@ def count_words(string):
     return count
 
 
+def count_content(node):
+    # count words and imgs
+    return count_words(node.text_content()) + len(node.findall('.//img'))
+
+
 regex_bad = re.compile('|'.join(['comment', 'community', 'extra', 'foot',
     'sponsor', 'pagination', 'pager', 'tweet', 'twitter', 'com-', 'masthead',
     'media', 'meta', 'related', 'shopping', 'tags', 'tool', 'author', 'about']),
