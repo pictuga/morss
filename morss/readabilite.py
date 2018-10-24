@@ -133,44 +133,64 @@ def write_score_all(root, grades):
 
 
 def clean_node(node):
-    # Step 1. Do we keep the node?
+    parent = node.getparent()
 
-    if node.getparent() is None:
-        # this is <html/>
+    if parent is None:
+        # this is <html/> (or a removed element waiting for GC)
         return
 
+    gdparent = parent.getparent()
+
+    # remove shitty tags
     if node.tag in tags_junk:
-        # remove shitty tags
-        node.getparent().remove(node)
+        parent.remove(node)
         return
 
-    # Turn <div><p>Bla bla bla</p></div> into <p>Bla bla bla</p>
-
-    if node.tag in ['div'] \
-        and len(list(node.iterchildren())) <= 1 \
-        and not (node.text or '').strip() \
-        and not (node.tail or '').strip():
-        node.drop_tag()
-        return
-
+    # remove shitty class/id FIXME TODO too efficient, might want to add a toggle
     class_id = node.get('class', '') + node.get('id', '')
-    if len(regex_junk.findall(class_id)) >= 2:
-        # remove shitty class/id
+    if len(regex_bad.findall(class_id)) >= 2:
         node.getparent().remove(node)
         return
 
+    # remove shitty link
     if node.tag == 'a' and len(list(node.iter())) > 3:
-        # shitty link
-        node.getparent().remove(node)
+        parent.remove(node)
         return
 
+    # remove comments
     if isinstance(node, lxml.html.HtmlComment):
-        # remove comments
-        node.getparent().remove(node)
+        parent.remove(node)
         return
 
-    # Step 2. Clean the node's attributes
+    # remove if too many kids & too high link density
+    wc = count_words(node.text_content())
+    if wc != 0 and len(list(node.iter())) > 3:
+        wca = count_words(' '.join([x.text_content() for x in node.findall('.//a')]))
+        if float(wca)/wc > 0.8:
+            parent.remove(node)
+            return
 
+    # squash text-less elements shells
+    if node.tag in tags_void:
+        # keep 'em
+        pass
+    elif node.tag in tags_meaning:
+        # remove if content-less
+        if not count_content(node):
+            parent.remove(node)
+            return
+    else:
+        # squash non-meaningful if no direct text
+        content = (node.text or '') + ' '.join([child.tail or '' for child in node])
+        if not count_words(content):
+            node.drop_tag()
+            return
+
+    # for http://vice.com/fr/
+    if node.tag == 'img' and 'data-src' in node.attrib:
+        node.attrib['src'] = node.attrib['data-src']
+
+    # clean the node's attributes
     for attrib in node.attrib:
         if attrib not in attributes_fine:
             del node.attrib[attrib]
