@@ -171,7 +171,7 @@ class FeedBase(object):
 
     def tostring(self, **k):
         """ Returns string using lxml. Arguments passed to tostring """
-        return etree.tostring(self.xml, pretty_print=True, **k)
+        return etree.tostring(self.xml, **k)
 
 
 class FeedDescriptor(object):
