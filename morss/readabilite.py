@@ -149,6 +149,8 @@ def spread_score(node, score, grades):
 
 
 def write_score_all(root, grades):
+    " Useful for debugging "
+
     for node in root.iter():
         node.attrib['score'] = str(int(grades.get(node, 0)))
 
@@ -281,6 +283,8 @@ def get_best_node(grades):
 
 
 def get_article(data, url=None, encoding=None):
+    " Input a raw html string, returns a raw html string of the article "
+
     html = parse(data, encoding)
     scores = score_all(html)
 
