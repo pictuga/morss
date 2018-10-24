@@ -43,31 +43,47 @@ def count_content(node):
     return count_words(node.text_content()) + len(node.findall('.//img'))
 
 
-regex_bad = re.compile('|'.join(['comment', 'community', 'extra', 'foot',
+class_bad = ['comment', 'community', 'extra', 'foot',
     'sponsor', 'pagination', 'pager', 'tweet', 'twitter', 'com-', 'masthead',
-    'media', 'meta', 'related', 'shopping', 'tags', 'tool', 'author', 'about']),
-    re.I)
+    'media', 'meta', 'related', 'shopping', 'tags', 'tool', 'author', 'about',
+    'head', 'robots-nocontent', 'combx', 'disqus', 'menu', 'remark', 'rss',
+    'shoutbox', 'sidebar', 'ad-', 'agegate', 'popup', 'sharing', 'share',
+    'social', 'contact', 'footnote', 'outbrain', 'promo', 'scroll', 'hidden',
+    'widget', 'hide']
 
-regex_junk = re.compile('|'.join(['robots-nocontent', 'combx', 'disqus',
-    'header', 'menu', 'remark', 'rss', 'shoutbox', 'sidebar', 'ad-', 'agegate',
-    'popup', 'sharing', 'share', 'social', 'contact', 'footnote', 'outbrain',
-    'promo', 'scroll', 'hidden', 'widget', 'hide']), re.I)
+regex_bad = re.compile('|'.join(class_bad), re.I)
 
-regex_good = re.compile('|'.join(['and', 'article', 'body', 'column', 'main',
+class_good = ['and', 'article', 'body', 'column', 'main',
     'shadow', 'content', 'entry', 'hentry', 'main', 'page', 'pagination',
-    'post', 'text', 'blog', 'story', 'par', 'editorial']), re.I)
+    'post', 'text', 'blog', 'story', 'par', 'editorial']
+
+regex_good = re.compile('|'.join(class_good), re.I)
 
 
-tags_bad = ['a']
+tags_junk = ['script', 'head', 'iframe', 'object', 'noscript',
+    'param', 'embed', 'layer', 'applet', 'style', 'form', 'input', 'textarea',
+    'button', 'footer']
 
-tags_junk = ['script', 'head', 'iframe', 'object', 'noscript', 'param', 'embed',
-    'layer', 'applet', 'style', 'form', 'input', 'textarea', 'button', 'footer']
+tags_bad = tags_junk + ['a', 'aside']
 
-tags_good = ['h1', 'h2', 'h3', 'article', 'p', 'cite', 'section', 'img',
-    'figcaption', 'figure']
+tags_good = ['h1', 'h2', 'h3', 'article', 'p', 'cite', 'section', 'figcaption',
+    'figure', 'em', 'strong', 'pre', 'br', 'hr', 'headline']
+
+tags_meaning = ['a', 'abbr', 'address', 'acronym', 'audio', 'article', 'aside',
+    'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'center',
+    'code', 'col', 'colgroup', 'data', 'dd', 'del', 'details', 'description',
+    'dfn', 'dl', 'font', 'dt', 'em', 'figure', 'figcaption', 'h1', 'h2', 'h3',
+    'h4', 'h5', 'h6', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'main', 'mark',
+    'nav', 'ol', 'p', 'pre', 'q', 'ruby', 'rp', 'rt', 's', 'samp', 'small',
+    'source', 'strike', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody',
+    'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'track', 'tt', 'u', 'ul', 'var',
+    'wbr', 'video']
+    # adapted from tt-rss source code, to keep even as shells
+
+tags_void = ['img', 'hr', 'br'] # to keep even if empty
 
 
-attributes_fine = ['title', 'src', 'href', 'type', 'name', 'for', 'value']
+attributes_fine = ['title', 'src', 'href', 'type', 'value']
 
 
 def score_node(node):
