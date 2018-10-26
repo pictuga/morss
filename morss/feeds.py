@@ -363,8 +363,14 @@ class FeedParser(FeedBase):
     def get_items(self):
         return []
 
-    title = FeedDescriptor('title')
-    description = desc = FeedDescriptor('desc')
+    title = property(
+        lambda f:   f.get_title(),
+        lambda f,x: f.set_title(x),
+        lambda f:   f.del_title() )
+    description = desc = property(
+        lambda f:   f.get_desc(),
+        lambda f,x: f.set_desc(x),
+        lambda f:   f.del_desc() )
     items = FeedListDescriptor('items')
 
     def tostring(self, **k):
@@ -548,11 +554,26 @@ class FeedItem(FeedBase):
     def del_updated(self):
         self.updated = None
 
-    title = FeedDescriptor('title')
-    link = FeedDescriptor('link')
-    description = desc = FeedDescriptor('desc')
-    content = FeedDescriptor('content')
-    id = FeedDescriptor('id')
+    title = property(
+        lambda f:   f.get_title(),
+        lambda f,x: f.set_title(x),
+        lambda f:   f.del_title() )
+    link = property(
+        lambda f:   f.get_link(),
+        lambda f,x: f.set_link(x),
+        lambda f:   f.del_link() )
+    description = desc = property(
+        lambda f:   f.get_desc(),
+        lambda f,x: f.set_desc(x),
+        lambda f:   f.del_desc() )
+    content = property(
+        lambda f:   f.get_content(),
+        lambda f,x: f.set_content(x),
+        lambda f:   f.del_content() )
+    id = property(
+        lambda f:   f.get_id(),
+        lambda f,x: f.set_id(x),
+        lambda f:   f.del_id() )
     is_permalink = FeedBool('is_permalink')
     time = FeedTime('time')
     updated = FeedTime('updated')
