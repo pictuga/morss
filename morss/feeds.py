@@ -160,6 +160,25 @@ class FeedBase(object):
         if match is not None:
             return match.getparent().remove(match)
 
+    def from_bool(self, x):
+        return (x or '').lower() != 'false'
+
+    def to_bool(self, x):
+        return 'true' if value else 'false'
+
+    def from_time(self, x):
+        try:
+            return parse_time(x)
+        except ValueError:
+            return None
+
+    def to_time(self, x):
+        try:
+            time = parse_time(value)
+            return time.strftime(instance.timeFormat)
+        except ValueError:
+            pass
+
     def tostring(self, **k):
         """ Returns string using lxml. Arguments passed to tostring """
         return etree.tostring(self.xml, **k)
