@@ -510,7 +510,7 @@ class FeedItem(FeedBase, Uniq):
     def set_time(self, value):
         pass
 
-    def delTime(self):
+    def del_time(self):
         self.time = None
 
     def get_updated(self):
