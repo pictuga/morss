@@ -165,60 +165,6 @@ class FeedBase(object):
         return etree.tostring(self.xml, **k)
 
 
-class FeedDescriptor(object):
-    """
-    Descriptor which gives off elements based on "self.getName" and
-    "self.setName" as getter/setters. Looks far better, and avoids duplicates
-    """
-
-    def __init__(self, name):
-        self.name = name
-
-    def __get__(self, instance, owner):
-        getter = getattr(instance, 'get_%s' % self.name)
-        return getter()
-
-    def __set__(self, instance, value):
-        setter = getattr(instance, 'set_%s' % self.name)
-        return setter(value)
-
-    def __delete__(self, instance):
-        deleter = getattr(instance, 'del_%s' % self.name)
-        return deleter()
-
-
-class FeedTime(FeedDescriptor):
-    def __get__(self, instance, owner):
-        getter = getattr(instance, 'get_%s' % self.name)
-        raw = getter()
-        try:
-            time = parse_time(raw)
-            return time
-        except ValueError:
-            return None
-
-    def __set__(self, instance, value):
-        try:
-            time = parse_time(value)
-            raw = time.strftime(instance.timeFormat)
-            setter = getattr(instance, 'set_%s' % self.name)
-            return setter(raw)
-        except ValueError:
-            pass
-
-
-class FeedBool(FeedDescriptor):
-    def __get__(self, instance, owner):
-        getter = getattr(instance, 'get_%s' % self.name)
-        raw = getter()
-        return (raw or '').lower() != 'false'
-
-    def __set__(self, instance, value):
-        raw = 'true' if value else 'false'
-        setter = getattr(instance, 'set_%s' % self.name)
-        return setter(raw)
-
-
 def parse_time(value):
     if isinstance(value, basestring):
         if re.match(r'^[0-9]+$', value):
@@ -542,9 +488,17 @@ class FeedItem(FeedBase, Uniq):
         lambda f:   f.get_id(),
         lambda f,x: f.set_id(x),
         lambda f:   f.del_id() )
-    is_permalink = FeedBool('is_permalink')
-    time = FeedTime('time')
-    updated = FeedTime('updated')
+    is_permalink = property(
+        lambda f:   f.from_bool(f.get_is_permalink()),
+        lambda f,x: f.set_is_permalink(f.to_bool(x)) )
+    time = property(
+        lambda f:   f.from_time(f.get_time()),
+        lambda f,x: f.set_time(f.to_time(x)),
+        lambda f:   f.del_time() )
+    updated = property(
+        lambda f:   f.from_time(f.get_updated()),
+        lambda f,x: f.set_updated(f.to_time(x)),
+        lambda f:   f.del_updated() )
 
     def push_content(self, value):
         if not self.desc and self.content:
