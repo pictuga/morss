@@ -110,21 +110,12 @@ class FeedBase(object):
     selection and item creation
     """
 
-    def __getitem__(self, item):
-        return getattr(self, item)
-
-    def __setitem__(self, item, value):
-        setattr(self, item, value)
-
-    def __delitem__(self, item):
-        delattr(self, item)
-
-    def __iter__(self):
+    def iterdic(self):
         for element in self.dic:
-            value = self[element]
+            value = getattr(self, element)
 
-            if isinstance(value, FeedList):
-                value = [OrderedDict(x) for x in value]
+            if element == 'items':
+                value = [OrderedDict(x.iterdic()) for x in value]
             elif isinstance(value, datetime):
                 value = value.isoformat()
 
@@ -242,67 +233,6 @@ def parse_time(value):
         return False
 
 
-class FeedList(object):
-    """
-    Class to map a list of xml elements against a list of matching objects,
-    while avoiding to recreate the same matching object over and over again. So
-    as to avoid extra confusion, list's elements are called "children" here, so
-    as not to use "items", which is already in use in RSS/Atom related code.
-
-    Comes with its very own descriptor.
-    """
-
-    def __init__(self, parent, getter, tag, child_class):
-        self.parent = parent
-        self.getter = getter
-        self.childClass = child_class
-        self.tag = tag
-        self._children = {}  # id(xml) => FeedItem
-
-    def get_children(self):
-        children = self.getter()
-        out = []
-        for child in children:
-            if id(child) in self._children:
-                out.append(self._children[id(child)])
-            else:
-                new = self.childClass(child, self.tag)
-                self._children[id(child)] = new
-                out.append(new)
-        return out
-
-    def append(self, cousin=None):
-        new = self.childClass(tag=self.tag)
-        self.parent.root.append(new.xml)
-        self._children[id(new.xml)] = new
-
-        if cousin is None:
-            return new
-
-        for key in self.childClass.__dict__:
-            if key.startswith('set_'):
-                attr = key[4:]
-                if hasattr(cousin, attr):
-                    setattr(new, attr, getattr(cousin, attr))
-                elif attr in cousin:
-                    setattr(new, attr, cousin[attr])
-
-        return new
-
-    def __getitem__(self, key):
-        return self.get_children()[key]
-
-    def __delitem__(self, key):
-        child = self.getter()[key]
-        if id(child) in self._children:
-            self._children[id(child)].remove()
-            del self._children[id(child)]
-        else:
-            child.getparent().remove(child)
-
-    def __len__(self):
-        return len(self.getter())
-
 class Uniq(object):
     _map = {}
     _id = None
@@ -322,30 +252,6 @@ class Uniq(object):
             cls._map[obj._id] = obj
             return obj
 
-class FeedListDescriptor(object):
-    """
-    Descriptor for FeedList
-    """
-
-    def __init__(self, name):
-        self.name = name
-        self.items = {}  # id(instance) => FeedList
-
-    def __get__(self, instance, owner=None):
-        key = id(instance)
-        if key in self.items:
-            return self.items[key]
-        else:
-            getter = getattr(instance, 'get_%s' % self.name)
-            class_name = globals()[getattr(instance, '%sClass' % self.name)]
-            self.items[key] = FeedList(instance, getter, instance.tag, class_name)
-            return self.items[key]
-
-    def __set__(self, instance, value):
-        feedlist = self.__get__(instance)
-        [x.remove() for x in list(feedlist)]
-        [feedlist.append(x) for x in value]
-
 
 class FeedParser(FeedBase):
     itemsClass = 'FeedItem'
@@ -359,6 +265,8 @@ class FeedParser(FeedBase):
         self.xml = xml
         self.root = self.xml.xpath("//atom03:feed|//atom:feed|//channel|//rssfake:channel", namespaces=NSMAP)[0]
         self.tag = tag
+
+        self.itemsClass = globals()[self.itemsClass]
 
     def get_title(self):
         return ""
@@ -381,6 +289,9 @@ class FeedParser(FeedBase):
     def get_items(self):
         return []
 
+    def wrap_items(self, items):
+        return [self.itemsClass(x, self.tag) for x in items]
+
     title = property(
         lambda f:   f.get_title(),
         lambda f,x: f.set_title(x),
@@ -389,23 +300,52 @@ class FeedParser(FeedBase):
         lambda f:   f.get_desc(),
         lambda f,x: f.set_desc(x),
         lambda f:   f.del_desc() )
-    items = FeedListDescriptor('items')
+    items = property(
+        lambda f:   f )
+
+    def append(self, cousin=None):
+        new = self.itemsClass(tag=self.tag)
+        self.root.append(new.xml)
+
+        if cousin is None:
+            return new
+
+        for attr in self.itemsClass.dic:
+            if hasattr(cousin, attr):
+                setattr(new, attr, getattr(cousin, attr))
+
+            elif attr in cousin:
+                setattr(new, attr, cousin[attr])
+
+        return new
+
+    def __getitem__(self, key):
+        return self.wrap_items(self.get_items())[key]
+
+    def __delitem__(self, key):
+        self[key].remove()
+
+    def __len__(self):
+        return len(self.get_items())
 
     def tostring(self, **k):
         return etree.tostring(self.xml.getroottree(), **k)
 
     def tojson(self, indent=None):
-        return json.dumps(OrderedDict(self), indent=indent)
+        return json.dumps(OrderedDict(self.iterdic()), indent=indent)
 
     def tocsv(self):
         out = StringIO()
         c = csv.writer(out, dialect=csv.excel)
+
         for item in self.items:
-            if sys.version_info[0] >= 3:
-                row = [x[1] for x in item]
-            else:
-                row = [x[1].encode('utf-8') if isinstance(x[1], unicode) else x[1] for x in item]
+            row = [getattr(item, x) for x in item.dic]
+
+            if sys.version_info[0] < 3:
+                row = [x.encode('utf-8') if isinstance(x, unicode) else x for x in row]
+
             c.writerow(row)
+
         out.seek(0)
         return out.read()
 
@@ -492,7 +432,7 @@ class FeedParserAtom(FeedParser):
         return self.xpath('atom:entry|atom03:entry')
 
 
-class FeedItem(FeedBase):
+class FeedItem(FeedBase, Uniq):
     timeFormat = ''
     dic = ('title', 'link', 'desc', 'content', 'id', 'is_permalink', 'time', 'updated')
 
@@ -500,8 +440,18 @@ class FeedItem(FeedBase):
         if xml is None:
             xml = Element(tag_NS(self.base[tag]))
 
+        self._id = FeedItem._gen_id(xml)
+
         self.root = self.xml = xml
         self.tag = tag
+
+    @classmethod
+    def _gen_id(cls, xml=None, *args, **kwargs):
+        if xml is not None:
+            return id(xml)
+
+        else:
+            return None
 
     def get_title(self):
         return ""
