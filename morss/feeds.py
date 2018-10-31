@@ -303,6 +303,24 @@ class FeedList(object):
     def __len__(self):
         return len(self.getter())
 
+class Uniq(object):
+    _map = {}
+    _id = None
+
+    def __new__(cls, *args, **kwargs):
+        # check if an item was already created for it
+        # if so, reuse it
+        # if not, create a new one
+
+        tmp_id = cls._gen_id(*args, **kwargs)
+        if tmp_id is not None and tmp_id in cls._map:
+            return cls._map[tmp_id]
+
+        else:
+            obj = object.__new__(cls, *args, **kwargs)
+            obj.__init__(*args, **kwargs)
+            cls._map[obj._id] = obj
+            return obj
 
 class FeedListDescriptor(object):
     """
