@@ -157,6 +157,34 @@ class ParserBase(object):
         # to output in sth fancy (json, csv, html), change class type
         pass
 
+    def tojson(self, indent=None):
+        # TODO temporary
+        return json.dumps(OrderedDict(self.iterdic()), indent=indent)
+
+    def tocsv(self):
+        # TODO temporary
+        out = StringIO()
+        c = csv.writer(out, dialect=csv.excel)
+
+        for item in self.items:
+            row = [getattr(item, x) for x in item.dic]
+
+            if sys.version_info[0] < 3:
+                row = [x.encode('utf-8') if isinstance(x, unicode) else x for x in row]
+
+            c.writerow(row)
+
+        out.seek(0)
+        return out.read()
+
+    def tohtml(self):
+        # TODO temporary
+        path = os.path.join(os.path.dirname(__file__), 'reader.html.template')
+        loader = DictLoader({'reader': open(path).read()})
+        engine = Engine(loader=loader, extensions=[CoreExtension()])
+        template = engine.get_template('reader')
+        return template.render({'feed': self}).encode('utf-8')
+
     def iterdic(self):
         for element in self.dic:
             value = getattr(self, element)
