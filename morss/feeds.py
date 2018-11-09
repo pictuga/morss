@@ -513,7 +513,6 @@ class Uniq(object):
 
         else:
             obj = object.__new__(cls, *args, **kwargs)
-            obj.__init__(*args, **kwargs)
             cls._map[obj._id] = obj
             return obj
 
