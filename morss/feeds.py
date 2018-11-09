@@ -239,6 +239,143 @@ class ParserBase(object):
         pass
 
 
+class ParserXML(ParserBase):
+    def parse(self, raw):
+        parser = etree.XMLParser(recover=True)
+        return etree.fromstring(raw, parser)
+
+    def tostring(self, **k):
+        return etree.tostring(self.root, **k)
+
+    def _rule_parse(self, rule):
+        test = re.search(r'^(.*)/@([a-z]+)$', rule) # to match //div/a/@href
+        return test.groups() if test else (rule, None)
+
+    def _resolve_ns(self, rule):
+        match = re.search(r'^([^:]+):([^:]+)$', rule)
+        if match:
+            match = match.groups()
+            if match[0] in NSMAP:
+                return "{%s}%s" % (NSMAP[match[0]], match[1].lower())
+
+        return rule
+
+    def rule_search_all(self, rule):
+        try:
+            return self.root.xpath(rule, namespaces=NSMAP)
+
+        except etree.XPathEvalError:
+            return []
+
+    def rule_create(self, rule):
+        # duplicate, copy from template or create from scratch
+        rule, key = self._rule_parse(rule)
+
+        # try recreating based on the rule (for really basic rules, ie. plain RSS)
+        if re.search(r'^[a-zA-Z0-9/:]+$', rule):
+            chain = rule.strip('/').split('/')
+            current = self.root
+
+            if rule[0] == '/':
+                chain = chain[1:]
+
+            for (i, node) in enumerate(chain):
+                test = current.find(self._resolve_ns(node))
+
+                if test and i < len(chain) - 1:
+                    # yay, go on
+                    current = test
+
+                else:
+                    # opps need to create
+                    element = etree.Element(self._resolve_ns(node))
+                    current.append(element)
+                    current = element
+
+            return current
+
+        # try duplicating from existing (works well with fucked up structures)
+        match = self.rule_search_last(rule)
+        if match:
+            element = deepcopy(match)
+            match.getparen().append(element)
+            return element
+
+        # try duplicating from template
+        # FIXME
+        # >>> self.xml.getroottree().getpath(ff.find('a'))
+
+        return None
+
+    def rule_remove(self, rule):
+        rule, key = self._rule_parse(rule)
+
+        match = self.rule_search(rule)
+
+        if key is not None:
+            del x.attrib[key]
+
+        else:
+            match.getparent().remove(match)
+
+    def rule_set(self, rule, value):
+        rule, key = self._rule_parse(rule)
+
+        match = self.rule_search(rule)
+
+        if key is not None:
+            match.attrib[key] = value
+
+        else:
+            match.text = value
+
+    def rule_str(self, rule):
+        match = self.rule_search(rule)
+
+        if isinstance(match, etree._Element):
+            return match.text or ""
+
+        else:
+            return match or ""
+
+    def bool_prs(self, x):
+        return (x or '').lower() != 'false'
+
+    def bool_fmt(self, x):
+        return 'true' if x else 'false'
+
+    def time_prs(self, x):
+        try:
+            return parse_time(x)
+        except ValueError:
+            return None
+
+    def time_fmt(self, x):
+        try:
+            time = parse_time(x)
+            return time.strftime(self.rules['timeformat'])
+        except ValueError:
+            pass
+
+    def get_raw(self, rule_name):
+        return self.rule_search_all(self.rules[rule_name])
+
+    def get_str(self, rule_name):
+        return self.rule_str(self.rules[rule_name])
+
+    def set_str(self, rule_name, value):
+        try:
+            return self.rule_set(self.rules[rule_name], value)
+
+        except AttributeError:
+            # does not exist, have to create it
+            self.rule_create(self.rules[rule_name])
+            return self.rule_set(self.rules[rule_name], value)
+
+    def remove(self, rule_name):
+        self.rule_remove(self.rules[rule_name])
+
+
 class FeedBase(object):
     """
     Base for xml-related classes, which provides simple wrappers around xpath
@@ -394,6 +531,13 @@ class Feed(object):
 
     def __len__(self):
         return len(self.get_raw('items'))
+
+
+class FeedXML(Feed, ParserXML):
+    itemsClass = 'ItemXML'
+
+    def tostring(self, **k):
+        return etree.tostring(self.root.getroottree(), **k)
 
 
 class FeedParser(FeedBase):
@@ -619,6 +763,10 @@ class Item(Uniq):
         lambda f:   f.time_fmt(f.get_str('item_updated')),
         lambda f,x: f.set_str('updated', f.time_prs(x)),
         lambda f:   f.remove('item_updated') )
+
+
+class ItemXML(Item, ParserXML):
+    pass
 
 
 class FeedItem(FeedBase, Uniq):
