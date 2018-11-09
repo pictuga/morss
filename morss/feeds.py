@@ -12,6 +12,7 @@ import csv
 from lxml import etree
 from dateutil import tz
 import dateutil.parser
+from copy import deepcopy
 
 from . import crawler
 
@@ -30,10 +31,12 @@ except ImportError:
 try:
     from StringIO import StringIO
     from urllib2 import urlopen
+    from ConfigParser import ConfigParser
 except ImportError:
     # python > 3
     from io import StringIO
     from urllib.request import urlopen
+    from configparser import ConfigParser
 
 try:
     basestring
@@ -102,6 +105,138 @@ def parse(data):
             return m_table[tag](doc, tag)
 
     raise FeedException('unknown feed type')
+
+
+def parse_rules(filename=None):
+    if not filename:
+        filename = os.path.join(os.path.dirname(__file__), 'feedify.ini')
+
+    config = ConfigParser()
+    config.read(filename)
+
+    rules = dict([(x, dict(config.items(x))) for x in config.sections()])
+
+    for section in rules.keys():
+        for arg in rules[section].keys():
+            if '\n' in rules[section][arg]:
+                rules[section][arg] = rules[section][arg].split('\n')[1:]
+
+    return rules
+
+
+class ParserBase(object):
+    def __init__(self, data=None, rules=None):
+        if rules is None:
+            rules = parse_rules()['rss']
+
+        if data is None:
+            data = rules['base'][0]
+
+        self.rules = rules
+        self.root = self.parse(data)
+
+        # do `if multi` and select the correct rule for each (and split \n)
+        if isinstance(self.rules['items'], list):
+            for (i, rule) in enumerate(self.rules['items']):
+                if self.rule_search(rule) is not None:
+                    key = i
+                    break
+
+            else:
+                key = 0
+
+            for arg in self.rules.keys():
+                if isinstance(self.rules[arg], list):
+                    self.rules[arg] = self.rules[arg][key]
+
+    def parse(self, raw):
+        pass
+
+    def tostring(self):
+        # output in its input format
+        # to output in sth fancy (json, csv, html), change class type
+        pass
+
+    def iterdic(self):
+        for element in self.dic:
+            value = getattr(self, element)
+
+            if element == 'items':
+                value = [OrderedDict(x.iterdic()) for x in value]
+            elif isinstance(value, datetime):
+                value = value.isoformat()
+
+            yield element, value
+
+    def rule_search(self, rule):
+        # xpath, return the first one only
+        try:
+            return self.rule_search_all(rule)[0]
+
+        except IndexError:
+            return None
+
+    def rule_search_all(self, rule):
+        # xpath, return all (useful to find feed items)
+        pass
+
+    def rule_search_last(self, rule):
+        # xpath, return the first one only
+        try:
+            return self.rule_search_all(rule)[-1]
+
+        except IndexError:
+            return None
+
+    def rule_create(self, rule):
+        # create node based on rule
+        # (duplicate, copy existing (or template) or create from scratch, if possible)
+        # --> might want to create node_duplicate helper fns
+        pass
+
+    def rule_remove(self, rule):
+        # remove node from its parent
+        pass
+
+    def rule_set(self, rule, value):
+        # value is always a str?
+        pass
+
+    def rule_str(self, rule):
+        # GETs inside (pure) text from it
+        pass
+
+    def bool_prs(self, x):
+        # parse
+        pass
+
+    def bool_fmt(self, x):
+        # format
+        pass
+
+    def time_prs(self, x):
+        # parse
+        pass
+
+    def time_fmt(self, x):
+        # format
+        pass
+
+    def get_raw(self, rule_name):
+        # get the raw output, for self.get_raw('items')
+        pass
+
+    def get_str(self, rule_name):
+        # simple function to get nice text from the rule name
+        # for use in @property, ie. self.get_str('title')
+        pass
+
+    def set_str(self, rule_name):
+        pass
+
+    def remove(self, rule_name):
+        # easy deleter
+        pass
 
 
 class FeedBase(object):
@@ -216,6 +351,49 @@ class Uniq(object):
             obj.__init__(*args, **kwargs)
             cls._map[obj._id] = obj
             return obj
+
+
+class Feed(object):
+    itemsClass = 'Item'
+    dic = ('title', 'desc', 'items')
+
+    def wrap_items(self, items):
+        itemsClass = globals()[self.itemsClass]
+        return [itemsClass(x, self.rules) for x in items]
+
+    title = property(
+        lambda f:   f.get_str('title'),
+        lambda f,x: f.set_str('title', x),
+        lambda f:   f.remove('title') )
+    description = desc = property(
+        lambda f:   f.get_str('desc'),
+        lambda f,x: f.set_str('desc', x),
+        lambda f:   f.remove('desc') )
+    items = property(
+        lambda f:   f )
+
+    def append(self, new=None):
+        self.rule_create(self.rules['items'])
+        item = self.items[-1]
+
+        if new is None:
+            return item
+
+        for attr in globals()[self.itemsClass].dic:
+            if hasattr(new, attr):
+                setattr(element, attr, getattr(new, attr))
+
+            elif attr in cousin:
+                setattr(element, attr, new[attr])
+
+    def __getitem__(self, key):
+        return self.wrap_items(self.get_raw('items'))[key]
+
+    def __delitem__(self, key):
+        self[key].remove()
+
+    def __len__(self):
+        return len(self.get_raw('items'))
 
 
 class FeedParser(FeedBase):
@@ -395,6 +573,52 @@ class FeedParserAtom(FeedParser):
 
     def get_items(self):
         return self.xpath('atom:entry|atom03:entry')
+
+
+class Item(Uniq):
+    dic = ('title', 'link', 'desc', 'content', 'id', 'is_permalink', 'time', 'updated')
+
+    def __init__(self, xml=None, rules=None):
+        self._id = self._gen_id(xml)
+        self.root = xml
+        self.rules = rules
+
+    @staticmethod
+    def _gen_id(xml=None, *args, **kwargs):
+        return id(xml)
+
+    title = property(
+        lambda f:   f.get_str('item_title'),
+        lambda f,x: f.set_str('item_title', x),
+        lambda f:   f.remove('item_title') )
+    link = property(
+        lambda f:   f.get_str('item_link'),
+        lambda f,x: f.set_str('item_link', x),
+        lambda f:   f.remove('item_link') )
+    description = desc = property(
+        lambda f:   f.get_str('item_desc'),
+        lambda f,x: f.set_str('item_desc', x),
+        lambda f:   f.remove('item_desc') )
+    content = property(
+        lambda f:   f.get_str('item_content'),
+        lambda f,x: f.set_str('item_content', x),
+        lambda f:   f.remove('item_content') )
+    id = property(
+        lambda f:   f.get_str('item_id'),
+        lambda f,x: f.set_str('item_id', x),
+        lambda f:   f.remove('item_id') )
+    is_permalink = property(
+        lambda f:   f.get_str('item_is_permalink'),
+        lambda f,x: f.set_str('item_is_permalink', x))#,
+        #lambda f:   f.remove('item_is_permalink') )
+    time = property(
+        lambda f:   f.time_fmt(f.get_str('item_time')),
+        lambda f,x: f.set_str('title', f.time_prs(x)),
+        lambda f:   f.remove('item_time') )
+    updated = property(
+        lambda f:   f.time_fmt(f.get_str('item_updated')),
+        lambda f,x: f.set_str('updated', f.time_prs(x)),
+        lambda f:   f.remove('item_updated') )
 
 
 class FeedItem(FeedBase, Uniq):
