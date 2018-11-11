@@ -465,10 +465,10 @@ class Feed(object):
 
         for attr in globals()[self.itemsClass].dic:
             if hasattr(new, attr):
-                setattr(element, attr, getattr(new, attr))
+                setattr(item, attr, getattr(new, attr))
 
-            elif attr in cousin:
-                setattr(element, attr, new[attr])
+            elif attr in new:
+                setattr(item, attr, new[attr])
 
     def __getitem__(self, key):
         return self.wrap_items(self.get_raw('items'))[key]
