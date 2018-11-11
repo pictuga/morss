@@ -343,7 +343,7 @@ class ParserXML(ParserBase):
             match.attrib[key] = value
 
         else:
-            if len(match):
+            if match is not None and len(match):
                 # atom stuff
                 self._clean_node(match)
 
