@@ -260,7 +260,7 @@ class ParserXML(ParserBase):
         return test.groups() if test else (rule, None)
 
     def _resolve_ns(self, rule):
-        match = re.search(r'^([^:]+):([^:]+)$', rule)
+        match = re.search(r'^([^:]+):([^:]+)$', rule) # to match fakerss:content
         if match:
             match = match.groups()
             if match[0] in NSMAP:
