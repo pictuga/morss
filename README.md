@@ -1,5 +1,7 @@
 # Morss - Get full-text RSS feeds
 
+_GNU AGPLv3 code_
+
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds,
 commonly available on internet. Indeed most newspapers only make a small
 description available to users in their rss feeds, which makes the RSS feed
@@ -58,8 +60,6 @@ You may also need:
 
 - Apache, with python-cgi support, to run on a server
 - a fast internet connection
-
-GPL3 code.
 
 ## Arguments
 
