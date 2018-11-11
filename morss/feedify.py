@@ -137,7 +137,7 @@ class Builder(object):
         elif self.rule['mode'] == 'json':
             self.doc = json.loads(self.data)
 
-        self.feed = feeds.FeedParserAtom()
+        self.feed = feeds.FeedXML()
 
     def raw(self, html, expr):
         " Returns selected items, thru a stupid query "
