@@ -483,13 +483,6 @@ class Feed(object):
         return len(self.get_raw('items'))
 
 
-class FeedXML(Feed, ParserXML):
-    itemsClass = 'ItemXML'
-
-    def tostring(self, **k):
-        return etree.tostring(self.root.getroottree(), **k)
-
-
 class Item(Uniq):
     dic = ('title', 'link', 'desc', 'content', 'id', 'is_permalink', 'time', 'updated')
 
@@ -534,6 +527,13 @@ class Item(Uniq):
         lambda f:   f.time_fmt(f.get_str('item_updated')),
         lambda f,x: f.set_str('updated', f.time_prs(x)),
         lambda f:   f.rmv('item_updated') )
+
+
+class FeedXML(Feed, ParserXML):
+    itemsClass = 'ItemXML'
+
+    def tostring(self, **k):
+        return etree.tostring(self.root.getroottree(), **k)
 
 
 class ItemXML(Item, ParserXML):
