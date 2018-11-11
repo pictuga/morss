@@ -328,7 +328,10 @@ class ParserXML(ParserBase):
 
         match = self.rule_search(rule)
 
-        if key is not None:
+        if match is None:
+            return
+
+        elif key is not None:
             del x.attrib[key]
 
         else:
