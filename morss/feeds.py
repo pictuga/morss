@@ -115,8 +115,11 @@ class ParserBase(object):
             else:
                 key = 0
 
+            len_items = len(rules['items'])
+
             for arg in self.rules.keys():
-                if isinstance(self.rules[arg], list):
+                if (isinstance(self.rules[arg], list)
+                        and len(self.rules[arg]) == len_items):
                     self.rules[arg] = self.rules[arg][key]
 
     def parse(self, raw):
