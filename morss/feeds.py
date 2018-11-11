@@ -125,6 +125,10 @@ class ParserBase(object):
     def parse(self, raw):
         pass
 
+    def remove(self):
+        # delete oneslf
+        pass
+
     def tostring(self):
         # output in its input format
         # to output in sth fancy (json, csv, html), change class type
@@ -235,7 +239,7 @@ class ParserBase(object):
     def set_str(self, rule_name):
         pass
 
-    def remove(self, rule_name):
+    def rmv(self, rule_name):
         # easy deleter
         pass
 
@@ -244,6 +248,9 @@ class ParserXML(ParserBase):
     def parse(self, raw):
         parser = etree.XMLParser(recover=True)
         return etree.fromstring(raw, parser)
+
+    def remove(self):
+        return self.root.getparent().remove(self.root)
 
     def tostring(self, **k):
         return etree.tostring(self.root, **k)
@@ -393,7 +400,7 @@ class ParserXML(ParserBase):
             self.rule_create(self.rules[rule_name])
             return self.rule_set(self.rules[rule_name], value)
 
-    def remove(self, rule_name):
+    def rmv(self, rule_name):
         self.rule_remove(self.rules[rule_name])
 
 
@@ -441,11 +448,11 @@ class Feed(object):
     title = property(
         lambda f:   f.get_str('title'),
         lambda f,x: f.set_str('title', x),
-        lambda f:   f.remove('title') )
+        lambda f:   f.rmv('title') )
     description = desc = property(
         lambda f:   f.get_str('desc'),
         lambda f,x: f.set_str('desc', x),
-        lambda f:   f.remove('desc') )
+        lambda f:   f.rmv('desc') )
     items = property(
         lambda f:   f )
 
@@ -467,7 +474,7 @@ class Feed(object):
         return self.wrap_items(self.get_raw('items'))[key]
 
     def __delitem__(self, key):
-        self[key].remove()
+        self[key].rmv()
 
     def __len__(self):
         return len(self.get_raw('items'))
@@ -495,35 +502,35 @@ class Item(Uniq):
     title = property(
         lambda f:   f.get_str('item_title'),
         lambda f,x: f.set_str('item_title', x),
-        lambda f:   f.remove('item_title') )
+        lambda f:   f.rmv('item_title') )
     link = property(
         lambda f:   f.get_str('item_link'),
         lambda f,x: f.set_str('item_link', x),
-        lambda f:   f.remove('item_link') )
+        lambda f:   f.rmv('item_link') )
     description = desc = property(
         lambda f:   f.get_str('item_desc'),
         lambda f,x: f.set_str('item_desc', x),
-        lambda f:   f.remove('item_desc') )
+        lambda f:   f.rmv('item_desc') )
     content = property(
         lambda f:   f.get_str('item_content'),
         lambda f,x: f.set_str('item_content', x),
-        lambda f:   f.remove('item_content') )
+        lambda f:   f.rmv('item_content') )
     id = property(
         lambda f:   f.get_str('item_id'),
         lambda f,x: f.set_str('item_id', x),
-        lambda f:   f.remove('item_id') )
+        lambda f:   f.rmv('item_id') )
     is_permalink = property(
         lambda f:   f.get_str('item_is_permalink'),
         lambda f,x: f.set_str('item_is_permalink', x))#,
-        #lambda f:   f.remove('item_is_permalink') )
+        #lambda f:   f.rmv('item_is_permalink') )
     time = property(
         lambda f:   f.time_fmt(f.get_str('item_time')),
         lambda f,x: f.set_str('title', f.time_prs(x)),
-        lambda f:   f.remove('item_time') )
+        lambda f:   f.rmv('item_time') )
     updated = property(
         lambda f:   f.time_fmt(f.get_str('item_updated')),
         lambda f,x: f.set_str('updated', f.time_prs(x)),
-        lambda f:   f.remove('item_updated') )
+        lambda f:   f.rmv('item_updated') )
 
 
 class ItemXML(Item, ParserXML):
