@@ -22,11 +22,13 @@ import wsgiref.handlers
 from html2text import HTML2Text
 
 try:
+    # python 2
     from Queue import Queue
     from httplib import HTTPException
     from urllib import quote_plus
     from urlparse import urlparse, urljoin, parse_qs
 except ImportError:
+    # python 3
     from queue import Queue
     from http.client import HTTPException
     from urllib.parse import quote_plus
