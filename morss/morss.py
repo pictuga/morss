@@ -562,8 +562,6 @@ def cgi_app(environ, start_response):
     if not options.silent:
         return out
 
-    log('done')
-
 
 def cgi_wrapper(environ, start_response):
     # simple http server for html and css

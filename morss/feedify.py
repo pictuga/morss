@@ -39,9 +39,11 @@ def get_rule(link):
     for section in config.sections():
         values = dict(config.items(section))
         values['path'] = values['path'].split('\n')[1:]
+
         for path in values['path']:
             if fnmatch(link, path):
                 return values
+
     return False
 
 
@@ -115,6 +117,7 @@ def pre_worker(url):
 
 class Builder(object):
     def __init__(self, link, data, rule=None):
+        # data must be a unicode string
 
         self.link = link
         self.data = data
@@ -130,6 +133,7 @@ class Builder(object):
 
         if self.rule['mode'] == 'xpath':
             self.doc = lxml.html.fromstring(self.data)
+
         elif self.rule['mode'] == 'json':
             self.doc = json.loads(self.data)
 
