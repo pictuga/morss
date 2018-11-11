@@ -164,7 +164,7 @@ def ItemFix(item, feedurl='/'):
 
     # feedburner
     feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
-    match = item.xval('feedburner:origLink')
+    match = item.rule_str('feedburner:origLink')
     if match:
         item.link = match
 
@@ -345,7 +345,7 @@ def FeedFetch(url, options):
         rss = feed.feed
 
     elif re.match(b'\s*<\?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
-        rss = feeds.parse(xml)
+        rss = feeds.FeedXML(xml)
 
     elif options.items:
         # using argument-based feedify
