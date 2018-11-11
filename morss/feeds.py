@@ -77,14 +77,6 @@ def tag_NS(tag, nsmap=NSMAP):
     return tag
 
 
-def inner_html(xml):
-    return (xml.text or '') + ''.join([etree.tostring(child) for child in xml])
-
-
-def clean_node(xml):
-    [xml.remove(child) for child in xml]
-
-
 def parse_rules(filename=None):
     if not filename:
         filename = os.path.join(os.path.dirname(__file__), 'feedify.ini')
@@ -266,6 +258,14 @@ class ParserXML(ParserBase):
 
         return rule
 
+    @staticmethod
+    def _inner_html(xml):
+        return (xml.text or '') + ''.join([etree.tostring(child) for child in xml])
+
+    @staticmethod
+    def _clean_node(xml):
+        [xml.remove(child) for child in xml]
+
     def rule_search_all(self, rule):
         try:
             return self.root.xpath(rule, namespaces=NSMAP)
@@ -333,13 +333,25 @@ class ParserXML(ParserBase):
             match.attrib[key] = value
 
         else:
+            if len(match):
+                # atom stuff
+                self._clean_node(match)
+
+                if match.attrib.get('type', '') == 'xhtml':
+                    match.attrib['type'] = 'html'
+
             match.text = value
 
     def rule_str(self, rule):
         match = self.rule_search(rule)
 
         if isinstance(match, etree._Element):
-            return match.text or ""
+            if len(match):
+                # atom stuff
+                return self._inner_html(match)
+
+            else:
+                return match.text or ""
 
         else:
             return match or ""
