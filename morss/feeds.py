@@ -56,27 +56,6 @@ NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
          'rssfake': 'http://purl.org/rss/1.0/'}
 
 
-def load(url):
-    d = urlopen(url).read()
-    return parse(d)
-
-
-def tag_NS(tag, nsmap=NSMAP):
-    match = re.search(r'^\{([^\}]+)\}(.*)$', tag)
-    if match:
-        match = match.groups()
-        for (key, url) in nsmap.items():
-            if url == match[0]:
-                return "%s:%s" % (key, match[1].lower())
-    else:
-        match = re.search(r'^([^:]+):([^:]+)$', tag)
-        if match:
-            match = match.groups()
-            if match[0] in nsmap:
-                return "{%s}%s" % (nsmap[match[0]], match[1].lower())
-    return tag
-
-
 def parse_rules(filename=None):
     if not filename:
         filename = os.path.join(os.path.dirname(__file__), 'feedify.ini')
