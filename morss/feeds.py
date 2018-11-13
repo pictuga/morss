@@ -293,7 +293,7 @@ class ParserXML(ParserBase):
         match = self.rule_search_last(rule)
         if match:
             element = deepcopy(match)
-            match.getparen().append(element)
+            match.getparent().append(element)
             return element
 
         # try duplicating from template
