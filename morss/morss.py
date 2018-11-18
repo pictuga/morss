@@ -164,8 +164,8 @@ def ItemFix(item, feedurl='/'):
         item.link = parse_qs(urlparse(item.link).query)['u'][0]
         log(item.link)
 
-    # feedburner
-    feeds.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
+    # feedburner FIXME only works if RSS...
+    item.NSMAP['feedburner'] = 'http://rssnamespace.org/feedburner/ext/1.0'
     match = item.rule_str('feedburner:origLink')
     if match:
         item.link = match

@@ -44,18 +44,6 @@ except NameError:
     basestring = unicode = str
 
 
-Element = etree.Element
-
-NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
-         'atom03': 'http://purl.org/atom/ns#',
-         'media': 'http://search.yahoo.com/mrss/',
-         'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-         'slash': 'http://purl.org/rss/1.0/modules/slash/',
-         'dc': 'http://purl.org/dc/elements/1.1/',
-         'content': 'http://purl.org/rss/1.0/modules/content/',
-         'rssfake': 'http://purl.org/rss/1.0/'}
-
-
 def parse_rules(filename=None):
     if not filename:
         filename = os.path.join(os.path.dirname(__file__), 'feedify.ini')
@@ -224,6 +212,15 @@ class ParserBase(object):
 
 
 class ParserXML(ParserBase):
+    NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
+        'atom03': 'http://purl.org/atom/ns#',
+        'media': 'http://search.yahoo.com/mrss/',
+        'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        'slash': 'http://purl.org/rss/1.0/modules/slash/',
+        'dc': 'http://purl.org/dc/elements/1.1/',
+        'content': 'http://purl.org/rss/1.0/modules/content/',
+        'rssfake': 'http://purl.org/rss/1.0/'}
+
     def parse(self, raw):
         parser = etree.XMLParser(recover=True)
         return etree.fromstring(raw, parser)
@@ -242,8 +239,8 @@ class ParserXML(ParserBase):
         match = re.search(r'^([^:]+):([^:]+)$', rule) # to match fakerss:content
         if match:
             match = match.groups()
-            if match[0] in NSMAP:
-                return "{%s}%s" % (NSMAP[match[0]], match[1].lower())
+            if match[0] in self.NSMAP:
+                return "{%s}%s" % (self.NSMAP[match[0]], match[1].lower())
 
         return rule
 
@@ -257,7 +254,7 @@ class ParserXML(ParserBase):
 
     def rule_search_all(self, rule):
         try:
-            return self.root.xpath(rule, namespaces=NSMAP)
+            return self.root.xpath(rule, namespaces=self.NSMAP)
 
         except etree.XPathEvalError:
             return []
@@ -405,17 +402,18 @@ class Uniq(object):
     _id = None
 
     def __new__(cls, *args, **kwargs):
-        # check if an item was already created for it
+        # check if a wrapper was already created for it
         # if so, reuse it
         # if not, create a new one
+        # note that the item itself (the tree node) is created beforehands
 
         tmp_id = cls._gen_id(*args, **kwargs)
-        if tmp_id is not None and tmp_id in cls._map:
+        if tmp_id in cls._map:
             return cls._map[tmp_id]
 
         else:
             obj = object.__new__(cls, *args, **kwargs)
-            cls._map[obj._id] = obj
+            cls._map[tmp_id] = obj
             return obj
 
 
