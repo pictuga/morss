@@ -188,11 +188,18 @@ class ParserBase(object):
 
     def time_prs(self, x):
         # parse
-        pass
+        try:
+            return parse_time(x)
+        except ValueError:
+            return None
 
     def time_fmt(self, x):
         # format
-        pass
+        try:
+            time = parse_time(x)
+            return time.strftime(self.rules['timeformat'])
+        except ValueError:
+            pass
 
     def get_raw(self, rule_name):
         # get the raw output, for self.get_raw('items')
@@ -350,19 +357,6 @@ class ParserXML(ParserBase):
 
     def bool_fmt(self, x):
         return 'true' if x else 'false'
-
-    def time_prs(self, x):
-        try:
-            return parse_time(x)
-        except ValueError:
-            return None
-
-    def time_fmt(self, x):
-        try:
-            time = parse_time(x)
-            return time.strftime(self.rules['timeformat'])
-        except ValueError:
-            pass
 
     def get_raw(self, rule_name):
         return self.rule_search_all(self.rules[rule_name])
