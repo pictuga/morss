@@ -138,6 +138,8 @@ class ParserBase(object):
 
             yield element, value
 
+    # RULE-BASED FUNCTIONS
+
     def rule_search(self, rule):
         # xpath, return the first one only
         try:
@@ -147,11 +149,11 @@ class ParserBase(object):
             return None
 
     def rule_search_all(self, rule):
-        # xpath, return all (useful to find feed items)
+        # xpath, return all raw matches (useful to find feed items)
         pass
 
     def rule_search_last(self, rule):
-        # xpath, return the first one only
+        # xpath, return only the first raw match
         try:
             return self.rule_search_all(rule)[-1]
 
@@ -176,6 +178,8 @@ class ParserBase(object):
         # GETs inside (pure) text from it
         pass
 
+    # PARSERS
+
     def bool_prs(self, x):
         # parse
         pass
@@ -199,21 +203,29 @@ class ParserBase(object):
         except ValueError:
             pass
 
+    # HELPERS
+
     def get_raw(self, rule_name):
         # get the raw output, for self.get_raw('items')
-        pass
+        return self.rule_search_all(self.rules[rule_name])
 
     def get_str(self, rule_name):
         # simple function to get nice text from the rule name
         # for use in @property, ie. self.get_str('title')
-        pass
+        return self.rule_str(self.rules[rule_name])
 
     def set_str(self, rule_name):
-        pass
+        try:
+            return self.rule_set(self.rules[rule_name], value)
+
+        except AttributeError:
+            # does not exist, have to create it
+            self.rule_create(self.rules[rule_name])
+            return self.rule_set(self.rules[rule_name], value)
 
     def rmv(self, rule_name):
         # easy deleter
-        pass
+        self.rule_remove(self.rules[rule_name])
 
 
 class ParserXML(ParserBase):
@@ -355,24 +367,6 @@ class ParserXML(ParserBase):
 
     def bool_fmt(self, x):
         return 'true' if x else 'false'
-
-    def get_raw(self, rule_name):
-        return self.rule_search_all(self.rules[rule_name])
-
-    def get_str(self, rule_name):
-        return self.rule_str(self.rules[rule_name])
-
-    def set_str(self, rule_name, value):
-        try:
-            return self.rule_set(self.rules[rule_name], value)
-
-        except AttributeError:
-            # does not exist, have to create it
-            self.rule_create(self.rules[rule_name])
-            return self.rule_set(self.rules[rule_name], value)
-
-    def rmv(self, rule_name):
-        self.rule_remove(self.rules[rule_name])
 
 
 def parse_time(value):
