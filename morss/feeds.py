@@ -29,12 +29,12 @@ except ImportError:
 try:
     from StringIO import StringIO
     from urllib2 import urlopen
-    from ConfigParser import ConfigParser
+    from ConfigParser import RawConfigParser
 except ImportError:
     # python > 3
     from io import StringIO
     from urllib.request import urlopen
-    from configparser import ConfigParser
+    from configparser import RawConfigParser
 
 try:
     basestring
@@ -46,7 +46,7 @@ def parse_rules(filename=None):
     if not filename:
         filename = os.path.join(os.path.dirname(__file__), 'feedify.ini')
 
-    config = ConfigParser()
+    config = RawConfigParser()
     config.read(filename)
 
     rules = dict([(x, dict(config.items(x))) for x in config.sections()])
