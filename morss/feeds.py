@@ -278,14 +278,14 @@ class ParserXML(ParserBase):
 
     def rule_create(self, rule):
         # duplicate, copy from template or create from scratch
-        rule, key = self._rule_parse(rule)
+        rrule, key = self._rule_parse(rule)
 
-        # try recreating based on the rule (for really basic rules, ie. plain RSS)
-        if re.search(r'^[a-zA-Z0-9/:]+$', rule):
-            chain = rule.strip('/').split('/')
+        # try recreating based on the rule (for really basic rules, ie. plain RSS) `/feed/item`
+        if re.search(r'^[a-zA-Z0-9/:]+$', rrule):
+            chain = rrule.strip('/').split('/')
             current = self.root
 
-            if rule[0] == '/':
+            if rrule[0] == '/':
                 chain = chain[1:]
 
             for (i, node) in enumerate(chain):
@@ -304,7 +304,7 @@ class ParserXML(ParserBase):
             return current
 
         # try duplicating from existing (works well with fucked up structures)
-        match = self.rule_search_last(rule)
+        match = self.rule_search_last(rrule)
         if match:
             element = deepcopy(match)
             match.getparent().append(element)
@@ -317,9 +317,9 @@ class ParserXML(ParserBase):
         return None
 
     def rule_remove(self, rule):
-        rule, key = self._rule_parse(rule)
+        rrule, key = self._rule_parse(rule)
 
-        match = self.rule_search(rule)
+        match = self.rule_search(rrule)
 
         if match is None:
             return
@@ -331,9 +331,9 @@ class ParserXML(ParserBase):
             match.getparent().remove(match)
 
     def rule_set(self, rule, value):
-        rule, key = self._rule_parse(rule)
+        rrule, key = self._rule_parse(rule)
 
-        match = self.rule_search(rule)
+        match = self.rule_search(rrule)
 
         if key is not None:
             match.attrib[key] = value
