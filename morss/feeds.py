@@ -14,8 +14,6 @@ from dateutil import tz
 import dateutil.parser
 from copy import deepcopy
 
-from . import crawler
-
 from wheezy.template.engine import Engine
 from wheezy.template.loader import DictLoader
 from wheezy.template.ext.core import CoreExtension
