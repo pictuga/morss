@@ -133,6 +133,19 @@ class ParserBase(object):
         template = engine.get_template('reader')
         return template.render({'feed': self}).encode('utf-8')
 
+    def convert(self, TargetParser):
+        target = TargetParser()
+
+        for attr in target.dic:
+            if attr == 'items':
+                for item in self.items:
+                    target.append(item)
+
+            else:
+                setattr(target, attr, getattr(self, attr))
+
+        return target
+
     def iterdic(self):
         for element in self.dic:
             value = getattr(self, element)
