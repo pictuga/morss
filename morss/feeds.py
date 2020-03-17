@@ -261,6 +261,7 @@ class ParserXML(ParserBase):
         return test.groups() if test else (rule, None)
 
     def _resolve_ns(self, rule):
+        # shortname to full name
         match = re.search(r'^([^:]+):([^:]+)$', rule) # to match fakerss:content
         if match:
             match = match.groups()
@@ -294,12 +295,14 @@ class ParserXML(ParserBase):
             current = self.root
 
             if rrule[0] == '/':
+                # we skip the first chain-element, as we _start_ from the first/root one
+                # i.e. for "/rss/channel/title" we only keep "/channel/title"
                 chain = chain[1:]
 
             for (i, node) in enumerate(chain):
                 test = current.find(self._resolve_ns(node))
 
-                if test and i < len(chain) - 1:
+                if test is not None and i < len(chain) - 1:
                     # yay, go on
                     current = test
 
@@ -435,7 +438,7 @@ class Feed(object):
         item = self.items[-1]
 
         if new is None:
-            return item
+            return
 
         for attr in globals()[self.itemsClass].dic:
             if hasattr(new, attr):
@@ -448,7 +451,7 @@ class Feed(object):
         return self.wrap_items(self.get_raw('items'))[key]
 
     def __delitem__(self, key):
-        self[key].rmv()
+        self[key].remove()
 
     def __len__(self):
         return len(self.get_raw('items'))
@@ -505,6 +508,7 @@ class FeedXML(Feed, ParserXML):
     itemsClass = 'ItemXML'
 
     def tostring(self, **k):
+        # override needed due to "getroottree" inclusion
         return etree.tostring(self.root.getroottree(), **k)
 
 
