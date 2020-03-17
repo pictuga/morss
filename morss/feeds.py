@@ -440,12 +440,16 @@ class Feed(object):
         if new is None:
             return
 
-        for attr in globals()[self.itemsClass].dic:
-            if hasattr(new, attr):
+        for attr in self.dic:
+            try:
                 setattr(item, attr, getattr(new, attr))
 
-            elif attr in new:
-                setattr(item, attr, new[attr])
+            except AttributeError:
+                try:
+                    setattr(item, attr, new[attr])
+
+                except (IndexError, TypeError):
+                    pass
 
     def __getitem__(self, key):
         return self.wrap_items(self.get_raw('items'))[key]
