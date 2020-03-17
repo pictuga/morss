@@ -199,14 +199,6 @@ class ParserBase(object):
 
     # PARSERS
 
-    def bool_prs(self, x):
-        # parse
-        pass
-
-    def bool_fmt(self, x):
-        # format
-        pass
-
     def time_prs(self, x):
         # parse
         try:
@@ -386,11 +378,7 @@ class ParserXML(ParserBase):
         else:
             return match or ""
 
-    def bool_prs(self, x):
-        return (x or '').lower() != 'false'
 
-    def bool_fmt(self, x):
-        return 'true' if x else 'false'
 
 
 def parse_time(value):
@@ -491,12 +479,6 @@ class ParserJSON(ParserBase):
         out = self.rule_search(rule)
         return str(out).replace('\n', '<br/>') if out else out
 
-    def bool_prs(self, x):
-        return (x or '').lower() != 'false'
-
-    def bool_fmt(self, x):
-        return str(bool(x))
-
 
 class Uniq(object):
     _map = {}
@@ -566,7 +548,7 @@ class Feed(object):
 
 
 class Item(Uniq):
-    dic = ('title', 'link', 'desc', 'content', 'id', 'is_permalink', 'time', 'updated')
+    dic = ('title', 'link', 'desc', 'content', 'time', 'updated')
 
     def __init__(self, xml=None, rules=None, parent=None):
         self._id = self._gen_id(xml)
@@ -594,14 +576,6 @@ class Item(Uniq):
         lambda f:   f.get_str('item_content'),
         lambda f,x: f.set_str('item_content', x),
         lambda f:   f.rmv('item_content') )
-    id = property(
-        lambda f:   f.get_str('item_id'),
-        lambda f,x: f.set_str('item_id', x),
-        lambda f:   f.rmv('item_id') )
-    is_permalink = property(
-        lambda f:   f.get_str('item_is_permalink'),
-        lambda f,x: f.set_str('item_is_permalink', x))#,
-        #lambda f:   f.rmv('item_is_permalink') )
     time = property(
         lambda f:   f.time_fmt(f.get_str('item_time')),
         lambda f,x: f.set_str('title', f.time_prs(x)),
