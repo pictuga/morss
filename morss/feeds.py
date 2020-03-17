@@ -62,12 +62,17 @@ def parse_rules(filename=None):
 class ParserBase(object):
     def __init__(self, data=None, rules=None, parent=None):
         if rules is None:
-            rules = parse_rules()['rss']
-
-        if data is None:
-            data = rules['base'][0]
+            rules = parse_rules()[self.ruleset] # FIXME
 
         self.rules = rules
+
+        if data is None:
+            if isinstance(self.rules['items'], list):
+                data = rules['base'][0]
+
+            else:
+                data = rules['base']
+
         self.root = self.parse(data)
         self.parent = parent
 
@@ -230,6 +235,8 @@ class ParserBase(object):
 
 
 class ParserXML(ParserBase):
+    ruleset = 'rss'
+
     NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
         'atom03': 'http://purl.org/atom/ns#',
         'media': 'http://search.yahoo.com/mrss/',
