@@ -60,7 +60,7 @@ def parse_rules(filename=None):
 
 
 class ParserBase(object):
-    def __init__(self, data=None, rules=None):
+    def __init__(self, data=None, rules=None, parent=None):
         if rules is None:
             rules = parse_rules()['rss']
 
@@ -69,6 +69,7 @@ class ParserBase(object):
 
         self.rules = rules
         self.root = self.parse(data)
+        self.parent = parent
 
         # do `if multi` and select the correct rule for each (and split \n)
         if isinstance(self.rules['items'], list):
@@ -409,7 +410,7 @@ class Feed(object):
 
     def wrap_items(self, items):
         itemsClass = globals()[self.itemsClass]
-        return [itemsClass(x, self.rules) for x in items]
+        return [itemsClass(x, self.rules, self) for x in items]
 
     title = property(
         lambda f:   f.get_str('title'),
@@ -449,10 +450,11 @@ class Feed(object):
 class Item(Uniq):
     dic = ('title', 'link', 'desc', 'content', 'id', 'is_permalink', 'time', 'updated')
 
-    def __init__(self, xml=None, rules=None):
+    def __init__(self, xml=None, rules=None, parent=None):
         self._id = self._gen_id(xml)
         self.root = xml
         self.rules = rules
+        self.parent = parent
 
     @staticmethod
     def _gen_id(xml=None, *args, **kwargs):
