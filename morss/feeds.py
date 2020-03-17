@@ -214,7 +214,7 @@ class ParserBase(object):
         # for use in @property, ie. self.get_str('title')
         return self.rule_str(self.rules[rule_name])
 
-    def set_str(self, rule_name):
+    def set_str(self, rule_name, value):
         try:
             return self.rule_set(self.rules[rule_name], value)
 
