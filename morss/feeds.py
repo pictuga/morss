@@ -394,6 +394,97 @@ def parse_time(value):
         return False
 
 
+class ParserJSON(ParserBase):
+    ruleset = 'json'
+
+    def parse(self, raw):
+        return json.loads(raw)
+
+    def remove(self):
+        # delete oneself FIXME
+        pass
+
+    def tostring(self):
+        return json.dumps(self.root, indent=True, ensure_ascii=False)
+            # ensure_ascii = False to have proper utf-8 string and not \u00
+
+    def _rule_parse(self, rule):
+        return rule.split(".")
+
+    def rule_search_all(self, rule):
+        try:
+            rrule = self._rule_parse(rule)
+            cur = self.root
+
+            for node in rrule:
+                if node == '[]':
+                    break
+                else:
+                    cur = cur[node]
+
+            return cur if isinstance(cur, list) else [cur,]
+
+        except (AttributeError, KeyError):
+            return []
+
+    def rule_create(self, rule):
+        # create from scracth
+        rrule = self._rule_parse(rule)
+        cur = self.root
+
+        for (i, node) in enumerate(rrule):
+            if rrule[i+1] == '[]':
+                if node in cur and isinstance(cur[node], list):
+                    cur[node].append({})
+
+                else:
+                    cur[node] = [{}]
+
+                return
+
+            else:
+                if node in cur:
+                    # yay, go on
+                    cur = cur[node]
+                else:
+                    # opps need to create
+                    cur[node] = {}
+
+    def rule_remove(self, rule):
+        if '[]' in rule:
+            raise ValueError('not supported') # FIXME
+
+        rrule = self._rule_parse(rule)
+        cur = self.root
+
+        for node in rrule[:-1]:
+            cur = cur[node]
+
+        del cur[rrule[-1]]
+
+    def rule_set(self, rule, value):
+        if '[]' in rule:
+            raise ValueError('not supported') # FIXME
+
+        rrule = self._rule_parse(rule)
+        cur = self.root
+
+        for node in rrule[:-1]:
+            cur = cur[node]
+
+        cur[rrule[-1]] = value
+
+    def rule_str(self, rule):
+        out = self.rule_search(rule)
+        return str(out).replace('\n', '<br/>') if out else out
+
+    def bool_prs(self, x):
+        return (x or '').lower() != 'false'
+
+    def bool_fmt(self, x):
+        return str(bool(x))
+
+
 class Uniq(object):
     _map = {}
     _id = None
@@ -518,3 +609,20 @@ class FeedXML(Feed, ParserXML):
 
 class ItemXML(Item, ParserXML):
     pass
+
+
+class FeedJSON(Feed, ParserJSON):
+    itemsClass = 'ItemJSON'
+
+
+class ItemJSON(Item, ParserJSON):
+    def remove(self):
+        rrule = self._rule_parse(self.rules['items'])
+        cur = self.parent.root
+
+        for node in rrule:
+            if node == '[]':
+                cur.remove(self.root)
+                return
+
+            cur = cur[node]
