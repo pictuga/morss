@@ -241,6 +241,8 @@ class ParserBase(object):
 
 class ParserXML(ParserBase):
     ruleset = 'rss'
+    mimetype = ['text/xml', 'application/xml', 'application/rss+xml',
+        'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml']
 
     NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
         'atom03': 'http://purl.org/atom/ns#',
@@ -397,6 +399,7 @@ def parse_time(value):
 
 class ParserJSON(ParserBase):
     ruleset = 'json'
+    mimetype = ['application/json', 'application/javascript', 'text/javascript']
 
     def parse(self, raw):
         return json.loads(raw)
