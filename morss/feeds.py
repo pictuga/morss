@@ -62,7 +62,7 @@ def parse_rules(filename=None):
 class ParserBase(object):
     def __init__(self, data=None, rules=None, parent=None):
         if rules is None:
-            rules = parse_rules()[self.ruleset] # FIXME
+            rules = parse_rules()[self.default_ruleset] # FIXME
 
         self.rules = rules
 
@@ -220,7 +220,7 @@ class ParserBase(object):
 
 
 class ParserXML(ParserBase):
-    ruleset = 'rss'
+    default_ruleset = 'rss-channel'
     mimetype = ['text/xml', 'application/xml', 'application/rss+xml',
         'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml']
 
@@ -378,7 +378,7 @@ def parse_time(value):
 
 
 class ParserJSON(ParserBase):
-    ruleset = 'json'
+    default_ruleset = 'json'
     mimetype = ['application/json', 'application/javascript', 'text/javascript']
 
     def parse(self, raw):
