@@ -14,9 +14,7 @@ from dateutil import tz
 import dateutil.parser
 from copy import deepcopy
 
-from wheezy.template.engine import Engine
-from wheezy.template.loader import DictLoader
-from wheezy.template.ext.core import CoreExtension
+import lxml.html
 
 json.encoder.c_make_encoder = None
 
@@ -99,12 +97,7 @@ class ParserBase(object):
         return out.read()
 
     def tohtml(self):
-        # TODO temporary
-        path = os.path.join(os.path.dirname(__file__), 'reader.html.template')
-        loader = DictLoader({'reader': open(path).read()})
-        engine = Engine(loader=loader, extensions=[CoreExtension()])
-        template = engine.get_template('reader')
-        return template.render({'feed': self}).encode('utf-8')
+        return self.convert(FeedHTML).tostring()
 
     def convert(self, TargetParser):
         target = TargetParser()
@@ -344,6 +337,43 @@ class ParserXML(ParserBase):
             return match or ""
 
 
+class ParserHTML(ParserXML):
+    default_ruleset = 'html'
+    mode = 'html'
+    mimetype = ['text/html', 'application/xhtml+xml']
+
+    def parse(self, raw):
+        return lxml.html.fromstring(raw)
+
+    def tostring(self, **k):
+        return lxml.html.tostring(self.root, **k)
+
+    @staticmethod
+    def _inner_html(xml):
+        return (xml.text or b'') + b''.join([lxml.html.tostring(child) for child in xml])
+
+    def rule_search_all(self, rule):
+        try:
+            # do proper "class" matching (too "heavy" to type as-it in rules)
+            pattern = r'\[class=([^\]]+)\]'
+            repl = r'[@class and contains(concat(" ", normalize-space(@class), " "), " \1 ")]'
+            rule = re.sub(pattern, repl, rule)
+
+            return self.root.xpath(rule)
+
+        except etree.XPathEvalError:
+            return []
+
+    def rule_create(self, rule):
+        # try duplicating from existing (works well with fucked up structures)
+        rrule, key = self._rule_parse(rule)
+
+        match = self.rule_search_last(rule)
+        if match is not None:
+            element = deepcopy(match)
+            match.getparent().append(element)
+
+    # TODO def rule_set for the html part
 
 
 def parse_time(value):
@@ -562,6 +592,14 @@ class FeedXML(Feed, ParserXML):
 
 
 class ItemXML(Item, ParserXML):
+    pass
+
+
+class FeedHTML(Feed, ParserHTML):
+    itemsClass = 'ItemHTML'
+
+
+class ItemHTML(Item, ParserHTML):
     pass
 
 
