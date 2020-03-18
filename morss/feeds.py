@@ -67,31 +67,11 @@ class ParserBase(object):
         self.rules = rules
 
         if data is None:
-            if isinstance(self.rules['items'], list):
-                data = rules['base'][0]
-
-            else:
-                data = rules['base']
+            data = rules['base']
 
         self.root = self.parse(data)
         self.parent = parent
 
-        # do `if multi` and select the correct rule for each (and split \n)
-        if isinstance(self.rules['items'], list):
-            for (i, rule) in enumerate(self.rules['items']):
-                if self.rule_search(rule) is not None:
-                    key = i
-                    break
-
-            else:
-                key = 0
-
-            len_items = len(rules['items'])
-
-            for arg in self.rules.keys():
-                if (isinstance(self.rules[arg], list)
-                        and len(self.rules[arg]) == len_items):
-                    self.rules[arg] = self.rules[arg][key]
 
     def parse(self, raw):
         pass
