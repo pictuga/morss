@@ -221,6 +221,7 @@ class ParserBase(object):
 
 class ParserXML(ParserBase):
     default_ruleset = 'rss-channel'
+    mode = 'xml'
     mimetype = ['text/xml', 'application/xml', 'application/rss+xml',
         'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml']
 
@@ -379,6 +380,7 @@ def parse_time(value):
 
 class ParserJSON(ParserBase):
     default_ruleset = 'json'
+    mode = 'json'
     mimetype = ['application/json', 'application/javascript', 'text/javascript']
 
     def parse(self, raw):
