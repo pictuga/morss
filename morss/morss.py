@@ -19,7 +19,6 @@ from . import readabilite
 import wsgiref.simple_server
 import wsgiref.handlers
 
-from html2text import HTML2Text
 
 try:
     # python 2
@@ -289,15 +288,6 @@ def ItemAfter(item, options):
 
     if options.noref:
         item.link = ''
-
-    if options.md:
-        conv = HTML2Text(baseurl=item.link)
-        conv.unicode_snob = True
-
-        if item.desc:
-            item.desc = conv.handle(item.desc)
-        if item.content:
-            item.content = conv.handle(item.content)
 
     return item
 

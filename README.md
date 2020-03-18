@@ -45,7 +45,6 @@ You do need:
 - [python](http://www.python.org/) >= 2.6 (python 3 is supported)
 - [lxml](http://lxml.de/) for xml parsing
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
-- [html2text](http://www.aaronsw.com/2002/html2text/)
 - [OrderedDict](https://pypi.python.org/pypi/ordereddict) if using python &lt; 2.7
 - [wheezy.template](https://pypi.python.org/pypi/wheezy.template) to generate HTML pages
 - [chardet](https://pypi.python.org/pypi/chardet)
@@ -77,7 +76,6 @@ The arguments are:
 	- `search=STRING`: does a basic case-sensitive search in the feed
 - Advanced
 	- `csv`: export to csv
-	- `md`: convert articles to Markdown
 	- `indent`: returns indented XML or JSON, takes more place, but human-readable
 	- `nolink`: drop links, but keeps links' inner text
 	- `noref`: drop items' link
@@ -199,7 +197,7 @@ Using cache and passing arguments:
 >>> import morss
 >>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
 >>> cache = '/tmp/morss-cache.db' # sqlite cache location
->>> options = {'csv':True, 'md':True}
+>>> options = {'csv':True}
 >>> xml_string = morss.process(url, cache, options)
 >>> xml_string[:50]
 '{"title": "BBC News - Home", "desc": "The latest s'
@@ -214,7 +212,7 @@ Doing it step-by-step:
 import morss, morss.crawler
 
 url = 'http://newspaper.example/feed.xml'
-options = morss.Options(csv=True, md=True) # arguments
+options = morss.Options(csv=True) # arguments
 morss.crawler.sqlite_default = '/tmp/morss-cache.db' # sqlite cache location
 
 rss = morss.FeedFetch(url, options) # this only grabs the RSS feed

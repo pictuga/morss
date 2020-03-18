@@ -1,5 +1,4 @@
 lxml
 python-dateutil <= 1.5
-html2text
 chardet
 pymysql
