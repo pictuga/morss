@@ -21,12 +21,6 @@ from wheezy.template.ext.core import CoreExtension
 json.encoder.c_make_encoder = None
 
 try:
-    from collections import OrderedDict
-except ImportError:
-    # python < 2.7
-    from ordereddict import OrderedDict
-
-try:
     from StringIO import StringIO
     from urllib2 import urlopen
     from ConfigParser import RawConfigParser
@@ -86,8 +80,7 @@ class ParserBase(object):
         pass
 
     def tojson(self, indent=None):
-        # TODO temporary
-        return json.dumps(OrderedDict(self.iterdic()), indent=indent)
+        return self.convert(FeedJSON).tostring()
 
     def tocsv(self):
         # TODO temporary
@@ -125,17 +118,6 @@ class ParserBase(object):
                 setattr(target, attr, getattr(self, attr))
 
         return target
-
-    def iterdic(self):
-        for element in self.dic:
-            value = getattr(self, element)
-
-            if element == 'items':
-                value = [OrderedDict(x.iterdic()) for x in value]
-            elif isinstance(value, datetime):
-                value = value.isoformat()
-
-            yield element, value
 
     # RULE-BASED FUNCTIONS
 
