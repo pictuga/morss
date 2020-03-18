@@ -9,6 +9,8 @@ import re
 import json
 import csv
 
+from fnmatch import fnmatch
+
 from lxml import etree
 from dateutil import tz
 import dateutil.parser
@@ -49,6 +51,65 @@ def parse_rules(filename=None):
                 rules[section][arg] = rules[section][arg].split('\n')[1:]
 
     return rules
+
+
+def parse(data, url=None, mimetype=None):
+    " Determine which ruleset to use "
+
+    rulesets = parse_rules()
+    parsers = [FeedXML, FeedHTML, FeedJSON]
+
+    # 1) Look for a ruleset based on path
+
+    if url is not None:
+        for ruleset in rulesets.values():
+            if 'path' in ruleset:
+                for path in ruleset['path']:
+                    if fnmatch(url, path):
+                        parser = [x for x in parsers if x.mode == ruleset['mode']][0]
+                        return parser(data, ruleset) 
+
+    # 2) Look for a parser based on mimetype
+
+    if mimetype is not None:
+        parser_candidates = [x for x in parsers if mimetype in x.mimetype]
+
+    if mimetype is None or parser_candidates is None:
+        parser_candidates = parsers
+
+    # 3) Look for working ruleset for given parser
+        # 3a) See if parsing works
+        # 3b) See if .items matches anything
+
+    for parser in parser_candidates:
+        ruleset_candidates = [x for x in rulesets.values() if x['mode'] == parser.mode and 'path' not in x]
+            # 'path' as they should have been caught beforehands
+
+        try:
+            feed = parser(data)
+
+        except (ValueError):
+            # parsing did not work
+            pass
+
+        else:
+            # parsing worked, now we try the rulesets
+
+            for ruleset in ruleset_candidates:
+                feed.rules = ruleset
+
+                try:
+                    feed.items[0]
+
+                except (AttributeError, IndexError):
+                    # parsing and or item picking did not work out
+                    pass
+
+                else:
+                    # it worked!
+                    return feed
+
+    raise Exception('no way to handle this feed')
 
 
 class ParserBase(object):
