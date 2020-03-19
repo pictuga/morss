@@ -166,6 +166,9 @@ class ParserBase(object):
         return self.convert(FeedHTML).tostring(**k)
 
     def convert(self, TargetParser):
+        if isinstance(self, TargetParser):
+            return self
+
         target = TargetParser()
 
         for attr in target.dic:
