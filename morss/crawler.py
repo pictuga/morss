@@ -1,8 +1,5 @@
 import sys
 
-import ssl
-import socket
-
 import zlib
 from io import BytesIO, StringIO
 import re
