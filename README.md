@@ -2,6 +2,10 @@
 
 _GNU AGPLv3 code_
 
+Upstream source code: https://git.pictuga.com/pictuga/morss
+Github mirror (for Issues & Pull requests): https://github.com/pictuga/morss
+Homepage: https://morss.it/
+
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds,
 commonly available on internet. Indeed most newspapers only make a small
 description available to users in their rss feeds, which makes the RSS feed
