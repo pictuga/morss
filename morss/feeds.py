@@ -21,18 +21,21 @@ import lxml.html
 json.encoder.c_make_encoder = None
 
 try:
+    # python 2
     from StringIO import StringIO
     from urllib2 import urlopen
     from ConfigParser import RawConfigParser
 except ImportError:
-    # python > 3
+    # python 3
     from io import StringIO
     from urllib.request import urlopen
     from configparser import RawConfigParser
 
 try:
+    # python 2
     basestring
 except NameError:
+    # python 3
     basestring = unicode = str
 
 
@@ -109,13 +112,13 @@ def parse(data, url=None, mimetype=None):
                     # it worked!
                     return feed
 
-    raise Exception('no way to handle this feed')
+    raise TypeError('no way to handle this feed')
 
 
 class ParserBase(object):
     def __init__(self, data=None, rules=None, parent=None):
         if rules is None:
-            rules = parse_rules()[self.default_ruleset] # FIXME
+            rules = parse_rules()[self.default_ruleset]
 
         self.rules = rules
 
@@ -488,7 +491,7 @@ class ParserJSON(ParserBase):
 
     def tostring(self):
         return json.dumps(self.root, indent=True, ensure_ascii=False)
-            # ensure_ascii = False to have proper utf-8 string and not \u00
+            # ensure_ascii = False to have proper (unicode?) string and not \u00
 
     def _rule_parse(self, rule):
         return rule.split(".")
@@ -558,7 +561,7 @@ class ParserJSON(ParserBase):
 
     def rule_str(self, rule):
         out = self.rule_search(rule)
-        return str(out).replace('\n', '<br/>') if out else out
+        return out.replace('\n', '<br/>') if out else out
 
 
 class Uniq(object):
@@ -576,7 +579,7 @@ class Uniq(object):
             return cls._map[tmp_id]
 
         else:
-            obj = object.__new__(cls, *args, **kwargs)
+            obj = object.__new__(cls) #, *args, **kwargs)
             cls._map[tmp_id] = obj
             return obj
 
