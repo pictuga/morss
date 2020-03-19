@@ -138,7 +138,7 @@ class ParserBase(object):
         # to output in sth fancy (json, csv, html), change class type
         pass
 
-    def tojson(self, indent=None):
+    def tojson(self):
         return self.convert(FeedJSON).tostring()
 
     def tocsv(self):
@@ -234,14 +234,23 @@ class ParserBase(object):
 
     def get_raw(self, rule_name):
         # get the raw output, for self.get_raw('items')
+        if rule_name not in self.rules:
+            return []
+
         return self.rule_search_all(self.rules[rule_name])
 
     def get_str(self, rule_name):
         # simple function to get nice text from the rule name
         # for use in @property, ie. self.get_str('title')
+        if rule_name not in self.rules:
+            return None
+
         return self.rule_str(self.rules[rule_name])
 
     def set_str(self, rule_name, value):
+        if rule_name not in self.rules:
+            return None
+
         try:
             return self.rule_set(self.rules[rule_name], value)
 
@@ -252,6 +261,9 @@ class ParserBase(object):
 
     def rmv(self, rule_name):
         # easy deleter
+        if rule_name not in self.rules:
+            return
+
         self.rule_remove(self.rules[rule_name])
 
 
@@ -296,11 +308,13 @@ class ParserXML(ParserBase):
 
     @staticmethod
     def _inner_html(xml):
-        return (xml.text or '') + ''.join([etree.tostring(child) for child in xml])
+        return (xml.text or '') + ''.join([etree.tostring(child, encoding='unicode') for child in xml])
 
     @staticmethod
     def _clean_node(xml):
-        [xml.remove(child) for child in xml]
+        if xml is not None and len(xml):
+            [xml.remove(child) for child in xml]
+            xml.text = None
 
     def rule_search_all(self, rule):
         try:
