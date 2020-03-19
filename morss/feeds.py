@@ -138,6 +138,9 @@ class ParserBase(object):
         # to output in sth fancy (json, csv, html), change class type
         pass
 
+    def torss(self):
+        return self.convert(FeedXML).tostring()
+
     def tojson(self):
         return self.convert(FeedJSON).tostring()
 
