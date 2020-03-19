@@ -320,8 +320,10 @@ class ParserXML(ParserBase):
 
     @staticmethod
     def _clean_node(xml):
-        if xml is not None and len(xml):
-            [xml.remove(child) for child in xml]
+        if xml is not None:
+            if len(xml):
+                [xml.remove(child) for child in xml]
+
             xml.text = None
 
     def rule_search_all(self, rule):
@@ -401,9 +403,12 @@ class ParserXML(ParserBase):
         else:
             if html_rich:
                 # atom stuff
+                if 'atom' in rule:
+                    match.attrib['type'] = 'xhtml'
+
                 self._clean_node(match)
-                match.attrib['type'] = 'xhtml'
                 match.append(lxml.html.fragment_fromstring(value, create_parent='div'))
+                match.find('div').drop_tag()
 
             else:
                 if match is not None and len(match):
