@@ -320,9 +320,9 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = crawler.custom_handler('xml', True, delay, options.encoding,
-            not feedify.supported(url) or not options.items).open(url, timeout=TIMEOUT * 2)
-            # feedify.supported(url) to use full crawler if using feedify
+        con = crawler.custom_handler(accept='xml', strict=True, delay=delay,
+            encoding=options.encoding, basic=not options.items) \
+            .open(url, timeout=TIMEOUT * 2)
         xml = con.read()
 
     except (IOError, HTTPException):
@@ -330,37 +330,30 @@ def FeedFetch(url, options):
 
     contenttype = con.info().get('Content-Type', '').split(';')[0]
 
-    if feedify.supported(url):
-        # using config file-based feedify
-        feed = feedify.Builder(url, xml)
-        feed.build()
-        rss = feed.feed
+    if options.items:
+        # using custom rules
+        rss = feeds.FeedHTML(xml, url, contenttype)
+        feed.rule
 
-    elif re.match(b'\s*<\?xml', xml) is not None or contenttype in crawler.MIMETYPE['xml']:
-        rss = feeds.FeedXML(xml)
-
-    elif options.items:
-        # using argument-based feedify
-        rule = {'items': options.items}
-        rule['mode'] = 'xpath'
+        rss.rules['items'] = options.items
 
         if options.item_title:
-            rule['item_title'] = options.item_title
+            rss.rules['item_title'] = options.item_title
         if options.item_link:
-            rule['item_link'] = options.item_link
+            rss.rules['item_link'] = options.item_link
         if options.item_content:
-            rule['item_content'] = options.item_content
+            rss.rules['item_content'] = options.item_content
         if options.item_time:
-            rule['item_time'] = options.item_time
-
-        feed = feedify.Builder(url, xml, rule)
-        feed.build()
-        rss = feed.feed
+            rss.rules['item_time'] = options.item_time
 
     else:
-        log('random page')
-        log(contenttype)
-        raise MorssException('Link provided is not a valid feed')
+        try:
+            rss = feeds.parse(xml, url, contenttype)
+
+        except TypeError:
+            log('random page')
+            log(contenttype)
+            raise MorssException('Link provided is not a valid feed')
 
     return rss
 
@@ -542,7 +535,7 @@ def cgi_app(environ, start_response):
     rss = FeedFetch(url, options)
 
     if headers['content-type'] == 'text/xml':
-        headers['content-type'] = rss.rules['mimetype'][0]
+        headers['content-type'] = rss.mimetype[0]
 
     start_response(headers['status'], list(headers.items()))
 
