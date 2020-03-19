@@ -232,9 +232,11 @@ class ParserBase(object):
         # format
         try:
             time = parse_time(x)
-            return time.strftime(self.rules['timeformat'])
+            return time.strftime(self.rules.get('timeformat', self.default_timeformat))
         except ValueError:
             pass
+
+    default_timeformat = "%D"
 
     # HELPERS
 
@@ -466,11 +468,14 @@ class ParserHTML(ParserXML):
 def parse_time(value):
     if isinstance(value, basestring):
         if re.match(r'^[0-9]+$', value):
-            return datetime.fromtimestamp(int(value), tz.tzutc())
+            return datetime.fromtimestamp(int(value), tz.UTC)
+
         else:
-            return dateutil.parser.parse(value, tzinfos=tz.tzutc)
+            return dateutil.parser.parse(value)
+
     elif isinstance(value, int):
-        return datetime.fromtimestamp(value, tz.tzutc())
+        return datetime.fromtimestamp(value, tz.UTC)
+
     elif isinstance(value, datetime):
         return value
     else:
@@ -661,12 +666,12 @@ class Item(Uniq):
         lambda f,x: f.set_str('item_content', x),
         lambda f:   f.rmv('item_content') )
     time = property(
-        lambda f:   f.time_fmt(f.get_str('item_time')),
-        lambda f,x: f.set_str('title', f.time_prs(x)),
+        lambda f:   f.time_prs(f.get_str('item_time')),
+        lambda f,x: f.set_str('item_time', f.time_fmt(x)),
         lambda f:   f.rmv('item_time') )
     updated = property(
-        lambda f:   f.time_fmt(f.get_str('item_updated')),
-        lambda f,x: f.set_str('updated', f.time_prs(x)),
+        lambda f:   f.time_prs(f.get_str('item_updated')),
+        lambda f,x: f.set_str('item_updated', f.time_fmt(x)),
         lambda f:   f.rmv('item_updated') )
 
 
