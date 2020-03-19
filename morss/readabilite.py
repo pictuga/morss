@@ -187,7 +187,7 @@ def clean_node(node):
         return
 
     # remove comments
-    if isinstance(node, lxml.html.HtmlComment):
+    if isinstance(node, lxml.html.HtmlComment) or isinstance(node, lxml.html.HtmlProcessingInstruction):
         parent.remove(node)
         return
 
