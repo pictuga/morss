@@ -387,29 +387,39 @@ class ParserXML(ParserBase):
 
         match = self.rule_search(rrule)
 
+        html_rich = ('atom' in rule or self.rules['mode'] == 'html') \
+            and rule in [self.rules.get('item_desc'), self.rules.get('item_content')]
+
         if key is not None:
             match.attrib[key] = value
 
         else:
-            if match is not None and len(match):
+            if html_rich:
                 # atom stuff
                 self._clean_node(match)
+                match.attrib['type'] = 'xhtml'
+                match.append(lxml.html.fragment_fromstring(value, create_parent='div'))
 
-                if match.attrib.get('type', '') == 'xhtml':
+            else:
+                if match is not None and len(match):
+                    self._clean_node(match)
                     match.attrib['type'] = 'html'
 
-            match.text = value
+                match.text = value
 
     def rule_str(self, rule):
         match = self.rule_search(rule)
 
+        html_rich = ('atom' in rule or self.rules['mode'] == 'html') \
+            and rule in [self.rules.get('item_desc'), self.rules.get('item_content')]
+
         if isinstance(match, etree._Element):
-            if len(match):
+            if html_rich:
                 # atom stuff
                 return self._inner_html(match)
 
             else:
-                return match.text or ""
+                return etree.tostring(match, method='text', encoding='unicode').strip()
 
         else:
             return match or ""
