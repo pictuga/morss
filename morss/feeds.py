@@ -136,35 +136,34 @@ class ParserBase(object):
         # delete oneslf
         pass
 
-    def tostring(self):
+    def tostring(self, **k):
         # output in its input format
-        # to output in sth fancy (json, csv, html), change class type
+        # to output in sth fancy (json, csv, html), change class type with .convert first
         pass
 
-    def torss(self):
-        return self.convert(FeedXML).tostring()
+    def torss(self, **k):
+        return self.convert(FeedXML).tostring(**k)
 
-    def tojson(self):
-        return self.convert(FeedJSON).tostring()
+    def tojson(self, **k):
+        return self.convert(FeedJSON).tostring(**k)
 
-    def tocsv(self):
-        # TODO temporary
+    def tocsv(self, encoding='unicode'):
         out = StringIO()
         c = csv.writer(out, dialect=csv.excel)
 
         for item in self.items:
             row = [getattr(item, x) for x in item.dic]
 
-            if sys.version_info[0] < 3:
-                row = [x.encode('utf-8') if isinstance(x, unicode) else x for x in row]
+            if encoding != 'unicode':
+                row = [x.encode(encoding) if isinstance(x, unicode) else x for x in row]
 
             c.writerow(row)
 
         out.seek(0)
         return out.read()
 
-    def tohtml(self):
-        return self.convert(FeedHTML).tostring()
+    def tohtml(self, **k):
+        return self.convert(FeedHTML).tostring(**k)
 
     def convert(self, TargetParser):
         target = TargetParser()
@@ -297,8 +296,8 @@ class ParserXML(ParserBase):
     def remove(self):
         return self.root.getparent().remove(self.root)
 
-    def tostring(self, **k):
-        return etree.tostring(self.root, **k)
+    def tostring(self, encoding='unicode', **k):
+        return etree.tostring(self.root, encoding=encoding, **k)
 
     def _rule_parse(self, rule):
         test = re.search(r'^(.*)/@([a-z]+)$', rule) # to match //div/a/@href
@@ -443,8 +442,8 @@ class ParserHTML(ParserXML):
     def parse(self, raw):
         return lxml.html.fromstring(raw)
 
-    def tostring(self, **k):
-        return lxml.html.tostring(self.root, **k)
+    def tostring(self, encoding='unicode', **k):
+        return lxml.html.tostring(self.root, encoding=encoding, **k)
 
     def rule_search_all(self, rule):
         try:
@@ -499,9 +498,14 @@ class ParserJSON(ParserBase):
         # delete oneself FIXME
         pass
 
-    def tostring(self):
-        return json.dumps(self.root, indent=True, ensure_ascii=False)
-            # ensure_ascii = False to have proper (unicode?) string and not \u00
+    def tostring(self, encoding='unicode', **k):
+        dump = json.dumps(self.root, ensure_ascii=False, **k) # ensure_ascii = False to have proper (unicode) string and not \u00
+
+        if encoding != 'unicode':
+            return dump.encode(encoding)
+
+        else:
+            return dump
 
     def _rule_parse(self, rule):
         return rule.split(".")
@@ -683,9 +687,9 @@ class Item(Uniq):
 class FeedXML(Feed, ParserXML):
     itemsClass = 'ItemXML'
 
-    def tostring(self, **k):
+    def tostring(self, encoding='unicode', **k):
         # override needed due to "getroottree" inclusion
-        return etree.tostring(self.root.getroottree(), **k)
+        return etree.tostring(self.root.getroottree(), encoding=encoding, **k)
 
 
 class ItemXML(Item, ParserXML):

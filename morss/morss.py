@@ -447,18 +447,23 @@ def FeedFormat(rss, options):
             raise MorssException('Invalid callback var name')
     elif options.json:
         if options.indent:
-            return rss.tojson(indent=4)
+            return rss.tojson(encoding='UTF-8', indent=4)
+
         else:
-            return rss.tojson()
+            return rss.tojson(encoding='UTF-8')
+
     elif options.csv:
-        return rss.tocsv()
+        return rss.tocsv(encoding='UTF-8')
+
     elif options.reader:
-        return rss.tohtml()
+        return rss.tohtml(encoding='UTF-8')
+
     else:
         if options.indent:
-            return rss.tostring(xml_declaration=True, encoding='UTF-8', pretty_print=True)
+            return rss.torss(xml_declaration=True, encoding='UTF-8', pretty_print=True)
+
         else:
-            return rss.tostring(xml_declaration=True, encoding='UTF-8')
+            return rss.torss(xml_declaration=True, encoding='UTF-8')
 
 
 def process(url, cache=None, options=None):
