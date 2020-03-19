@@ -436,10 +436,6 @@ class ParserHTML(ParserXML):
     def tostring(self, **k):
         return lxml.html.tostring(self.root, **k)
 
-    @staticmethod
-    def _inner_html(xml):
-        return (xml.text or b'') + b''.join([lxml.html.tostring(child) for child in xml])
-
     def rule_search_all(self, rule):
         try:
             # do proper "class" matching (too "heavy" to type as-it in rules)
