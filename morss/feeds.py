@@ -620,7 +620,7 @@ class Feed(object):
         if new is None:
             return
 
-        for attr in self.dic:
+        for attr in globals()[self.itemsClass].dic:
             try:
                 setattr(item, attr, getattr(new, attr))
 
