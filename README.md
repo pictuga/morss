@@ -55,7 +55,9 @@ You do need:
 
 Simplest way to get these:
 
-	pip install -r requirements.txt
+```shell
+pip install -r requirements.txt
+```
 
 You may also need:
 
@@ -140,7 +142,9 @@ ensure that the provided `/www/.htaccess` works well with your server.
 
 Running this command should do:
 
-	uwsgi --http :9090 --plugin python --wsgi-file main.py
+```shell
+uwsgi --http :9090 --plugin python --wsgi-file main.py
+```
 
 However, one problem might be how to serve the provided `index.html` file if it
 isn't in the same directory. Therefore you can add this at the end of the
