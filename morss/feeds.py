@@ -245,7 +245,7 @@ class ParserBase(object):
 
         return self.rule_search_all(self.rules[rule_name])
 
-    def get_str(self, rule_name):
+    def get(self, rule_name):
         # simple function to get nice text from the rule name
         # for use in @property, ie. self.get_str('title')
         if rule_name not in self.rules:
@@ -253,7 +253,7 @@ class ParserBase(object):
 
         return self.rule_str(self.rules[rule_name])
 
-    def set_str(self, rule_name, value):
+    def set(self, rule_name, value):
         if rule_name not in self.rules:
             return None
 
@@ -607,12 +607,12 @@ class Feed(object):
         return [itemsClass(x, self.rules, self) for x in items]
 
     title = property(
-        lambda f:   f.get_str('title'),
-        lambda f,x: f.set_str('title', x),
+        lambda f:   f.get('title'),
+        lambda f,x: f.set('title', x),
         lambda f:   f.rmv('title') )
     description = desc = property(
-        lambda f:   f.get_str('desc'),
-        lambda f,x: f.set_str('desc', x),
+        lambda f:   f.get('desc'),
+        lambda f,x: f.set('desc', x),
         lambda f:   f.rmv('desc') )
     items = property(
         lambda f:   f )
@@ -659,28 +659,28 @@ class Item(Uniq):
         return id(xml)
 
     title = property(
-        lambda f:   f.get_str('item_title'),
-        lambda f,x: f.set_str('item_title', x),
+        lambda f:   f.get('item_title'),
+        lambda f,x: f.set('item_title', x),
         lambda f:   f.rmv('item_title') )
     link = property(
-        lambda f:   f.get_str('item_link'),
-        lambda f,x: f.set_str('item_link', x),
+        lambda f:   f.get('item_link'),
+        lambda f,x: f.set('item_link', x),
         lambda f:   f.rmv('item_link') )
     description = desc = property(
-        lambda f:   f.get_str('item_desc'),
-        lambda f,x: f.set_str('item_desc', x),
+        lambda f:   f.get('item_desc'),
+        lambda f,x: f.set('item_desc', x),
         lambda f:   f.rmv('item_desc') )
     content = property(
-        lambda f:   f.get_str('item_content'),
-        lambda f,x: f.set_str('item_content', x),
+        lambda f:   f.get('item_content'),
+        lambda f,x: f.set('item_content', x),
         lambda f:   f.rmv('item_content') )
     time = property(
-        lambda f:   f.time_prs(f.get_str('item_time')),
-        lambda f,x: f.set_str('item_time', f.time_fmt(x)),
+        lambda f:   f.time_prs(f.get('item_time')),
+        lambda f,x: f.set('item_time', f.time_fmt(x)),
         lambda f:   f.rmv('item_time') )
     updated = property(
-        lambda f:   f.time_prs(f.get_str('item_updated')),
-        lambda f,x: f.set_str('item_updated', f.time_fmt(x)),
+        lambda f:   f.time_prs(f.get('item_updated')),
+        lambda f,x: f.set('item_updated', f.time_fmt(x)),
         lambda f:   f.rmv('item_updated') )
 
 
