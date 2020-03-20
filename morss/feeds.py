@@ -372,10 +372,6 @@ class ParserXML(ParserBase):
             match.getparent().append(element)
             return element
 
-        # try duplicating from template
-        # FIXME
-        # >>> self.xml.getroottree().getpath(ff.find('a'))
-
         return None
 
     def rule_remove(self, rule):
@@ -471,8 +467,6 @@ class ParserHTML(ParserXML):
             element = deepcopy(match)
             match.getparent().append(element)
 
-    # TODO def rule_set for the html part
-
 
 def parse_time(value):
     if isinstance(value, basestring):
@@ -487,6 +481,7 @@ def parse_time(value):
 
     elif isinstance(value, datetime):
         return value
+
     else:
         return False
 

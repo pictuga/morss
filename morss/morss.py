@@ -435,8 +435,10 @@ def FeedFormat(rss, options):
     if options.callback:
         if re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
             return '%s(%s)' % (options.callback, rss.tojson())
+
         else:
             raise MorssException('Invalid callback var name')
+
     elif options.json:
         if options.indent:
             return rss.tojson(encoding='UTF-8', indent=4)
