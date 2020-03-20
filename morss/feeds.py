@@ -469,7 +469,10 @@ class ParserHTML(ParserXML):
 
 
 def parse_time(value):
-    if isinstance(value, basestring):
+    if value is None or value == 0:
+        return None
+
+    elif isinstance(value, basestring):
         if re.match(r'^[0-9]+$', value):
             return datetime.fromtimestamp(int(value), tz.UTC)
 
@@ -483,7 +486,7 @@ def parse_time(value):
         return value
 
     else:
-        return False
+        return None
 
 
 class ParserJSON(ParserBase):
