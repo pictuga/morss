@@ -98,9 +98,6 @@ The arguments are:
 	- `item_title`: entry's title
 	- `item_content`: entry's description
 	- `item_time`: entry's date & time (accepts a wide range of time formats)
-- Completely useless
-	- `strip`: remove all description and content from feed items
-	- `empty`: remove all feed items
 
 ## Use cases
 

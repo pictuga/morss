@@ -255,10 +255,6 @@ def ItemFill(item, options, feedurl='/', fast=False):
 def ItemBefore(item, options):
     # return None if item deleted
 
-    if options.empty:
-        item.remove()
-        return None
-
     if options.search:
         if options.search not in item.title:
             item.remove()
@@ -268,10 +264,6 @@ def ItemBefore(item, options):
 
 
 def ItemAfter(item, options):
-    if options.strip:
-        del item.desc
-        del item.content
-
     if options.clip and item.desc and item.content:
         item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
         del item.desc
