@@ -50,12 +50,17 @@
 			<h1>RSS feed by morss</h1>
 
 			<p>Your RSS feed is <strong style="color: green">ready</strong>. You
-			can enter the url of this page in your newsreader.</p>
+			can enter the following url in your newsreader:</p>
+
+			<div id="url"></div>
 
 			<ul>
 				<xsl:apply-templates/>
 			</ul>
 
+			<script>
+				document.getElementById("url").innerHTML = window.location.href;
+			</script>
 		</body>
 		</html>
 	</xsl:template>
