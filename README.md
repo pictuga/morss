@@ -191,7 +191,7 @@ scripts can be run on top of the RSS feed, using its
 
 To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command:
 ```
-[python2.7] PATH/TO/MORSS/main.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+[python[2.7]] PATH/TO/MORSS/main.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
 ```
 For example: `python2.7 PATH/TO/MORSS/main.py http://feeds.bbci.co.uk/news/rss.xml`
 
