@@ -162,7 +162,7 @@ class ParserBase(object):
         return self.convert(FeedHTML).tostring(**k)
 
     def convert(self, TargetParser):
-        if isinstance(self, TargetParser):
+        if type(self) == TargetParser:
             return self
 
         target = TargetParser()
