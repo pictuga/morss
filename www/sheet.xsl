@@ -7,12 +7,24 @@
 		<html>
 		<head>
 			<title>RSS feed by morss</title>
+			<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
 
 			<style type="text/css">
-				body > pre {
+				body {
+					overflow-wrap: anywhere;
+					word-wrap: anywhere;
+				}
+
+				#url {
+					background-color: rgba(255, 165, 0, 0.25);
+					padding: 1% 5%;
+					display: inline-block;
+					max-width: 100%;
+				}
+
+				body > ul {
 					background-color: #FFFAF4;
 					padding: 1%;
-					overflow-x: scroll;
 					max-width: 100%;
 				}
 
@@ -40,8 +52,6 @@
 					margin: 0;
 					max-width: 100%;
 					white-space: normal;
-					overflow-wrap: anywhere;
-					word-wrap: anywhere;
 				}
 			</style>
 		</head>
