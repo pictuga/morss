@@ -20,8 +20,16 @@
 					list-style-type: none;
 				}
 
-				.element {
+				.tag {
 					color: darkred;
+				}
+
+				.attr {
+					color: darksalmon;
+				}
+
+				.value {
+					color: darkblue;
 				}
 
 				.comment {
@@ -55,15 +63,27 @@
 	<xsl:template match="*">
 		<li>
 			<span class="element">
-				<xsl:value-of select="concat('&lt;', name(), '&gt;')"/>
+				&lt;
+					<span class="tag"><xsl:value-of select="name()"/></span>
+
+					<xsl:for-each select="@*">
+						<span class="attr"> <xsl:value-of select="name()"/></span>
+						=
+						"<span class="value"><xsl:value-of select="."/></span>"
+					</xsl:for-each>
+				&gt;
 			</span>
+
 			<xsl:if test="node()">
 				<ul>
 					<xsl:apply-templates/>
 				</ul>
 			</xsl:if>
+
 			<span class="element">
-				<xsl:value-of select="concat('&lt;/', name(), '&gt;')"/>
+				&lt;/
+					<span class="tag"><xsl:value-of select="name()"/></span>
+				&gt;
 			</span>
 		</li>
 	</xsl:template>
