@@ -495,8 +495,9 @@ class ParserJSON(ParserBase):
         return json.loads(raw)
 
     def remove(self):
-        # delete oneself FIXME
-        pass
+        # impossible to "delete" oneself per se but can clear all its items
+        for attr in self.root:
+            del self.root[attr]
 
     def tostring(self, encoding='unicode', **k):
         dump = json.dumps(self.root, ensure_ascii=False, **k) # ensure_ascii = False to have proper (unicode) string and not \u00
@@ -556,10 +557,15 @@ class ParserJSON(ParserBase):
         rrule = self._rule_parse(rule)
         cur = self.root
 
-        for node in rrule[:-1]:
-            cur = cur[node]
+        try:
+            for node in rrule[:-1]:
+                cur = cur[node]
 
-        del cur[rrule[-1]]
+            del cur[rrule[-1]]
+
+        except KeyError:
+            # nothing to delete
+            pass
 
     def rule_set(self, rule, value):
         if '[]' in rule:
