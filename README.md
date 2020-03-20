@@ -222,12 +222,12 @@ output = morss.Format(rss, options) # formats final feed
 
 ## Cache information
 
-morss uses a small cache directory to make the loading faster. Given the way
-it's designed, the cache doesn't need to be purged each while and then, unless
-you stop following a big amount of feeds. Only in the case of mass un-subscribing,
-you might want to delete the cache files corresponding to the bygone feeds. If
-morss is running as a server, the cache folder is at `MORSS_DIRECTORY/cache/`,
-and in `$HOME/.cache/morss` otherwise.
+morss uses caching to make loading faster. There are 2 possible cache backends
+(visible in `morss/crawler.py`):
+
+- `SQLiteCache`: sqlite3 cache. Default file location is in-memory (i.e. it will
+be cleared every time the program is run
+- `MySQLCacheHandler`: /!\ Does NOT support multi-threading
 
 ## Configuration
 ### Length limitation
