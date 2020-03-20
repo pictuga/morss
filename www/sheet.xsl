@@ -30,6 +30,10 @@
 
 				pre {
 					margin: 0;
+					max-width: 100%;
+					white-space: normal;
+					overflow-wrap: anywhere;
+					word-wrap: anywhere;
 				}
 			</style>
 		</head>
@@ -73,7 +77,7 @@
 	<xsl:template match="text()">
 		<li>
 			<pre>
-				<xsl:value-of select="."/>
+				<xsl:value-of select="normalize-space(.)"/>
 			</pre>
 		</li>
 	</xsl:template>
