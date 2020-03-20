@@ -206,11 +206,11 @@ class ParserBase(object):
         pass
 
     def rule_remove(self, rule):
-        # remove node from its parent
+        # remove node from its parent. Returns nothing
         pass
 
     def rule_set(self, rule, value):
-        # value is always a str?
+        # set the value. Returns nothing
         pass
 
     def rule_str(self, rule):
@@ -247,23 +247,28 @@ class ParserBase(object):
 
     def get(self, rule_name):
         # simple function to get nice text from the rule name
-        # for use in @property, ie. self.get_str('title')
+        # for use in @property, ie. self.get('title')
         if rule_name not in self.rules:
             return None
 
-        return self.rule_str(self.rules[rule_name])
+        return self.rule_str(self.rules[rule_name]) or None
 
     def set(self, rule_name, value):
+        # simple function to set nice text from the rule name. Returns nothing
         if rule_name not in self.rules:
-            return None
+            return
+
+        if value is None:
+            self.rmv(rule_name)
+            return
 
         try:
-            return self.rule_set(self.rules[rule_name], value)
+            self.rule_set(self.rules[rule_name], value)
 
         except AttributeError:
             # does not exist, have to create it
             self.rule_create(self.rules[rule_name])
-            return self.rule_set(self.rules[rule_name], value)
+            self.rule_set(self.rules[rule_name], value)
 
     def rmv(self, rule_name):
         # easy deleter
@@ -430,7 +435,7 @@ class ParserXML(ParserBase):
                 return etree.tostring(match, method='text', encoding='unicode').strip()
 
         else:
-            return match or ""
+            return match # might be None is no match
 
 
 class ParserHTML(ParserXML):
