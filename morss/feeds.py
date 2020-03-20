@@ -21,12 +21,10 @@ json.encoder.c_make_encoder = None
 try:
     # python 2
     from StringIO import StringIO
-    from urllib2 import urlopen
     from ConfigParser import RawConfigParser
 except ImportError:
     # python 3
     from io import StringIO
-    from urllib.request import urlopen
     from configparser import RawConfigParser
 
 try:
