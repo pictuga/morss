@@ -448,7 +448,11 @@ def FeedFormat(rss, options):
         return rss.tocsv(encoding='UTF-8')
 
     elif options.reader:
-        return rss.tohtml(encoding='UTF-8')
+        if options.indent:
+            return rss.tohtml(encoding='UTF-8', pretty_print=True)
+
+        else:
+            return rss.tohtml(encoding='UTF-8')
 
     else:
         if options.indent:

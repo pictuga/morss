@@ -291,7 +291,7 @@ class ParserXML(ParserBase):
         'rssfake': 'http://purl.org/rss/1.0/'}
 
     def parse(self, raw):
-        parser = etree.XMLParser(recover=True)
+        parser = etree.XMLParser(recover=True, remove_blank_text=True) # remove_blank_text needed for pretty_print
         return etree.fromstring(raw, parser)
 
     def remove(self):
@@ -441,7 +441,8 @@ class ParserHTML(ParserXML):
     mimetype = ['text/html', 'application/xhtml+xml']
 
     def parse(self, raw):
-        return lxml.html.fromstring(raw)
+        parser = etree.HTMLParser(remove_blank_text=True) # remove_blank_text needed for pretty_print
+        return etree.fromstring(raw, parser)
 
     def tostring(self, encoding='unicode', **k):
         return lxml.html.tostring(self.root, encoding=encoding, **k)
