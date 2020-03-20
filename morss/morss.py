@@ -204,7 +204,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
 
     # twitter
     if urlparse(feedurl).netloc == 'twitter.com':
-        match = lxml.html.fromstring(item.content).xpath('//a/@data-expanded-url')
+        match = lxml.html.fromstring(item.desc).xpath('//a/@data-expanded-url')
         if len(match):
             link = match[0]
             log(link)
