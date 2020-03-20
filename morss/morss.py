@@ -341,6 +341,8 @@ def FeedFetch(url, options):
     else:
         try:
             rss = feeds.parse(xml, url, contenttype)
+            rss = rss.convert(feeds.FeedXML)
+                # contains all fields, otherwise much-needed data can be lost
 
         except TypeError:
             log('random page')
