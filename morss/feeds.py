@@ -294,7 +294,7 @@ class ParserXML(ParserBase):
         'rssfake': 'http://purl.org/rss/1.0/'}
 
     def parse(self, raw):
-        parser = etree.XMLParser(recover=True, remove_blank_text=True) # remove_blank_text needed for pretty_print
+        parser = etree.XMLParser(recover=True, remove_blank_text=True, remove_pis=True) # remove_blank_text needed for pretty_print
         return etree.fromstring(raw, parser)
 
     def remove(self):
@@ -698,6 +698,10 @@ class FeedXML(Feed, ParserXML):
 
     def tostring(self, encoding='unicode', **k):
         # override needed due to "getroottree" inclusion
+
+        if self.root.getprevious() is None:
+            self.root.addprevious(etree.PI('xml-stylesheet', 'type="text/xsl" href="/sheet.xsl"'))
+
         return etree.tostring(self.root.getroottree(), encoding=encoding, **k)
 
 
