@@ -160,8 +160,12 @@ You can change the port and the location of the `www/` folder like this `python 
 
 #### Passing arguments
 
-Then visit: **`http://PATH/TO/MORSS/[main.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL`**  
-For example: `http://morss.example/:clip/https://twitter.com/pictuga`  
+Then visit:
+```
+http://PATH/TO/MORSS/[main.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL
+```
+For example: `http://morss.example/:clip/https://twitter.com/pictuga`
+
 *(Brackets indicate optional text)*
 
 The `main.py` part is only needed if your server doesn't support the Apache redirect rule set in the provided `.htaccess`.
@@ -170,8 +174,12 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 ### As a CLI application
 
-Run: **`python[2.7] -m morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
-For example: `python -m morss debug http://feeds.bbci.co.uk/news/rss.xml`  
+Run:
+```
+python[2.7] -m morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+```
+For example: `python -m morss debug http://feeds.bbci.co.uk/news/rss.xml`
+
 *(Brackets indicate optional text)*
 
 ### As a newsreader hook
@@ -181,8 +189,12 @@ To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required
 scripts can be run on top of the RSS feed, using its
 [output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
 
-To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command: **`[python2.7] PATH/TO/MORSS/main.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL`**  
-For example: `python2.7 PATH/TO/MORSS/main.py http://feeds.bbci.co.uk/news/rss.xml`  
+To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command:
+```
+[python2.7] PATH/TO/MORSS/main.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+```
+For example: `python2.7 PATH/TO/MORSS/main.py http://feeds.bbci.co.uk/news/rss.xml`
+
 *(Brackets indicate optional text)*
 
 ### As a python library
