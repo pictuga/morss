@@ -552,8 +552,11 @@ def cgi_app(environ, start_response):
     rss = FeedGather(rss, url, options)
     out = FeedFormat(rss, options)
 
-    if not options.silent:
-        return out
+    if options.silent:
+        return ['']
+
+    else:
+        return [out]
 
 def middleware(func):
     " Decorator to turn a function into a wsgi middleware "
