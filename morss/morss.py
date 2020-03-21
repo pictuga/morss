@@ -284,10 +284,12 @@ def ItemAfter(item, options):
     return item
 
 
-def FeedFetch(url, options):
-    # basic url clean-up
+def UrlFix(url):
     if url is None:
         raise MorssException('No url provided')
+
+    if isinstance(url, bytes):
+        url = url.decode()
 
     if urlparse(url).scheme not in PROTOCOL:
         url = 'http://' + url
@@ -295,13 +297,13 @@ def FeedFetch(url, options):
 
     url = url.replace(' ', '%20')
 
-    if isinstance(url, bytes):
-        url = url.decode()
+    return url
 
+def FeedFetch(url, options):
     # allow for code execution for feedify
     pre = feedify.pre_worker(url)
     if pre:
-        url = pre
+        url = UrlFix(pre)
         log('url redirect')
         log(url)
 
@@ -324,7 +326,7 @@ def FeedFetch(url, options):
 
     if options.items:
         # using custom rules
-        rss = feeds.FeedHTML(xml, url, contenttype)
+        rss = feeds.FeedHTML(xml)
         feed.rule
 
         rss.rules['items'] = options.items
@@ -475,6 +477,7 @@ def process(url, cache=None, options=None):
     if cache:
         crawler.default_cache = crawler.SQLiteCache(cache)
 
+    url = UrlFix(url)
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
 
@@ -537,6 +540,7 @@ def cgi_app(environ, start_response):
     crawler.default_cache = crawler.SQLiteCache(os.path.join(os.getcwd(), 'morss-cache.db'))
 
     # get the work done
+    url = UrlFix(url)
     rss = FeedFetch(url, options)
 
     if headers['content-type'] == 'text/xml':
@@ -608,6 +612,7 @@ def cli_app():
 
     crawler.default_cache = crawler.SQLiteCache(os.path.expanduser('~/.cache/morss-cache.db'))
 
+    url = UrlFix(url)
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
     out = FeedFormat(rss, options)
