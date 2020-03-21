@@ -93,6 +93,7 @@ def score_node(node):
     class_id = node.get('class', '') + node.get('id', '')
 
     if (isinstance(node, lxml.html.HtmlComment)
+            or isinstance(node, lxml.html.HtmlProcessingInstruction)
             or node.tag in tags_bad
             or regex_bad.search(class_id)):
         return 0
