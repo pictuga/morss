@@ -436,37 +436,38 @@ def FeedGather(rss, url, options):
     return rss
 
 
-def FeedFormat(rss, options):
+def FeedFormat(rss, options, encoding='utf-8'):
     if options.callback:
         if re.match(r'^[a-zA-Z0-9\.]+$', options.callback) is not None:
-            return '%s(%s)' % (options.callback, rss.tojson())
+            out = '%s(%s)' % (options.callback, rss.tojson(encoding='unicode'))
+            return out if encoding == 'unicode' else out.encode(encoding)
 
         else:
             raise MorssException('Invalid callback var name')
 
     elif options.json:
         if options.indent:
-            return rss.tojson(encoding='UTF-8', indent=4)
+            return rss.tojson(encoding=encoding, indent=4)
 
         else:
-            return rss.tojson(encoding='UTF-8')
+            return rss.tojson(encoding=encoding)
 
     elif options.csv:
-        return rss.tocsv(encoding='UTF-8')
+        return rss.tocsv(encoding=encoding)
 
     elif options.reader:
         if options.indent:
-            return rss.tohtml(encoding='UTF-8', pretty_print=True)
+            return rss.tohtml(encoding=encoding, pretty_print=True)
 
         else:
-            return rss.tohtml(encoding='UTF-8')
+            return rss.tohtml(encoding=encoding)
 
     else:
         if options.indent:
-            return rss.torss(xml_declaration=True, encoding='UTF-8', pretty_print=True)
+            return rss.torss(xml_declaration=True, encoding=encoding, pretty_print=True)
 
         else:
-            return rss.torss(xml_declaration=True, encoding='UTF-8')
+            return rss.torss(xml_declaration=True, encoding=encoding)
 
 
 def process(url, cache=None, options=None):
