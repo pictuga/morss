@@ -555,9 +555,26 @@ def cgi_app(environ, start_response):
     if not options.silent:
         return out
 
+def middleware(func):
+    " Decorator to turn a function into a wsgi middleware "
+    # This is called when parsing the code
 
-def cgi_wrapper(environ, start_response):
-    # simple http server for html and css
+    def app_builder(app):
+        # This is called when doing app = cgi_wrapper(app)
+
+        def app_wrapp(environ, start_response):
+            # This is called when a http request is being processed
+
+            return func(environ, start_response, app)
+
+        return app_wrapp
+
+    return app_builder
+
+@middleware
+def cgi_file_handler(environ, start_response, app):
+    " Simple HTTP server to serve static files (.html, .css, etc.) "
+
     files = {
         '': 'text/html',
         'index.html': 'text/html',
@@ -565,6 +582,7 @@ def cgi_wrapper(environ, start_response):
 
     if 'REQUEST_URI' in environ:
         url = environ['REQUEST_URI'][1:]
+
     else:
         url = environ['PATH_INFO'][1:]
 
@@ -593,11 +611,17 @@ def cgi_wrapper(environ, start_response):
             start_response(headers['status'], list(headers.items()))
             return ['Error %s' % headers['status']]
 
-    # actual morss use
+    else:
+        return app(environ, start_response)
+
+@middleware
+def cgi_error_handler(environ, start_response, app):
     try:
-        return [cgi_app(environ, start_response) or '(empty)']
+        return app(environ, start_response)
+
     except (KeyboardInterrupt, SystemExit):
         raise
+
     except Exception as e:
         headers = {'status': '500 Oops', 'content-type': 'text/html'}
         start_response(headers['status'], list(headers.items()), sys.exc_info())
@@ -636,7 +660,11 @@ def isInt(string):
 def main():
     if 'REQUEST_URI' in os.environ:
         # mod_cgi
-        wsgiref.handlers.CGIHandler().run(cgi_wrapper)
+
+        app = cgi_app
+        app = cgi_error_handler(app)
+
+        wsgiref.handlers.CGIHandler().run(app)
 
     elif len(sys.argv) <= 1 or isInt(sys.argv[1]) or '--root' in sys.argv[1:]:
         # start internal (basic) http server
@@ -651,8 +679,12 @@ def main():
         else:
             port = PORT
 
+        app = cgi_app
+        app = cgi_file_handler(app)
+        app = cgi_error_handler(app)
+
         print('Serving http://localhost:%s/'%port)
-        httpd = wsgiref.simple_server.make_server('', port, cgi_wrapper)
+        httpd = wsgiref.simple_server.make_server('', port, app)
         httpd.serve_forever()
 
     else:
