@@ -67,6 +67,7 @@ def log(txt, force=False):
     if DEBUG or force:
         if 'REQUEST_URI' in os.environ:
             open('morss.log', 'a').write("%s\n" % repr(txt))
+
         else:
             print(repr(txt))
 
@@ -74,6 +75,7 @@ def log(txt, force=False):
 def len_html(txt):
     if len(txt):
         return len(lxml.html.fromstring(txt).text_content())
+
     else:
         return 0
 
@@ -81,6 +83,7 @@ def len_html(txt):
 def count_words(txt):
     if len(txt):
         return len(lxml.html.fromstring(txt).text_content().split())
+
     return 0
 
 
@@ -89,12 +92,14 @@ class Options:
         if len(args):
             self.options = args
             self.options.update(options or {})
+
         else:
             self.options = options or {}
 
     def __getattr__(self, key):
         if key in self.options:
             return self.options[key]
+
         else:
             return False
 
@@ -108,17 +113,23 @@ class Options:
 def parseOptions(options):
     """ Turns ['md=True'] into {'md':True} """
     out = {}
+
     for option in options:
         split = option.split('=', 1)
+
         if len(split) > 1:
             if split[0].lower() == 'true':
                 out[split[0]] = True
+
             elif split[0].lower() == 'false':
                 out[split[0]] = False
+
             else:
                 out[split[0]] = split[1]
+
         else:
             out[split[0]] = True
+
     return out
 
 
@@ -209,6 +220,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         if len(match):
             link = match[0]
             log(link)
+
         else:
             link = None
 
@@ -218,6 +230,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         if len(match) and urlparse(match[0]).netloc != 'www.facebook.com':
             link = match[0]
             log(link)
+
         else:
             link = None
 
@@ -300,6 +313,7 @@ def UrlFix(url):
 
     return url
 
+
 def FeedFetch(url, options):
     # allow for code execution for feedify
     pre = feedify.pre_worker(url)
@@ -379,6 +393,7 @@ def FeedGather(rss, url, options):
             value = queue.get()
             try:
                 worker(*value)
+
             except Exception as e:
                 log('Thread Error: %s' % e.message)
             queue.task_done()
@@ -418,6 +433,7 @@ def FeedGather(rss, url, options):
     for i, item in enumerate(list(rss.items)):
         if threads == 1:
             worker(*[i, item])
+
         else:
             queue.put([i, item])
 
@@ -560,6 +576,7 @@ def cgi_app(environ, start_response):
     else:
         return [out]
 
+
 def middleware(func):
     " Decorator to turn a function into a wsgi middleware "
     # This is called when parsing the code
@@ -575,6 +592,7 @@ def middleware(func):
         return app_wrap
 
     return app_builder
+
 
 @middleware
 def cgi_file_handler(environ, start_response, app):
@@ -619,6 +637,7 @@ def cgi_file_handler(environ, start_response, app):
     else:
         return app(environ, start_response)
 
+
 @middleware
 def cgi_error_handler(environ, start_response, app):
     try:
@@ -633,10 +652,12 @@ def cgi_error_handler(environ, start_response, app):
         log('ERROR: %s' % repr(e), force=True)
         return [cgitb.html(sys.exc_info())]
 
+
 @middleware
 def cgi_encode(environ, start_response, app):
     out = app(environ, start_response)
     return [x if isinstance(x, bytes) else x.encode('utf-8') for x in out]
+
 
 def cli_app():
     options = Options(filterOptions(parseOptions(sys.argv[1:-1])))
@@ -662,6 +683,7 @@ def isInt(string):
     try:
         int(string)
         return True
+
     except ValueError:
         return False
 
@@ -683,6 +705,7 @@ def main():
             argPort = int(sys.argv[1])
             if argPort > 0:
                 port = argPort
+
             else:
                 raise MorssException('Port must be positive integer')
 
@@ -702,8 +725,10 @@ def main():
         # as a CLI app
         try:
             cli_app()
+
         except (KeyboardInterrupt, SystemExit):
             raise
+
         except Exception as e:
             print('ERROR: %s' % e.message)
 
