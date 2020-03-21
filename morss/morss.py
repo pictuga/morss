@@ -341,6 +341,8 @@ def FeedFetch(url, options):
         if options.item_time:
             rss.rules['item_time'] = options.item_time
 
+        rss = rss.convert(feeds.FeedXML)
+
     else:
         try:
             rss = feeds.parse(xml, url, contenttype)
