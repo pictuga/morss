@@ -499,7 +499,7 @@ def cgi_app(environ, start_response):
     if url.startswith(':'):
         split = url.split('/', 1)
 
-        options = split[0].replace('|', '/').replace('\\\'', '\'').split(':')[1:]
+        raw_options = split[0].replace('|', '/').replace('\\\'', '\'').split(':')[1:]
 
         if len(split) > 1:
             url = split[1]
@@ -507,10 +507,10 @@ def cgi_app(environ, start_response):
             url = ''
 
     else:
-        options = []
+        raw_options = []
 
     # init
-    options = Options(filterOptions(parseOptions(options)))
+    options = Options(filterOptions(parseOptions(raw_options)))
     headers = {}
 
     global DEBUG
