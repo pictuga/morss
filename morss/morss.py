@@ -18,6 +18,7 @@ from . import readabilite
 
 import wsgiref.simple_server
 import wsgiref.handlers
+import cgitb
 
 
 try:
@@ -598,10 +599,10 @@ def cgi_wrapper(environ, start_response):
     except (KeyboardInterrupt, SystemExit):
         raise
     except Exception as e:
-        headers = {'status': '500 Oops', 'content-type': 'text/plain'}
+        headers = {'status': '500 Oops', 'content-type': 'text/html'}
         start_response(headers['status'], list(headers.items()), sys.exc_info())
-        log('ERROR <%s>: %s' % (url, e.message), force=True)
-        return ['An error happened:\n%s' % e.message]
+        log('ERROR: %s' % repr(e), force=True)
+        return [cgitb.html(sys.exc_info())]
 
 
 def cli_app():
