@@ -45,7 +45,7 @@ THREADS = 10  # number of threads (1 for single-threaded)
 DEBUG = False
 PORT = 8080
 
-PROTOCOL = ['http', 'https', 'ftp']
+PROTOCOL = ['http', 'https']
 
 
 def filterOptions(options):
@@ -328,7 +328,6 @@ def FeedFetch(url, options):
     if options.items:
         # using custom rules
         rss = feeds.FeedHTML(xml)
-        feed.rule
 
         rss.rules['items'] = options.items
 
@@ -568,12 +567,12 @@ def middleware(func):
     def app_builder(app):
         # This is called when doing app = cgi_wrapper(app)
 
-        def app_wrapp(environ, start_response):
+        def app_wrap(environ, start_response):
             # This is called when a http request is being processed
 
             return func(environ, start_response, app)
 
-        return app_wrapp
+        return app_wrap
 
     return app_builder
 
@@ -695,7 +694,7 @@ def main():
         app = cgi_error_handler(app)
         app = cgi_encode(app)
 
-        print('Serving http://localhost:%s/'%port)
+        print('Serving http://localhost:%s/' % port)
         httpd = wsgiref.simple_server.make_server('', port, app)
         httpd.serve_forever()
 
