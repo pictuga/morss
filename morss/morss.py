@@ -559,7 +559,8 @@ def cgi_wrapper(environ, start_response):
     # simple http server for html and css
     files = {
         '': 'text/html',
-        'index.html': 'text/html'}
+        'index.html': 'text/html',
+        'sheet.xsl': 'text/xsl'}
 
     if 'REQUEST_URI' in environ:
         url = environ['REQUEST_URI'][1:]
