@@ -628,6 +628,10 @@ def cgi_error_handler(environ, start_response, app):
         log('ERROR: %s' % repr(e), force=True)
         return [cgitb.html(sys.exc_info())]
 
+@middleware
+def cgi_encode(environ, start_response, app):
+    out = app(environ, start_response)
+    return [x if isinstance(x, bytes) else x.encode('utf-8') for x in out]
 
 def cli_app():
     options = Options(filterOptions(parseOptions(sys.argv[1:-1])))
@@ -663,6 +667,7 @@ def main():
 
         app = cgi_app
         app = cgi_error_handler(app)
+        app = cgi_encode(app)
 
         wsgiref.handlers.CGIHandler().run(app)
 
@@ -682,6 +687,7 @@ def main():
         app = cgi_app
         app = cgi_file_handler(app)
         app = cgi_error_handler(app)
+        app = cgi_encode(app)
 
         print('Serving http://localhost:%s/'%port)
         httpd = wsgiref.simple_server.make_server('', port, app)
