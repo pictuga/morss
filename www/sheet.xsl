@@ -13,6 +13,7 @@
 				body {
 					overflow-wrap: anywhere;
 					word-wrap: anywhere;
+					font-family: sans;
 				}
 
 				#url {
