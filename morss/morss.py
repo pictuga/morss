@@ -651,6 +651,21 @@ def cgi_file_handler(environ, start_response, app):
         return app(environ, start_response)
 
 
+dispatch_table = {
+    }
+
+
+@middleware
+def cgi_dispatcher(environ, start_response, app):
+    url, options = cgi_parse_environ(environ)
+
+    for key in dispatch_table.keys():
+        if key in options:
+            return dispatch_table[key](environ, start_response)
+
+    return app(environ, start_response)
+
+
 @middleware
 def cgi_error_handler(environ, start_response, app):
     try:
@@ -706,6 +721,7 @@ def main():
         # mod_cgi
 
         app = cgi_app
+        app = cgi_dispatcher(app)
         app = cgi_error_handler(app)
         app = cgi_encode(app)
 
@@ -727,6 +743,7 @@ def main():
 
         app = cgi_app
         app = cgi_file_handler(app)
+        app = cgi_dispatcher(app)
         app = cgi_error_handler(app)
         app = cgi_encode(app)
 
