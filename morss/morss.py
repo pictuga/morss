@@ -349,14 +349,17 @@ def FeedFetch(url, options):
         # using custom rules
         rss = feeds.FeedHTML(xml)
 
+        rss.rules['title'] = options.title              if options.title        else '//head/title'
+        rss.rules['desc'] = options.desc                if options.desc         else '//head/meta[@name="description"]/@content'
+
         rss.rules['items'] = options.items
 
-        if options.item_title:
-            rss.rules['item_title'] = options.item_title
-        if options.item_link:
-            rss.rules['item_link'] = options.item_link
+        rss.rules['item_title'] = options.item_title    if options.item_title   else './/a|.'
+        rss.rules['item_link'] = options.item_link      if options.item_link    else './@href|.//a/@href'
+
         if options.item_content:
             rss.rules['item_content'] = options.item_content
+
         if options.item_time:
             rss.rules['item_time'] = options.item_time
 
