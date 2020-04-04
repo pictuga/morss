@@ -25,13 +25,13 @@ try:
     # python 2
     from Queue import Queue
     from httplib import HTTPException
-    from urllib import quote_plus
+    from urllib import unquote
     from urlparse import urlparse, urljoin, parse_qs
 except ImportError:
     # python 3
     from queue import Queue
     from http.client import HTTPException
-    from urllib.parse import quote_plus
+    from urllib.parse import unquote
     from urllib.parse import urlparse, urljoin, parse_qs
 
 LIM_ITEM = 100  # deletes what's beyond
@@ -523,7 +523,7 @@ def cgi_app(environ, start_response):
     if url.startswith(':'):
         split = url.split('/', 1)
 
-        raw_options = split[0].replace('|', '/').replace('\\\'', '\'').split(':')[1:]
+        raw_options = unquote(split[0]).replace('|', '/').replace('\\\'', '\'').split(':')[1:]
 
         if len(split) > 1:
             url = split[1]
