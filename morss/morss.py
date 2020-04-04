@@ -671,7 +671,7 @@ def cgi_page(environ, start_response):
 
     if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
         html = lxml.html.fromstring(BeautifulSoup(data, 'lxml').prettify())
-        html.make_links_absolute(url)
+        html.make_links_absolute(con.geturl())
 
         kill_tags = ['script', 'iframe', 'noscript']
 
