@@ -170,6 +170,11 @@ def ItemFix(item, feedurl='/'):
         item.link = parse_qs(urlparse(item.link).query)['url'][0]
         log(item.link)
 
+    # pocket
+    if fnmatch(item.link, 'https://getpocket.com/redirect?url=*'):
+        item.link = parse_qs(urlparse(item.link).query)['url'][0]
+        log(item.link)
+
     # facebook
     if fnmatch(item.link, 'https://www.facebook.com/l.php?u=*'):
         item.link = parse_qs(urlparse(item.link).query)['u'][0]
