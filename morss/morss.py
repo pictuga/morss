@@ -508,8 +508,9 @@ def process(url, cache=None, options=None):
     return FeedFormat(rss, options)
 
 
-def cgi_app(environ, start_response):
+def cgi_parse_environ(environ):
     # get options
+
     if 'REQUEST_URI' in environ:
         url = environ['REQUEST_URI'][1:]
     else:
@@ -535,10 +536,17 @@ def cgi_app(environ, start_response):
 
     # init
     options = Options(filterOptions(parseOptions(raw_options)))
-    headers = {}
 
     global DEBUG
     DEBUG = options.debug
+
+    return (url, options)
+
+
+def cgi_app(environ, start_response):
+    url, options = cgi_parse_environ(environ)
+
+    headers = {}
 
     # headers
     headers['status'] = '200 OK'
