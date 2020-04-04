@@ -10,6 +10,7 @@ import re
 
 import lxml.etree
 import lxml.html
+from bs4 import BeautifulSoup
 
 from . import feeds
 from . import feedify
@@ -651,7 +652,43 @@ def cgi_file_handler(environ, start_response, app):
         return app(environ, start_response)
 
 
+def cgi_page(environ, start_response):
+    url, options = cgi_parse_environ(environ)
+
+    # get page
+    PROTOCOL = ['http', 'https']
+
+    if urlparse(url).scheme not in ['http', 'https']:
+        url = 'http://' + url
+
+    con = crawler.custom_handler().open(url)
+    data = con.read()
+
+    contenttype = con.info().get('Content-Type', '').split(';')[0]
+
+    if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
+        html = lxml.html.fromstring(BeautifulSoup(data, 'lxml').prettify())
+        html.make_links_absolute(url)
+
+        kill_tags = ['script', 'iframe', 'noscript']
+
+        for tag in kill_tags:
+            for elem in html.xpath('//'+tag):
+                elem.getparent().remove(elem)
+
+        output = lxml.etree.tostring(html.getroottree(), encoding='utf-8')
+
+    else:
+        output = None
+
+    # return html page
+    headers = {'status': '200 OK', 'content-type': 'text/html'}
+    start_response(headers['status'], list(headers.items()))
+    return [output]
+
+
 dispatch_table = {
+    'getpage': cgi_page
     }
 
 

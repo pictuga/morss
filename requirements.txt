@@ -1,4 +1,5 @@
 lxml
+bs4
 python-dateutil <= 1.5
 chardet
 pymysql

@@ -48,6 +48,7 @@ You do need:
 
 - [python](http://www.python.org/) >= 2.6 (python 3 is supported)
 - [lxml](http://lxml.de/) for xml parsing
+- [bs4](https://pypi.org/project/bs4/) for badly-formatted html pages
 - [dateutil](http://labix.org/python-dateutil) to parse feed dates
 - [chardet](https://pypi.python.org/pypi/chardet)
 - [six](https://pypi.python.org/pypi/six), a dependency of chardet
