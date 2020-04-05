@@ -54,7 +54,7 @@ def filterOptions(options):
 
     # example of filtering code below
 
-    #allowed = ['proxy', 'clip', 'keep', 'cache', 'force', 'silent', 'pro', 'debug']
+    #allowed = ['proxy', 'clip', 'cache', 'force', 'silent', 'pro', 'debug']
     #filtered = dict([(key,value) for (key,value) in options.items() if key in allowed])
 
     #return filtered
@@ -286,9 +286,6 @@ def ItemBefore(item, options):
 def ItemAfter(item, options):
     if options.clip and item.desc and item.content:
         item.content = item.desc + "<br/><br/><center>* * *</center><br/><br/>" + item.content
-        del item.desc
-
-    if not options.keep and not options.proxy:
         del item.desc
 
     if options.nolink and item.content:

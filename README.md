@@ -77,7 +77,6 @@ The arguments are:
 	- `json`: output as JSON
 	- `proxy`: doesn't fill the articles
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
-	- `keep`: by default, morss does drop feed description whenever the full-content is found (so as not to mislead users who use Firefox, since the latter only shows the description in the feed preview, so they might believe morss doens't work), but with this argument, the description is kept
 	- `search=STRING`: does a basic case-sensitive search in the feed
 - Advanced
 	- `csv`: export to csv
