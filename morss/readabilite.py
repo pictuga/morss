@@ -63,7 +63,7 @@ regex_good = re.compile('|'.join(class_good), re.I)
 
 tags_junk = ['script', 'head', 'iframe', 'object', 'noscript',
     'param', 'embed', 'layer', 'applet', 'style', 'form', 'input', 'textarea',
-    'button', 'footer']
+    'button', 'footer', 'link', 'meta']
 
 tags_bad = tags_junk + ['a', 'aside']
 
@@ -94,10 +94,17 @@ def score_node(node):
     class_id = node.get('class', '') + node.get('id', '')
 
     if (isinstance(node, lxml.html.HtmlComment)
-            or isinstance(node, lxml.html.HtmlProcessingInstruction)
-            or node.tag in tags_bad
-            or regex_bad.search(class_id)):
+            or isinstance(node, lxml.html.HtmlProcessingInstruction)):
         return 0
+
+    if node.tag in tags_junk:
+        score += -1 # actuall -2 as tags_junk is included tags_bad
+
+    if node.tag in tags_bad:
+        score += -1
+
+    if regex_bad.search(class_id):
+        score += -1
 
     if node.tag in tags_good:
         score += 4
@@ -126,7 +133,7 @@ def score_all(node, grades=None):
         score = score_node(child)
         child.attrib['seen'] = 'yes, ' + str(int(score))
 
-        if score > 0:
+        if score > 0 or not len(grades):
             spread_score(child, score, grades)
             score_all(child, grades)
 
