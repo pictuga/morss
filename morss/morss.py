@@ -336,7 +336,7 @@ def FeedFetch(url, options):
 
     try:
         con = crawler.custom_handler(accept='xml', strict=True, delay=delay,
-            encoding=options.encoding, basic=not options.items) \
+            encoding=options.encoding) \
             .open(url, timeout=TIMEOUT * 2)
         xml = con.read()
 

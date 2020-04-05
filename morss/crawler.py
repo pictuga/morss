@@ -33,7 +33,7 @@ MIMETYPE = {
 DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 
-def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=False):
+def custom_handler(accept=None, strict=False, delay=None, encoding=None):
     handlers = []
 
     # as per urllib2 source code, these Handelers are added first
@@ -51,9 +51,7 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None, basic=F
     handlers.append(HTTPEquivHandler())
     handlers.append(HTTPRefreshHandler())
     handlers.append(UAHandler(DEFAULT_UA))
-
-    if not basic:
-        handlers.append(AutoRefererHandler())
+    handlers.append(AutoRefererHandler())
 
     handlers.append(EncodingFixHandler(encoding))
 
