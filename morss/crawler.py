@@ -367,7 +367,7 @@ class CacheHandler(BaseHandler):
 
         elif  self.force_min is None and ('no-cache' in cc_list
                                         or 'no-store' in cc_list
-                                        or ('private' in cc_list and not self.private)):
+                                        or ('private' in cc_list and not self.private_cache)):
             # kindly follow web servers indications, refresh
             return None
 
@@ -402,7 +402,7 @@ class CacheHandler(BaseHandler):
 
             cc_list = [x for x in cache_control if '=' not in x]
 
-            if 'no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private):
+            if 'no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private_cache):
                 # kindly follow web servers indications
                 return resp
 
