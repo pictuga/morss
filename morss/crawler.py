@@ -197,7 +197,7 @@ class UAHandler(BaseHandler):
 
 class AutoRefererHandler(BaseHandler):
     def http_request(self, req):
-        req.add_unredirected_header('Referer', 'http://%s' % req.host)
+        req.add_unredirected_header('Referer', '%s://%s' % (req.type, req.host))
         return req
 
     https_request = http_request
