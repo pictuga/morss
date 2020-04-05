@@ -13,7 +13,6 @@ import lxml.html
 from bs4 import BeautifulSoup
 
 from . import feeds
-from . import feedify
 from . import crawler
 from . import readabilite
 
@@ -318,13 +317,6 @@ def UrlFix(url):
 
 
 def FeedFetch(url, options):
-    # allow for code execution for feedify
-    pre = feedify.pre_worker(url)
-    if pre:
-        url = UrlFix(pre)
-        log('url redirect')
-        log(url)
-
     # fetch feed
     delay = DELAY
 
