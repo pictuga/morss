@@ -1,5 +1,6 @@
 import lxml.etree
 import lxml.html
+from bs4 import BeautifulSoup
 import re
 
 
@@ -9,7 +10,7 @@ def parse(data, encoding=None):
     else:
         parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True)
 
-    return lxml.html.fromstring(data, parser=parser)
+    return lxml.html.fromstring(BeautifulSoup(data, 'lxml').prettify('utf-8'), parser=parser)
 
 
 def count_words(string):
