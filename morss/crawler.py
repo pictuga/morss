@@ -27,13 +27,14 @@ except NameError:
 
 MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml'],
+    'rss': ['application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
     'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
 
 DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 
-def custom_handler(accept=None, strict=False, delay=None, encoding=None):
+def custom_handler(follow=None, delay=None, encoding=None):
     handlers = []
 
     # as per urllib2 source code, these Handelers are added first
@@ -55,8 +56,8 @@ def custom_handler(accept=None, strict=False, delay=None, encoding=None):
 
     handlers.append(EncodingFixHandler(encoding))
 
-    if accept:
-        handlers.append(ContentNegociationHandler(MIMETYPE[accept], strict))
+    if follow:
+        handlers.append(AlternateHandler(MIMETYPE[follow]))
 
     handlers.append(CacheHandler(force_min=delay))
 
@@ -202,37 +203,22 @@ class AutoRefererHandler(BaseHandler):
     https_request = http_request
 
 
-class ContentNegociationHandler(BaseHandler):
-    " Handler for content negociation. Also parses <link rel='alternate' type='application/rss+xml' href='...' /> "
+class AlternateHandler(BaseHandler):
+    " Follow <link rel='alternate' type='application/rss+xml' href='...' /> "
 
-    def __init__(self, accept=None, strict=False):
-        self.accept = accept
-        self.strict = strict
-
-    def http_request(self, req):
-        if self.accept is not None:
-            if isinstance(self.accept, basestring):
-                self.accept = (self.accept,)
-
-            string = ','.join(self.accept)
-
-            if self.strict:
-                string += ',*/*;q=0.9'
-
-            req.add_unredirected_header('Accept', string)
-
-        return req
+    def __init__(self, follow=None):
+        self.follow = follow or []
 
     def http_response(self, req, resp):
         contenttype = resp.info().get('Content-Type', '').split(';')[0]
-        if 200 <= resp.code < 300 and self.accept is not None and self.strict and contenttype in MIMETYPE['html'] and contenttype not in self.accept:
+        if 200 <= resp.code < 300 and len(self.follow) and contenttype in MIMETYPE['html'] and contenttype not in self.follow:
             # opps, not what we were looking for, let's see if the html page suggests an alternative page of the right types
 
             data = resp.read()
             links = lxml.html.fromstring(data[:10000]).findall('.//link[@rel="alternate"]')
 
             for link in links:
-                if link.get('type', '') in self.accept:
+                if link.get('type', '') in self.follow:
                     resp.code = 302
                     resp.msg = 'Moved Temporarily'
                     resp.headers['location'] = link.get('href')
@@ -244,7 +230,6 @@ class ContentNegociationHandler(BaseHandler):
 
         return resp
 
-    https_request = http_request
     https_response = http_response
 
 

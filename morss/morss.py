@@ -252,7 +252,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = -2
 
     try:
-        con = crawler.custom_handler('html', False, delay, options.encoding).open(link, timeout=TIMEOUT)
+        con = crawler.custom_handler(delay=delay, encoding=options.encoding).open(link, timeout=TIMEOUT)
         data = con.read()
 
     except (IOError, HTTPException) as e:
@@ -335,8 +335,7 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = crawler.custom_handler(accept='xml', strict=True, delay=delay,
-            encoding=options.encoding) \
+        con = crawler.custom_handler(follow='rss', delay=delay, encoding=options.encoding) \
             .open(url, timeout=TIMEOUT * 2)
         xml = con.read()
 
