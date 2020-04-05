@@ -24,15 +24,13 @@ hand-written rules (ie. there's no automatic detection of links to build feeds).
 Please mind that feeds based on html files may stop working unexpectedly, due to
 html structure changes on the target website.
 
-Additionally morss can grab the source xml feed of iTunes podcast, and detect
-rss feeds in html pages' `<meta>`.
+Additionally morss can detect rss feeds in html pages' `<meta>`.
 
 You can use this program online for free at **[morss.it](https://morss.it/)**.
 
 Some features of morss:
 - Read RSS/Atom feeds
 - Create RSS feeds from json/html pages
-- Convert iTunes podcast links into xml links
 - Export feeds as RSS/JSON/CSV/HTML
 - Fetch full-text content of feed items
 - Follow 301/meta redirects
