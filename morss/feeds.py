@@ -442,7 +442,7 @@ class ParserHTML(ParserXML):
 
     def parse(self, raw):
         parser = etree.HTMLParser(remove_blank_text=True) # remove_blank_text needed for pretty_print
-        return etree.fromstring(BeautifulSoup(raw, 'lxml').prettify(), parser)
+        return etree.fromstring(BeautifulSoup(raw, 'lxml').prettify('utf-8'), parser)
 
     def tostring(self, encoding='unicode', **k):
         return lxml.html.tostring(self.root, encoding=encoding, **k)
