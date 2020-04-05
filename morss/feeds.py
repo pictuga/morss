@@ -402,13 +402,14 @@ class ParserXML(ParserBase):
 
         else:
             if html_rich:
-                # atom stuff
-                if 'atom' in rule:
-                    match.attrib['type'] = 'xhtml'
-
                 self._clean_node(match)
                 match.append(lxml.html.fragment_fromstring(value, create_parent='div'))
-                match.find('div').drop_tag()
+
+                if self.rules['mode'] == 'html':
+                    match.find('div').drop_tag() # not supported by lxml.etree
+
+                else: # i.e. if atom
+                    match.attrib['type'] = 'xhtml'
 
             else:
                 if match is not None and len(match):
