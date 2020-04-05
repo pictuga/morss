@@ -720,7 +720,7 @@ def cgi_error_handler(environ, start_response, app):
 @middleware
 def cgi_encode(environ, start_response, app):
     out = app(environ, start_response)
-    return [x if isinstance(x, bytes) else x.encode('utf-8') for x in out]
+    return [x if isinstance(x, bytes) else str(x).encode('utf-8') for x in out]
 
 
 def cli_app():
