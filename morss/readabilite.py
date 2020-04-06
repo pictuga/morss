@@ -186,7 +186,7 @@ def clean_node(node, keep_threshold=None):
         # this is <html/> (or a removed element waiting for GC)
         return
 
-    if keep_threshold is not None and get_score(node) <= keep_threshold:
+    if keep_threshold is not None and get_score(node) >= keep_threshold:
         # high score, so keep
         return
 
