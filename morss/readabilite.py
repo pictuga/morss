@@ -123,45 +123,47 @@ def score_node(node):
     return score
 
 
-def score_all(node, grades=None):
+def score_all(node):
     " Fairly dumb loop to score all worthwhile nodes. Tries to be fast "
-
-    if grades is None:
-        grades = {}
 
     for child in node:
         score = score_node(child)
         child.attrib['seen'] = 'yes, ' + str(int(score))
 
-        if score > 0 or not len(grades):
-            spread_score(child, score, grades)
-            score_all(child, grades)
-
-    return grades
+        if score > 0 or len(list(child.iterancestors())) <= 2:
+            spread_score(child, score)
+            score_all(child)
 
 
-def spread_score(node, score, grades):
+def set_score(node, value):
+    node.attrib['morss_score'] = str(float(value))
+
+
+def get_score(node):
+    return float(node.attrib.get('morss_score', 0))
+
+
+def incr_score(node, delta):
+    set_score(node, get_score(node) + delta)
+
+
+def get_all_scores(node):
+    return {x:get_score(x) for x in list(node.iter()) if get_score(x) != 0}
+
+
+def spread_score(node, score):
     " Spread the node's score to its parents, on a linear way "
 
     delta = score / 2
+
     for ancestor in [node,] + list(node.iterancestors()):
         if score >= 1 or ancestor is node:
-            try:
-                grades[ancestor] += score
-            except KeyError:
-                grades[ancestor] = score
+            incr_score(ancestor, score)
 
             score -= delta
 
         else:
             break
-
-
-def write_score_all(root, grades):
-    " Useful for debugging "
-
-    for node in root.iter():
-        node.attrib['score'] = str(int(grades.get(node, 0)))
 
 
 def clean_root(root):
@@ -275,18 +277,18 @@ def lowest_common_ancestor(nodeA, nodeB, max_depth=None):
     return nodeA # should always find one tho, at least <html/>, but needed for max_depth
 
 
-def rank_nodes(grades):
+def rank_grades(grades):
+    # largest score to smallest
     return sorted(grades.items(), key=lambda x: x[1], reverse=True)
 
 
-def get_best_node(grades):
+def get_best_node(ranked_grades):
     " To pick the best (raw) node. Another function will clean it "
 
-    if len(grades) == 1:
-        return grades[0]
+    if len(ranked_grades) == 1:
+        return ranked_grades[0]
 
-    top = rank_nodes(grades)
-    lowest = lowest_common_ancestor(top[0][0], top[1][0], 3)
+    lowest = lowest_common_ancestor(ranked_grades[0][0], ranked_grades[1][0], 3)
 
     return lowest
 
@@ -295,7 +297,8 @@ def get_article(data, url=None, encoding=None):
     " Input a raw html string, returns a raw html string of the article "
 
     html = parse(data, encoding)
-    scores = score_all(html)
+    score_all(html)
+    scores = rank_grades(get_all_scores(html))
 
     if not len(scores):
         return None
