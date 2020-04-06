@@ -74,7 +74,7 @@ def parse(data, url=None, mimetype=None):
     if mimetype is not None:
         parser_candidates = [x for x in parsers if mimetype in x.mimetype]
 
-    if mimetype is None or parser_candidates is None:
+    if mimetype is None or len(parser_candidates) == 0:
         parser_candidates = parsers
 
     # 3) Look for working ruleset for given parser
