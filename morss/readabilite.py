@@ -44,6 +44,12 @@ def count_content(node):
     return count_words(node.text_content()) + len(node.findall('.//img'))
 
 
+def percentile(N, P):
+    # https://stackoverflow.com/a/7464107
+    n = max(int(round(P * len(N) + 0.5)), 2)
+    return N[n-2]
+
+
 class_bad = ['comment', 'community', 'extra', 'foot',
     'sponsor', 'pagination', 'pager', 'tweet', 'twitter', 'com-', 'masthead',
     'media', 'meta', 'related', 'shopping', 'tags', 'tool', 'author', 'about',
@@ -166,17 +172,22 @@ def spread_score(node, score):
             break
 
 
-def clean_root(root):
+def clean_root(root, keep_threshold=None):
     for node in list(root):
-        clean_root(node)
-        clean_node(node)
+        # bottom-up approach, i.e. starting with children before cleaning current node
+        clean_root(node, keep_threshold)
+        clean_node(node, keep_threshold)
 
 
-def clean_node(node):
+def clean_node(node, keep_threshold=None):
     parent = node.getparent()
 
     if parent is None:
         # this is <html/> (or a removed element waiting for GC)
+        return
+
+    if keep_threshold is not None and get_score(node) <= keep_threshold:
+        # high score, so keep
         return
 
     gdparent = parent.getparent()
@@ -313,6 +324,7 @@ def get_article(data, url=None, encoding=None):
     if url:
         best.make_links_absolute(url)
 
-    clean_root(best)
+    keep_threshold = percentile([x[1] for x in scores], 0.1)
+    clean_root(best, keep_threshold)
 
     return lxml.etree.tostring(best, pretty_print=True)
