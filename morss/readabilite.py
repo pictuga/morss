@@ -315,6 +315,10 @@ def get_article(data, url=None, encoding=None):
         return None
 
     best = get_best_node(scores)
+
+    keep_threshold = percentile([x[1] for x in scores], 0.1)
+    clean_root(best, keep_threshold)
+
     wc = count_words(best.text_content())
     wca = count_words(' '.join([x.text_content() for x in best.findall('.//a')]))
 
@@ -323,8 +327,5 @@ def get_article(data, url=None, encoding=None):
 
     if url:
         best.make_links_absolute(url)
-
-    keep_threshold = percentile([x[1] for x in scores], 0.1)
-    clean_root(best, keep_threshold)
 
     return lxml.etree.tostring(best, pretty_print=True)
