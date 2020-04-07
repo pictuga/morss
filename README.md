@@ -73,6 +73,7 @@ The arguments are:
 
 - Change what morss does
 	- `json`: output as JSON
+	- `html`: outpout as HTML
 	- `proxy`: doesn't fill the articles
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
 	- `search=STRING`: does a basic case-sensitive search in the feed
@@ -90,7 +91,6 @@ The arguments are:
 - http server only
 	- `callback=NAME`: for JSONP calls
 	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
-	- `html`: changes the http content-type to html, so that python cgi erros (written in html) are readable in a web browser
 	- `txt`: changes the http content-type to txt (for faster "`view-source:`")
 - Custom feeds: you can turn any HTML page into a RSS feed using morss, using xpath rules. The article content will be fetched as usual (with readabilite). Please note that you will have to **replace** any `/` in your rule with a `|` when using morss as a webserver
 	- `items`: (**mandatory** to activate the custom feeds function) xpath rule to match all the RSS entries

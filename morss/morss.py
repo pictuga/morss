@@ -469,7 +469,7 @@ def FeedFormat(rss, options, encoding='utf-8'):
     elif options.csv:
         return rss.tocsv(encoding=encoding)
 
-    elif options.reader:
+    elif options.html:
         if options.indent:
             return rss.tohtml(encoding=encoding, pretty_print=True)
 
@@ -547,7 +547,7 @@ def cgi_app(environ, start_response):
     if options.cors:
         headers['access-control-allow-origin'] = '*'
 
-    if options.html or options.reader:
+    if options.html:
         headers['content-type'] = 'text/html'
     elif options.txt or options.silent:
         headers['content-type'] = 'text/plain'
