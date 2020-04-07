@@ -74,6 +74,7 @@ The arguments are:
 - Change what morss does
 	- `json`: output as JSON
 	- `html`: outpout as HTML
+	- `csv`: outpout as CSV
 	- `proxy`: doesn't fill the articles
 	- `clip`: stick the full article content under the original feed content (useful for twitter)
 	- `search=STRING`: does a basic case-sensitive search in the feed
