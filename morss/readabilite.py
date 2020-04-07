@@ -6,11 +6,14 @@ import re
 
 def parse(data, encoding=None):
     if encoding:
-        parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True, encoding=encoding)
-    else:
-        parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True)
+        data = BeautifulSoup(data, 'lxml', from_encoding=encoding).prettify('utf-8')
 
-    return lxml.html.fromstring(BeautifulSoup(data, 'lxml').prettify('utf-8'), parser=parser)
+    else:
+        data = BeautifulSoup(data, 'lxml').prettify('utf-8')
+
+    parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True, encoding='utf-8')
+
+    return lxml.html.fromstring(data, parser=parser)
 
 
 def count_words(string):

@@ -10,7 +10,6 @@ import re
 
 import lxml.etree
 import lxml.html
-from bs4 import BeautifulSoup
 
 from . import feeds
 from . import crawler
@@ -261,7 +260,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = readabilite.get_article(data, link, options.encoding or crawler.detect_encoding(data, con))
+    out = readabilite.get_article(data, url=con.geturl(), encoding=encoding)
 
     if out is not None:
         item.content = out
@@ -329,7 +328,7 @@ def FeedFetch(url, options):
 
     if options.items:
         # using custom rules
-        rss = feeds.FeedHTML(xml)
+        rss = feeds.FeedHTML(xml, encoding=encoding)
 
         rss.rules['title'] = options.title              if options.title        else '//head/title'
         rss.rules['desc'] = options.desc                if options.desc         else '//head/meta[@name="description"]/@content'
@@ -349,7 +348,7 @@ def FeedFetch(url, options):
 
     else:
         try:
-            rss = feeds.parse(xml, url, contenttype)
+            rss = feeds.parse(xml, url, contenttype, encoding=encoding)
             rss = rss.convert(feeds.FeedXML)
                 # contains all fields, otherwise much-needed data can be lost
 
@@ -649,7 +648,7 @@ def cgi_page(environ, start_response):
     data, con, contenttype, encoding = crawler.adv_get(url=url)
 
     if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
-        html = lxml.html.fromstring(BeautifulSoup(data, 'lxml').prettify())
+        html = readabilite.parse(data, encoding=encoding)
         html.make_links_absolute(con.geturl())
 
         kill_tags = ['script', 'iframe', 'noscript']

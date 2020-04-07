@@ -15,7 +15,7 @@ import dateutil.parser
 from copy import deepcopy
 
 import lxml.html
-from bs4 import BeautifulSoup
+from .readabilite import parse as html_parse
 
 json.encoder.c_make_encoder = None
 
@@ -53,7 +53,7 @@ def parse_rules(filename=None):
     return rules
 
 
-def parse(data, url=None, mimetype=None):
+def parse(data, url=None, mimetype=None, encoding=None):
     " Determine which ruleset to use "
 
     rulesets = parse_rules()
@@ -67,7 +67,7 @@ def parse(data, url=None, mimetype=None):
                 for path in ruleset['path']:
                     if fnmatch(url, path):
                         parser = [x for x in parsers if x.mode == ruleset['mode']][0]
-                        return parser(data, ruleset) 
+                        return parser(data, ruleset, encoding=encoding) 
 
     # 2) Look for a parser based on mimetype
 
@@ -86,7 +86,7 @@ def parse(data, url=None, mimetype=None):
             # 'path' as they should have been caught beforehands
 
         try:
-            feed = parser(data)
+            feed = parser(data, encoding=encoding)
 
         except (ValueError):
             # parsing did not work
@@ -113,7 +113,7 @@ def parse(data, url=None, mimetype=None):
 
 
 class ParserBase(object):
-    def __init__(self, data=None, rules=None, parent=None):
+    def __init__(self, data=None, rules=None, parent=None, encoding=None):
         if rules is None:
             rules = parse_rules()[self.default_ruleset]
 
@@ -122,9 +122,10 @@ class ParserBase(object):
         if data is None:
             data = rules['base']
 
-        self.root = self.parse(data)
         self.parent = parent
+        self.encoding = encoding
 
+        self.root = self.parse(data)
 
     def parse(self, raw):
         pass
@@ -442,8 +443,7 @@ class ParserHTML(ParserXML):
     mimetype = ['text/html', 'application/xhtml+xml']
 
     def parse(self, raw):
-        parser = etree.HTMLParser(remove_blank_text=True) # remove_blank_text needed for pretty_print
-        return etree.fromstring(BeautifulSoup(raw, 'lxml').prettify('utf-8'), parser)
+        return html_parse(raw, encoding=self.encoding)
 
     def tostring(self, encoding='unicode', **k):
         return lxml.html.tostring(self.root, encoding=encoding, **k)

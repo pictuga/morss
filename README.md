@@ -88,7 +88,6 @@ The arguments are:
 	- `mono`: disable multithreading while fetching, makes debugging easier
 	- `theforce`: force download the rss feed and ignore cached http errros
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
-	- `encoding=ENCODING`: overrides the encoding auto-detection of the crawler. Some web developers did not quite understand the importance of setting charset/encoding tags correctly...
 - http server only
 	- `callback=NAME`: for JSONP calls
 	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
