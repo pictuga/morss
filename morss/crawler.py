@@ -34,6 +34,25 @@ MIMETYPE = {
 DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
 
 
+def get(*args, **kwargs):
+    return adv_get(*args, **kwargs)[0]
+
+
+def adv_get(url, timeout=None, *args, **kwargs):
+    if timeout is None:
+        con = custom_handler(*args, **kwargs).open(url)
+
+    else:
+        con = custom_handler(*args, **kwargs).open(url, timeout=timeout)
+
+    data = con.read()
+
+    contenttype = con.info().get('Content-Type', '').split(';')[0]
+    encoding= detect_encoding(data, con)
+
+    return data, con, contenttype, encoding
+
+
 def custom_handler(follow=None, delay=None, encoding=None):
     handlers = []
 

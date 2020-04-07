@@ -251,14 +251,12 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = -2
 
     try:
-        con = crawler.custom_handler(delay=delay, encoding=options.encoding).open(link, timeout=TIMEOUT)
-        data = con.read()
+        data, con, contenttype, encoding = crawler.adv_get(url=link, delay=delay, timeout=TIMEOUT)
 
     except (IOError, HTTPException) as e:
         log('http error')
         return False # let's just delete errors stuff when in cache mode
 
-    contenttype = con.info().get('Content-Type', '').split(';')[0]
     if contenttype not in crawler.MIMETYPE['html'] and contenttype != 'text/plain':
         log('non-text page')
         return True
@@ -324,14 +322,10 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        con = crawler.custom_handler(follow='rss', delay=delay, encoding=options.encoding) \
-            .open(url, timeout=TIMEOUT * 2)
-        xml = con.read()
+        xml, con, contenttype, encoding = crawler.adv_get(url=url, follow='rss', delay=delay, timeout=TIMEOUT * 2)
 
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
-
-    contenttype = con.info().get('Content-Type', '').split(';')[0]
 
     if options.items:
         # using custom rules
@@ -652,10 +646,7 @@ def cgi_page(environ, start_response):
     if urlparse(url).scheme not in ['http', 'https']:
         url = 'http://' + url
 
-    con = crawler.custom_handler().open(url)
-    data = con.read()
-
-    contenttype = con.info().get('Content-Type', '').split(';')[0]
+    data, con, contenttype, encoding = crawler.adv_get(url=url)
 
     if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
         html = lxml.html.fromstring(BeautifulSoup(data, 'lxml').prettify())
