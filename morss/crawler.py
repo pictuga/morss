@@ -218,7 +218,6 @@ class BrowserlyHeaderHandler(BaseHandler):
     """ Add more headers to look less suspicious """
 
     def http_request(self, req):
-        req.add_unredirected_header('Referer', '%s://%s' % (req.type, req.host))
         req.add_unredirected_header('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8')
         req.add_unredirected_header('Accept-Language', 'en-US,en;q=0.5')
         return req
