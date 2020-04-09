@@ -554,6 +554,8 @@ def cgi_app(environ, start_response):
     else:
         headers['content-type'] = 'text/xml'
 
+    headers['content-type'] += '; charset=utf-8'
+
     crawler.default_cache = crawler.SQLiteCache(os.path.join(os.getcwd(), 'morss-cache.db'))
 
     # get the work done
