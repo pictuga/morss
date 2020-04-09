@@ -636,7 +636,7 @@ def cgi_file_handler(environ, start_response, app):
         return app(environ, start_response)
 
 
-def cgi_page(environ, start_response):
+def cgi_get(environ, start_response):
     url, options = cgi_parse_environ(environ)
 
     # get page
@@ -648,28 +648,35 @@ def cgi_page(environ, start_response):
     data, con, contenttype, encoding = crawler.adv_get(url=url)
 
     if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
-        html = readabilite.parse(data, encoding=encoding)
-        html.make_links_absolute(con.geturl())
+        if options.get == 'page':
+            html = readabilite.parse(data, encoding=encoding)
+            html.make_links_absolute(con.geturl())
 
-        kill_tags = ['script', 'iframe', 'noscript']
+            kill_tags = ['script', 'iframe', 'noscript']
 
-        for tag in kill_tags:
-            for elem in html.xpath('//'+tag):
-                elem.getparent().remove(elem)
+            for tag in kill_tags:
+                for elem in html.xpath('//'+tag):
+                    elem.getparent().remove(elem)
 
-        output = lxml.etree.tostring(html.getroottree(), encoding='utf-8')
+            output = lxml.etree.tostring(html.getroottree(), encoding='utf-8')
+
+        elif options.get == 'article':
+            output = readabilite.get_article(data, url=con.geturl(), encoding=encoding)
+
+        else:
+            raise MorssException('no :get option passed')
 
     else:
-        output = None
+        output = data
 
     # return html page
-    headers = {'status': '200 OK', 'content-type': 'text/html'}
+    headers = {'status': '200 OK', 'content-type': 'text/html; charset=utf-8'}
     start_response(headers['status'], list(headers.items()))
     return [output]
 
 
 dispatch_table = {
-    'getpage': cgi_page
+    'get': cgi_get,
     }
 
 
