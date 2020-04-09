@@ -69,19 +69,13 @@ def parse(data, url=None, mimetype=None, encoding=None):
                         parser = [x for x in parsers if x.mode == ruleset['mode']][0]
                         return parser(data, ruleset, encoding=encoding) 
 
-    # 2) Look for a parser based on mimetype
-
-    if mimetype is not None:
-        parser_candidates = [x for x in parsers if mimetype in x.mimetype]
-
-    if mimetype is None or len(parser_candidates) == 0:
-        parser_candidates = parsers
+    # 2) Try each and every parser
 
     # 3) Look for working ruleset for given parser
         # 3a) See if parsing works
         # 3b) See if .items matches anything
 
-    for parser in parser_candidates:
+    for parser in parsers:
         ruleset_candidates = [x for x in rulesets.values() if x['mode'] == parser.mode and 'path' not in x]
             # 'path' as they should have been caught beforehands
 
