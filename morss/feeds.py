@@ -269,8 +269,15 @@ class ParserBase(object):
 
         except AttributeError:
             # does not exist, have to create it
-            self.rule_create(self.rules[rule_name])
-            self.rule_set(self.rules[rule_name], value)
+            try:
+                self.rule_create(self.rules[rule_name])
+
+            except AttributeError:
+                # no way to create it, give up
+                pass
+
+            else:
+                self.rule_set(self.rules[rule_name], value)
 
     def rmv(self, rule_name):
         # easy deleter
@@ -468,6 +475,9 @@ class ParserHTML(ParserXML):
         if match is not None:
             element = deepcopy(match)
             match.getparent().append(element)
+
+        else:
+            raise AttributeError('no way to create item')
 
 
 def parse_time(value):
