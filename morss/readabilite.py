@@ -307,7 +307,7 @@ def get_best_node(ranked_grades):
     return lowest
 
 
-def get_article(data, url=None, encoding=None):
+def get_article(data, url=None, encoding=None, debug=False):
     " Input a raw html string, returns a raw html string of the article "
 
     html = parse(data, encoding)
@@ -319,16 +319,17 @@ def get_article(data, url=None, encoding=None):
 
     best = get_best_node(scores)
 
-    keep_threshold = percentile([x[1] for x in scores], 0.1)
-    clean_root(best, keep_threshold)
+    if not debug:
+        keep_threshold = percentile([x[1] for x in scores], 0.1)
+        clean_root(best, keep_threshold)
 
     wc = count_words(best.text_content())
     wca = count_words(' '.join([x.text_content() for x in best.findall('.//a')]))
 
-    if wc - wca < 50 or float(wca) / wc > 0.3:
+    if not debug and (wc - wca < 50 or float(wca) / wc > 0.3):
         return None
 
     if url:
         best.make_links_absolute(url)
 
-    return lxml.etree.tostring(best, pretty_print=True)
+    return lxml.etree.tostring(best if not debug else html, pretty_print=True)
