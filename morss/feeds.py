@@ -150,15 +150,15 @@ class ParserBase(object):
         c = csv.writer(out, dialect=csv.excel)
 
         for item in self.items:
-            row = [getattr(item, x) for x in item.dic]
-
-            if encoding != 'unicode':
-                row = [x.encode(encoding) if isinstance(x, unicode) else x for x in row]
-
-            c.writerow(row)
+            c.writerow([getattr(item, x) for x in item.dic])
 
         out.seek(0)
-        return out.read()
+        out = out.read()
+
+        if encoding != 'unicode':
+            out = out.encode(encoding)
+
+        return out
 
     def tohtml(self, **k):
         return self.convert(FeedHTML).tostring(**k)
