@@ -471,10 +471,10 @@ def FeedFormat(rss, options, encoding='utf-8'):
 
     else:
         if options.indent:
-            return rss.torss(xml_declaration=True, encoding=encoding, pretty_print=True)
+            return rss.torss(xml_declaration=(not encoding == 'unicode'), encoding=encoding, pretty_print=True)
 
         else:
-            return rss.torss(xml_declaration=True, encoding=encoding)
+            return rss.torss(xml_declaration=(not encoding == 'unicode'), encoding=encoding)
 
 
 def process(url, cache=None, options=None):
@@ -724,10 +724,10 @@ def cli_app():
     url = UrlFix(url)
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
-    out = FeedFormat(rss, options)
+    out = FeedFormat(rss, options, 'unicode')
 
     if not options.silent:
-        print(out.decode('utf-8', 'replace') if isinstance(out, bytes) else out)
+        print(out)
 
     log('done')
 
