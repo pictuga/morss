@@ -47,7 +47,11 @@ def parse_rules(filename=None):
 
     for section in rules.keys():
         for arg in rules[section].keys():
-            if '\n' in rules[section][arg]:
+            if rules[section][arg].startswith('file:'):
+                import_file = os.path.join(os.path.dirname(__file__), rules[section][arg][5:])
+                rules[section][arg] = open(import_file).read()
+
+            elif '\n' in rules[section][arg]:
                 rules[section][arg] = rules[section][arg].split('\n')[1:]
 
     return rules

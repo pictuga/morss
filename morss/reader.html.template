@@ -1,11 +1,9 @@
-@require(feed)
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>@feed.title &#8211; via morss</title>
-		<meta charset="UTF-8" />
-		<meta name="description" content="@feed.desc (via morss)" />
+		<title>Feed reader by morss</title>
 		<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+		<meta name="robots" content="noindex" />
 
 		<style type="text/css">
 			/* columns - from https://thisisdallas.github.io/Simple-Grid/simpleGrid.css */
@@ -32,7 +30,7 @@
 				padding-right: 20px; /* column-space */
 			}
 
-			@@media handheld, only screen and (max-width: 767px) { /* @@ to escape from the template engine */
+			@media handheld, only screen and (max-width: 767px) {
 				#content {
 					width: 100%;
 					min-width: 0;
@@ -82,6 +80,7 @@
 
 			#content {
 				text-align: justify;
+				line-height: 1.5em;
 			}
 
 				.item .title {
@@ -171,30 +170,17 @@
 
 	<body>
 		<div id="header">
-			<h1>@feed.title</h1>
-			@if feed.desc:
-				<h2>@feed.desc</h2>
-			@end
+			<h1>RSS feed</h1>
+			<h2>with full text articles</h2>
 			<p>- via morss</p>
 		</div>
 
 		<div id="content">
-			@for item in feed.items:
 				<div class="item">
-					@if item.link:
-						<a class="title link" href="@item.link" target="_blank">@item.title</a>
-					@else:
-						<span class="title">@item.title</span>
-					@end
-					<div class="article">
-						@if item.content:
-							@item.content
-						@else:
-							@item.desc
-						@end
-					</div>
+					<a class="title link" href="@item.link" target="_blank"></a>
+					<div class="desc"></div>
+					<div class="content"></div>
 				</div>
-			@end
 		</div>
 
 	<script>
