@@ -420,7 +420,8 @@ def FeedGather(rss, url, options):
         t.daemon = True
         t.start()
 
-    for i, item in enumerate(list(rss.items)):
+    sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or 0, reverse=True)
+    for i, item in enumerate(sorted_items):
         if threads == 1:
             worker(*[i, item])
 
