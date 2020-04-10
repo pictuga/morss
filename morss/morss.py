@@ -1,7 +1,10 @@
 import sys
 import os
 import os.path
+
 import time
+from datetime import datetime
+from dateutil import tz
 
 import threading
 
@@ -420,7 +423,8 @@ def FeedGather(rss, url, options):
         t.daemon = True
         t.start()
 
-    sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or 0, reverse=True)
+    now = datetime.now(tz.tzutc())
+    sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or now, reverse=True)
     for i, item in enumerate(sorted_items):
         if threads == 1:
             worker(*[i, item])

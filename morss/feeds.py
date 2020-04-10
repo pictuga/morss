@@ -484,13 +484,13 @@ def parse_time(value):
 
     elif isinstance(value, basestring):
         if re.match(r'^[0-9]+$', value):
-            return datetime.fromtimestamp(int(value), tz.UTC)
+            return datetime.fromtimestamp(int(value), tz.tzutc())
 
         else:
-            return dateutil.parser.parse(value)
+            return dateutil.parser.parse(value).replace(tzinfo=tz.tzutc())
 
     elif isinstance(value, int):
-        return datetime.fromtimestamp(value, tz.UTC)
+        return datetime.fromtimestamp(value, tz.tzutc())
 
     elif isinstance(value, datetime):
         return value
