@@ -518,18 +518,20 @@ import pymysql.cursors
 
 
 class MySQLCacheHandler(BaseCache):
-    " NB. Requires mono-threading, as pymysql isn't thread-safe "
     def __init__(self, user, password, database, host='localhost'):
-        self.con = pymysql.connect(host=host, user=user, password=password, database=database, charset='utf8', autocommit=True)
+        self.user = user
+        self.password = password
+        self.database = database
+        self.host = host
 
-        with self.con.cursor() as cursor:
+        with self.cursor() as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS data (url VARCHAR(255) NOT NULL PRIMARY KEY, code INT, msg TEXT, headers TEXT, data BLOB, timestamp INT)')
 
-    def __del__(self):
-        self.con.close()
+    def cursor(self):
+        return pymysql.connect(host=self.host, user=self.user, password=self.password, database=self.database, charset='utf8', autocommit=True).cursor()
 
     def __getitem__(self, url):
-        cursor = self.con.cursor()
+        cursor = self.cursor()
         cursor.execute('SELECT * FROM data WHERE url=%s', (url,))
         row = cursor.fetchone()
 
@@ -540,10 +542,10 @@ class MySQLCacheHandler(BaseCache):
 
     def __setitem__(self, url, value): # (code, msg, headers, data, timestamp)
         if url in self:
-            with self.con.cursor() as cursor:
+            with self.cursor() as cursor:
                 cursor.execute('UPDATE data SET code=%s, msg=%s, headers=%s, data=%s, timestamp=%s WHERE url=%s',
                     value + (url,))
 
         else:
-            with self.con.cursor() as cursor:
+            with self.cursor() as cursor:
                 cursor.execute('INSERT INTO data VALUES (%s,%s,%s,%s,%s,%s)', (url,) + value)
