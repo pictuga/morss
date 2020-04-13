@@ -719,6 +719,9 @@ def cgi_encode(environ, start_response, app):
     return [x if isinstance(x, bytes) else str(x).encode('utf-8') for x in out]
 
 
+cgi_standalone_app = cgi_encode(cgi_error_handler(cgi_dispatcher(cgi_file_handler(cgi_app))))
+
+
 def cli_app():
     options = Options(filterOptions(parseOptions(sys.argv[1:-1])))
     url = sys.argv[-1]
