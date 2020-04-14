@@ -625,7 +625,6 @@ def cgi_file_handler(environ, start_response, app):
 
         for path in paths:
             try:
-                print(path)
                 body = open(path, 'rb').read()
 
                 headers['status'] = '200 OK'
