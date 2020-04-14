@@ -620,21 +620,24 @@ def cgi_file_handler(environ, start_response, app):
         if url == '':
             url = 'index.html'
 
-        if '--root' in sys.argv[1:]:
-            path = os.path.join(sys.argv[-1], url)
+        paths = [os.path.join(sys.prefix, 'share/morss', url),
+            os.path.join(os.path.dirname(__file__), '../www', url)]
+
+        for path in paths:
+            try:
+                print(path)
+                body = open(path, 'rb').read()
+
+                headers['status'] = '200 OK'
+                headers['content-type'] = files[url]
+                start_response(headers['status'], list(headers.items()))
+                return [body]
+
+            except IOError:
+                continue
 
         else:
-            path = url
-
-        try:
-            body = open(path, 'rb').read()
-
-            headers['status'] = '200 OK'
-            headers['content-type'] = files[url]
-            start_response(headers['status'], list(headers.items()))
-            return [body]
-
-        except IOError:
+            # the for loop did not return, so here we are, i.e. no file found
             headers['status'] = '404 Not found'
             start_response(headers['status'], list(headers.items()))
             return ['Error %s' % headers['status']]
@@ -762,7 +765,7 @@ def main():
 
         wsgiref.handlers.CGIHandler().run(app)
 
-    elif len(sys.argv) <= 1 or isInt(sys.argv[1]) or '--root' in sys.argv[1:]:
+    elif len(sys.argv) <= 1 or isInt(sys.argv[1]):
         # start internal (basic) http server
 
         if len(sys.argv) > 1 and isInt(sys.argv[1]):

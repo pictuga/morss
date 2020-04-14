@@ -144,17 +144,12 @@ Running this command should do:
 uwsgi --http :9090 --plugin python --wsgi-file main.py
 ```
 
-However, one problem might be how to serve the provided `index.html` file if it
-isn't in the same directory. Therefore you can add this at the end of the
-command to point to another directory `--pyargv '--root ../../www/'`.
-
-
 #### Using morss' internal HTTP server
 
 Morss can run its own HTTP server. The later should start when you run morss
 without any argument, on port 8080.
 
-You can change the port and the location of the `www/` folder like this `python -m morss 9000 --root ../../www`.
+You can change the port like this `python -m morss 9000`.
 
 #### Passing arguments
 
@@ -174,9 +169,9 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 Run:
 ```
-python[2.7] -m morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
 ```
-For example: `python -m morss debug http://feeds.bbci.co.uk/news/rss.xml`
+For example: `morss debug http://feeds.bbci.co.uk/news/rss.xml`
 
 *(Brackets indicate optional text)*
 
@@ -189,9 +184,9 @@ scripts can be run on top of the RSS feed, using its
 
 To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command:
 ```
-[python[2.7]] PATH/TO/MORSS/main.py [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
 ```
-For example: `python2.7 PATH/TO/MORSS/main.py http://feeds.bbci.co.uk/news/rss.xml`
+For example: `morss http://feeds.bbci.co.uk/news/rss.xml`
 
 *(Brackets indicate optional text)*
 
