@@ -620,7 +620,7 @@ def cgi_file_handler(environ, start_response, app):
         if url == '':
             url = 'index.html'
 
-        paths = [os.path.join(sys.prefix, 'share/morss', url),
+        paths = [os.path.join(sys.prefix, 'share/morss/www', url),
             os.path.join(os.path.dirname(__file__), '../www', url)]
 
         for path in paths:

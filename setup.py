@@ -15,8 +15,9 @@ setup(
     install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet', 'pymysql'],
     package_data = {package_name: ['feedify.ini', 'reader.html.template']},
     data_files = [
-        ('share/' + package_name, glob('www/*.*')),
-        ('share/' + package_name + '/cgi', [])
+        ('share/' + package_name, ['README.md', 'LICENSE']),
+        ('share/' + package_name + '/www', glob('www/*.*')),
+        ('share/' + package_name + '/www/cgi', [])
     ],
     entry_points = {
         'console_scripts': [package_name + '=' + package_name + ':main']
