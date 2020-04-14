@@ -149,7 +149,11 @@ uwsgi --http :9090 --plugin python --wsgi-file main.py
 Morss can run its own HTTP server. The later should start when you run morss
 without any argument, on port 8080.
 
-You can change the port like this `python -m morss 9000`.
+```shell
+morss
+```
+
+You can change the port like this `morss 9000`.
 
 #### Passing arguments
 
