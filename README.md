@@ -55,7 +55,7 @@ You do need:
 Simplest way to get these:
 
 ```shell
-pip install -r requirements.txt
+pip install git+https://git.pictuga.com/pictuga/morss.git@master
 ```
 
 You may also need:
