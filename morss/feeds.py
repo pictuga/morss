@@ -52,8 +52,9 @@ def parse_rules(filename=None):
             # for each rule
 
             if rules[section][arg].startswith('file:'):
-                paths = [os.path.join(sys.prefix, 'share/morss', rules[section][arg][5:]),
-                    os.path.join(os.path.dirname(__file__), '..', rules[section][arg][5:])]
+                paths = [os.path.join(sys.prefix, 'share/morss/www', rules[section][arg][5:]),
+                    os.path.join(os.path.dirname(__file__), '../www', rules[section][arg][5:]),
+                    os.path.join(os.path.dirname(__file__), '../..', rules[section][arg][5:])]
 
                 for path in paths:
                     try:

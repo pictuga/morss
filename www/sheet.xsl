@@ -52,6 +52,10 @@
 					font-weight: bold;
 					font-size: 1.5em;
 				}
+
+				.content * {
+					max-width: 100%;
+				}
 			</style>
 		</head>
 
