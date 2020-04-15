@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.1" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.1"
+	xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+	xmlns:atom="http://www.w3.org/2005/Atom"
+	xmlns:atom03="http://purl.org/atom/ns#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:rssfake="http://purl.org/rss/1.0/"
+	>
 
 	<xsl:output method="html"/>
 
 	<xsl:template match="/">
+		<!DOCTYPE html>
 		<html>
 		<head>
 			<title>RSS feed by morss</title>
 			<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+			<meta name="robots" content="noindex" />
 
 			<style type="text/css">
 				body {
@@ -23,36 +32,16 @@
 					max-width: 100%;
 				}
 
-				body > ul {
+				.item {
 					background-color: #FFFAF4;
+					border: 1px solid silver;
 					padding: 1%;
+					margin: 1%;
 					max-width: 100%;
 				}
 
-				ul {
-					list-style-type: none;
-				}
-
-				.tag {
-					color: darkred;
-				}
-
-				.attr {
-					color: darksalmon;
-				}
-
-				.value {
-					color: darkblue;
-				}
-
-				.comment {
-					color: lightgrey;
-				}
-
-				pre {
-					margin: 0;
-					max-width: 100%;
-					white-space: normal;
+				.item > a {
+					border-bottom: 1px solid silver;
 				}
 			</style>
 		</head>
@@ -65,59 +54,44 @@
 
 			<div id="url"></div>
 
-			<ul>
-				<xsl:apply-templates/>
-			</ul>
+			<hr/>
+
+			<div id="header">
+				<h1>
+					<xsl:value-of select="rdf:RDF/rssfake:channel/rssfake:title|rss/channel/title|atom:feed/atom:title|atom03:feed/atom03:title"/>
+				</h1>
+
+				<p>
+					<xsl:value-of select="rdf:RDF/rssfake:channel/rssfake:description|rss/channel/description|atom:feed/atom:subtitle|atom03:feed/atom03:subtitle"/>
+				</p>
+			</div>
+
+			<div id="content">
+				<xsl:for-each select="rdf:RDF/rssfake:channel/rssfake:item|rss/channel/item|atom:feed/atom:entry|atom03:feed/atom03:entry">
+					<div class="item">
+						<a href="/" target="_blank"><xsl:attribute name="href"><xsl:value-of select="rssfake:link|link|atom:link/@href|atom03:link/@href"/></xsl:attribute>
+								<xsl:value-of select="rssfake:title|title|atom:title|atom03:title"/>
+						</a>
+
+						<div class="desc">
+							<xsl:value-of select="rssfake:description|description|atom:summary|atom03:summary"/>
+						</div>
+
+						<div class="content">
+							<xsl:value-of select="content:encoded|atom:content|atom03:content"/>
+						</div>
+					</div>
+				</xsl:for-each>
+			</div>
 
 			<script>
-				document.getElementById("url").innerHTML = window.location.href;
+				document.getElementById("url").innerHTML = window.location.href.replace(':html/', '')
+
+				if (!/:html/.test(window.location.href))
+					for (var content of document.getElementsByClassName("content"))
+						content.innerHTML = content.innerText
 			</script>
 		</body>
 		</html>
 	</xsl:template>
-
-	<xsl:template match="*">
-		<li>
-			<span class="element">
-				&lt;
-					<span class="tag"><xsl:value-of select="name()"/></span>
-
-					<xsl:for-each select="@*">
-						<span class="attr"> <xsl:value-of select="name()"/></span>
-						=
-						"<span class="value"><xsl:value-of select="."/></span>"
-					</xsl:for-each>
-				&gt;
-			</span>
-
-			<xsl:if test="node()">
-				<ul>
-					<xsl:apply-templates/>
-				</ul>
-			</xsl:if>
-
-			<span class="element">
-				&lt;/
-					<span class="tag"><xsl:value-of select="name()"/></span>
-				&gt;
-			</span>
-		</li>
-	</xsl:template>
-
-	<xsl:template match="comment()">
-		<li>
-			<pre class="comment"><![CDATA[<!--]]><xsl:value-of select="."/><![CDATA[-->]]></pre>
-		</li>
-	</xsl:template>
-
-	<xsl:template match="text()">
-		<li>
-			<pre>
-				<xsl:value-of select="normalize-space(.)"/>
-			</pre>
-		</li>
-	</xsl:template>
-
-	<xsl:template match="text()[not(normalize-space())]"/>
-
 </xsl:stylesheet>

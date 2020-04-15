@@ -46,10 +46,23 @@ def parse_rules(filename=None):
     rules = dict([(x, dict(config.items(x))) for x in config.sections()])
 
     for section in rules.keys():
+        # for each ruleset
+
         for arg in rules[section].keys():
+            # for each rule
+
             if rules[section][arg].startswith('file:'):
-                import_file = os.path.join(os.path.dirname(__file__), rules[section][arg][5:])
-                rules[section][arg] = open(import_file).read()
+                paths = [os.path.join(sys.prefix, 'share/morss', rules[section][arg][5:]),
+                    os.path.join(os.path.dirname(__file__), '..', rules[section][arg][5:])]
+
+                for path in paths:
+                    try:
+                        file_raw = open(path).read()
+                        file_clean = re.sub('<[/?]?(xsl|xml)[^>]+?>', '', file_raw)
+                        rules[section][arg] = file_clean
+
+                    except IOError:
+                        pass
 
             elif '\n' in rules[section][arg]:
                 rules[section][arg] = rules[section][arg].split('\n')[1:]
@@ -293,10 +306,7 @@ class ParserXML(ParserBase):
 
     NSMAP = {'atom': 'http://www.w3.org/2005/Atom',
         'atom03': 'http://purl.org/atom/ns#',
-        'media': 'http://search.yahoo.com/mrss/',
         'rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-        'slash': 'http://purl.org/rss/1.0/modules/slash/',
-        'dc': 'http://purl.org/dc/elements/1.1/',
         'content': 'http://purl.org/rss/1.0/modules/content/',
         'rssfake': 'http://purl.org/rss/1.0/'}
 
