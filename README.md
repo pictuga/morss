@@ -144,6 +144,12 @@ Running this command should do:
 uwsgi --http :9090 --plugin python --wsgi-file main.py
 ```
 
+#### Using Gunicorn
+
+```shell
+gunicorn morss:cgi_standalone_app
+```
+
 #### Using morss' internal HTTP server
 
 Morss can run its own HTTP server. The later should start when you run morss
