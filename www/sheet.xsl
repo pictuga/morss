@@ -11,7 +11,6 @@
 	<xsl:output method="html"/>
 
 	<xsl:template match="/">
-		<!DOCTYPE html>
 		<html>
 		<head>
 			<title>RSS feed by morss</title>
@@ -35,13 +34,23 @@
 				.item {
 					background-color: #FFFAF4;
 					border: 1px solid silver;
-					padding: 1%;
 					margin: 1%;
 					max-width: 100%;
 				}
 
-				.item > a {
+				.item > * {
+					padding: 1%;
+				}
+
+				.item > :not(:last-child) {
 					border-bottom: 1px solid silver;
+				}
+
+				.item > a {
+
+					display: block;
+					font-weight: bold;
+					font-size: 1.5em;
 				}
 			</style>
 		</head>
@@ -74,11 +83,11 @@
 						</a>
 
 						<div class="desc">
-							<xsl:value-of select="rssfake:description|description|atom:summary|atom03:summary"/>
+							<xsl:copy-of select="rssfake:description|description|atom:summary|atom03:summary"/>
 						</div>
 
 						<div class="content">
-							<xsl:value-of select="content:encoded|atom:content|atom03:content"/>
+							<xsl:copy-of select="content:encoded|atom:content|atom03:content"/>
 						</div>
 					</div>
 				</xsl:for-each>
@@ -88,8 +97,8 @@
 				document.getElementById("url").innerHTML = window.location.href.replace(':html/', '')
 
 				if (!/:html/.test(window.location.href))
-					for (var content of document.getElementsByClassName("content"))
-						content.innerHTML = content.innerText
+					for (var content of document.querySelectorAll(".desc,.content"))
+						content.innerHTML = content.children.children ? content.innerHTML : content.innerText
 			</script>
 		</body>
 		</html>
