@@ -98,7 +98,7 @@
 			</div>
 
 			<script>
-				document.getElementById("url").innerHTML = window.location.href.replace(':html/', '')
+				document.getElementById("url").innerHTML = window.location.href.replace(/:html\/?/, '')
 
 				if (!/:html/.test(window.location.href))
 					for (var content of document.querySelectorAll(".desc,.content"))
