@@ -150,6 +150,22 @@ uwsgi --http :9090 --plugin python --wsgi-file main.py
 gunicorn morss:cgi_standalone_app
 ```
 
+#### Using docker
+
+Build
+
+```shell
+docker build https://git.pictuga.com/pictuga/morss.git
+```
+
+Run & Build in one go
+
+```shell
+docker run --rm $(docker build -q https://git.pictuga.com/pictuga/morss.git)
+```
+
+It will run on port 8000 by default
+
 #### Using morss' internal HTTP server
 
 Morss can run its own HTTP server. The later should start when you run morss
