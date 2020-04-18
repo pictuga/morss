@@ -141,7 +141,7 @@ ensure that the provided `/www/.htaccess` works well with your server.
 Running this command should do:
 
 ```shell
-uwsgi --http :9090 --plugin python --wsgi-file main.py
+uwsgi --http :8080 --plugin python --wsgi-file main.py
 ```
 
 #### Using Gunicorn
@@ -161,10 +161,10 @@ docker build https://git.pictuga.com/pictuga/morss.git
 Run & Build in one go
 
 ```shell
-docker run --rm $(docker build -q https://git.pictuga.com/pictuga/morss.git)
+docker run -p 8080:8080 $(docker build -q https://git.pictuga.com/pictuga/morss.git)
 ```
 
-It will run on port 8000 by default
+It will run on port 8080 by default
 
 #### Using morss' internal HTTP server
 
