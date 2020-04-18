@@ -36,13 +36,15 @@ except ImportError:
     from urllib.parse import unquote
     from urllib.parse import urlparse, urljoin, parse_qs
 
-LIM_ITEM = 100  # deletes what's beyond
-LIM_TIME = 7  # deletes what's after
-MAX_ITEM = 50  # cache-only beyond
-MAX_TIME = 7  # cache-only after (in sec)
+MAX_ITEM = 5  # cache-only beyond
+MAX_TIME = 2  # cache-only after (in sec)
+
+LIM_ITEM = 10  # deletes what's beyond
+LIM_TIME = 2.5  # deletes what's after
+
 DELAY = 10 * 60  # xml cache & ETag cache (in sec)
 TIMEOUT = 4  # http timeout (in sec)
-THREADS = 10  # number of threads (1 for single-threaded)
+THREADS = MAX_ITEM  # number of threads (1 for single-threaded)
 
 DEBUG = False
 PORT = 8080
