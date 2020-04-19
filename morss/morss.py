@@ -620,7 +620,7 @@ def cgi_get(environ, start_response):
     if urlparse(url).scheme not in ['http', 'https']:
         url = 'http://' + url
 
-    data, con, contenttype, encoding = crawler.adv_get(url=url)
+    data, con, contenttype, encoding = crawler.adv_get(url=url, timeout=TIMEOUT)
 
     if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
         if options.get == 'page':
