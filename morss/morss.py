@@ -40,7 +40,6 @@ LIM_TIME = 2.5  # deletes what's after
 
 DELAY = 10 * 60  # xml cache & ETag cache (in sec)
 TIMEOUT = 4  # http timeout (in sec)
-THREADS = MAX_ITEM  # number of threads (1 for single-threaded)
 
 DEBUG = False
 PORT = 8080
