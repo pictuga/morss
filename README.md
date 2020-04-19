@@ -150,19 +150,18 @@ gunicorn morss:cgi_standalone_app
 
 #### Using docker
 
-Build
+Build & run
 
 ```shell
-docker build https://git.pictuga.com/pictuga/morss.git
+docker build https://git.pictuga.com/pictuga/morss.git -t morss
+docker run -p 8080:8080 morss
 ```
 
-Run & Build in one go
+In one line
 
 ```shell
 docker run -p 8080:8080 $(docker build -q https://git.pictuga.com/pictuga/morss.git)
 ```
-
-It will run on port 8080 by default
 
 #### Using morss' internal HTTP server
 
