@@ -108,7 +108,6 @@ morss will auto-detect what "mode" to use.
 For this, you'll want to change a bit the architecture of the files, for example
 into something like this.
 
-
 ```
 /
 ├── cgi

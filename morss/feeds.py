@@ -85,7 +85,7 @@ def parse(data, url=None, mimetype=None, encoding=None):
                 for path in ruleset['path']:
                     if fnmatch(url, path):
                         parser = [x for x in parsers if x.mode == ruleset['mode']][0]
-                        return parser(data, ruleset, encoding=encoding) 
+                        return parser(data, ruleset, encoding=encoding)
 
     # 2) Try each and every parser
 

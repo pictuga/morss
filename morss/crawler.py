@@ -72,7 +72,6 @@ def custom_handler(follow=None, delay=None, encoding=None):
     handlers.append(HTTPRefreshHandler())
     handlers.append(UAHandler(DEFAULT_UA))
     handlers.append(BrowserlyHeaderHandler())
-
     handlers.append(EncodingFixHandler(encoding))
 
     if follow:

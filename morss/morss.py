@@ -550,7 +550,7 @@ def cgi_app(environ, start_response):
 
 def middleware(func):
     " Decorator to turn a function into a wsgi middleware "
-    # This is called when parsing the code
+    # This is called when parsing the "@middleware" code
 
     def app_builder(app):
         # This is called when doing app = cgi_wrapper(app)
