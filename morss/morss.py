@@ -6,8 +6,6 @@ import time
 from datetime import datetime
 from dateutil import tz
 
-import threading
-
 from fnmatch import fnmatch
 import re
 
@@ -25,13 +23,11 @@ import cgitb
 
 try:
     # python 2
-    from Queue import Queue
     from httplib import HTTPException
     from urllib import unquote
     from urlparse import urlparse, urljoin, parse_qs
 except ImportError:
     # python 3
-    from queue import Queue
     from http.client import HTTPException
     from urllib.parse import unquote
     from urllib.parse import urlparse, urljoin, parse_qs
@@ -374,35 +370,22 @@ def FeedGather(rss, url, options):
     lim_time = LIM_TIME
     max_item = MAX_ITEM
     max_time = MAX_TIME
-    threads = THREADS
 
     if options.cache:
         max_time = 0
 
-    if options.mono:
-        threads = 1
-
-    # set
-    def runner(queue):
-        while True:
-            value = queue.get()
-            try:
-                worker(*value)
-
-            except Exception as e:
-                log('Thread Error: %s' % e.message)
-            queue.task_done()
-
-    def worker(i, item):
+    now = datetime.now(tz.tzutc())
+    sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or now, reverse=True)
+    for i, item in enumerate(sorted_items):
         if time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0:
             log('dropped')
             item.remove()
-            return
+            continue
 
         item = ItemBefore(item, options)
 
         if item is None:
-            return
+            continue
 
         item = ItemFix(item, url)
 
@@ -410,32 +393,13 @@ def FeedGather(rss, url, options):
             if not options.proxy:
                 if ItemFill(item, options, url, True) is False:
                     item.remove()
-                    return
+                    continue
 
         else:
             if not options.proxy:
                 ItemFill(item, options, url)
 
         item = ItemAfter(item, options)
-
-    queue = Queue()
-
-    for i in range(threads):
-        t = threading.Thread(target=runner, args=(queue,))
-        t.daemon = True
-        t.start()
-
-    now = datetime.now(tz.tzutc())
-    sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or now, reverse=True)
-    for i, item in enumerate(sorted_items):
-        if threads == 1:
-            worker(*[i, item])
-
-        else:
-            queue.put([i, item])
-
-    if threads != 1:
-        queue.join()
 
     if options.ad:
         new = rss.items.append()

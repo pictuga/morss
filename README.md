@@ -85,7 +85,6 @@ The arguments are:
 	- `noref`: drop items' link
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
-	- `mono`: disable multithreading while fetching, makes debugging easier
 	- `theforce`: force download the rss feed and ignore cached http errros
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - http server only
@@ -262,7 +261,7 @@ morss uses caching to make loading faster. There are 2 possible cache backends
 
 - `SQLiteCache`: sqlite3 cache. Default file location is in-memory (i.e. it will
 be cleared every time the program is run
-- `MySQLCacheHandler`: /!\ Does NOT support multi-threading
+- `MySQLCacheHandler`
 
 ## Configuration
 ### Length limitation
@@ -281,7 +280,6 @@ different values at the top of the script.
 
 - `DELAY` sets the browser cache delay, only for HTTP clients
 - `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
-- `THREADS` sets the number of threads to use. `1` makes no use of multithreading.
 
 ### Content matching
 
