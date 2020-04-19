@@ -465,6 +465,8 @@ class CacheHandler(BaseHandler):
 
 
 class BaseCache:
+    """ Subclasses must behave like a dict """
+
     def __contains__(self, url):
         try:
             self[url]

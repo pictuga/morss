@@ -136,7 +136,7 @@ def ItemFix(item, feedurl='/'):
     """ Improves feed items (absolute links, resolve feedburner links, etc) """
 
     # check unwanted uppercase title
-    if len(item.title) > 20 and item.title.isupper():
+    if item.title is not None and len(item.title) > 20 and item.title.isupper():
         item.title = item.title.title()
 
     # check if it includes link
@@ -199,7 +199,7 @@ def ItemFix(item, feedurl='/'):
 
     # reddit
     if urlparse(feedurl).netloc == 'www.reddit.com':
-        match = lxml.html.fromstring(item.desc).xpath('//a[text()="[link]"]/@href')
+        match = lxml.html.fromstring(item.content).xpath('//a[text()="[link]"]/@href')
         if len(match):
             item.link = match[0]
             log(item.link)

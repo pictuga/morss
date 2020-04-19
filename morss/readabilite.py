@@ -137,7 +137,7 @@ def score_all(node):
 
     for child in node:
         score = score_node(child)
-        child.attrib['seen'] = 'yes, ' + str(int(score))
+        child.attrib['morss_own_score'] = str(float(score))
 
         if score > 0 or len(list(child.iterancestors())) <= 2:
             spread_score(child, score)

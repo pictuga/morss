@@ -255,9 +255,10 @@ output = morss.Format(rss, options) # formats final feed
 
 ## Cache information
 
-morss uses caching to make loading faster. There are 2 possible cache backends
+morss uses caching to make loading faster. There are 3 possible cache backends
 (visible in `morss/crawler.py`):
 
+- `{}`: a simple python in-memory dict() object
 - `SQLiteCache`: sqlite3 cache. Default file location is in-memory (i.e. it will
 be cleared every time the program is run
 - `MySQLCacheHandler`
