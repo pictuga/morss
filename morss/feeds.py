@@ -100,7 +100,7 @@ def parse(data, url=None, mimetype=None, encoding=None):
         try:
             feed = parser(data, encoding=encoding)
 
-        except (ValueError):
+        except (ValueError, SyntaxError):
             # parsing did not work
             pass
 
