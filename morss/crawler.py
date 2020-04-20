@@ -149,6 +149,15 @@ class GZIPHandler(BaseHandler):
 
 
 def detect_encoding(data, resp=None):
+    enc = detect_raw_encoding(data, resp)
+
+    if enc == 'gb2312':
+        enc = 'gbk'
+
+    return enc
+
+
+def detect_raw_encoding(data, resp=None):
     if resp is not None:
         enc = resp.headers.get('charset')
         if enc is not None:
