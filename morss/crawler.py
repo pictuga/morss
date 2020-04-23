@@ -252,6 +252,7 @@ class AlternateHandler(BaseHandler):
                     resp.code = 302
                     resp.msg = 'Moved Temporarily'
                     resp.headers['location'] = link.get('href')
+                    break
 
             fp = BytesIO(data)
             old_resp = resp
