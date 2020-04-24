@@ -401,7 +401,8 @@ class ParserXML(ParserBase):
             return
 
         elif key is not None:
-            del x.attrib[key]
+            if key in match.attrib:
+                del match.attrib[key]
 
         else:
             match.getparent().remove(match)
