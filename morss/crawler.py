@@ -7,6 +7,7 @@ import chardet
 from cgi import parse_header
 import lxml.html
 import time
+import random
 
 try:
     # python 2
@@ -31,7 +32,19 @@ MIMETYPE = {
     'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
 
 
-DEFAULT_UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:25.0) Gecko/20100101 Firefox/25.0'
+DEFAULT_UAS = [
+    #https://gist.github.com/fijimunkii/952acac988f2d25bef7e0284bc63c406
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.1 Safari/605.1.15",
+    "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/67.0",
+    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36"
+    ]
 
 
 def get(*args, **kwargs):
@@ -70,7 +83,7 @@ def custom_handler(follow=None, delay=None, encoding=None):
     handlers.append(GZIPHandler())
     handlers.append(HTTPEquivHandler())
     handlers.append(HTTPRefreshHandler())
-    handlers.append(UAHandler(DEFAULT_UA))
+    handlers.append(UAHandler(random.choice(DEFAULT_UAS)))
     handlers.append(BrowserlyHeaderHandler())
     handlers.append(EncodingFixHandler(encoding))
 
