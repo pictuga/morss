@@ -24,7 +24,7 @@
 					font-family: sans;
 				}
 
-				input {
+				input, select {
 					font-family: inherit;
 					font-size: inherit;
 					text-align: inherit;
@@ -164,6 +164,31 @@
 						</svg>
 					</span>
 				</div>
+
+				<form onchange="open_feed()">
+					More options: Output the 
+					<select>
+						<option value="">full-text</option>
+						<option value=":proxy">original</option>
+						<option value=":clip">original + full-text</option>
+					</select>
+					feed as 
+					<select>
+						<option value="">RSS</option>
+						<option value=":json:cors">JSON</option>
+						<option value=":html">HTML</option>
+						<option value=":csv">CSV</option>
+					</select>
+					and 
+					<select>
+						<option value="">keep</option>
+						<option value=":nolink:noref">remove</option>
+					</select>
+					links
+					<input type="hidden" value="" name="extra_options"/>
+				</form>
+
+				<p>Click <a href="/">here</a> to go back to morss</p>
 			</header>
 
 			<div id="header">
@@ -201,6 +226,22 @@
 					for (var content of document.querySelectorAll(".desc,.content"))
 						content.innerHTML = (content.innerText.match(/>/g) || []).length > 10 ? content.innerText : content.innerHTML
 
+				var options = parse_location()[0]
+
+				if (options) {
+					for (var select of document.forms[0].elements)
+						if (select.tagName == 'SELECT')
+							for (var option of select)
+								if (option.value)
+									if (options.match(option.value)) {
+										select.value = option.value
+										options = options.replace(option.value, '')
+										break
+									}
+
+					document.forms[0]['extra_options'].value = options
+				}
+
 				function copy_content(input) {
 					input.focus()
 					input.select()
@@ -209,6 +250,20 @@
 
 				function copy_link() {
 					copy_content(document.getElementById("url"))
+				}
+
+				function parse_location() {
+					return (window.location.pathname + window.location.search).match(/^\/(?:(:[^\/]+)\/)?(.*$)$/).slice(1)
+				}
+
+				function open_feed() {
+					var url = parse_location()[1]
+					var options = Array.from(document.forms[0].elements).map(x=>x.value).join('')
+
+					var target = '/' + (options ? options + '/' : '') + url
+
+					if (target != window.location.pathname)
+						window.location.href = target
 				}
 			</script>
 		</body>
