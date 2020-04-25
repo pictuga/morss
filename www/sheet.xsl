@@ -142,7 +142,11 @@
 					font-size: 1.5em;
 				}
 
-				.content * {
+				.desc, .content {
+					overflow: hidden;
+				}
+
+				.desc *, .content * {
 					max-width: 100%;
 				}
 			</style>
