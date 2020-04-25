@@ -184,7 +184,7 @@
 
 				if (!/:html/.test(window.location.href))
 					for (var content of document.querySelectorAll(".desc,.content"))
-						content.innerHTML = content.children.children ? content.innerHTML : content.innerText
+						content.innerHTML = (content.innerText.match(/>/g) || []).length > 10 ? content.innerText : content.innerHTML
 
 				function copy_content(input) {
 					input.focus()
