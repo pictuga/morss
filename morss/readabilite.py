@@ -70,9 +70,10 @@ class_good = ['and', 'article', 'body', 'column', 'main',
 regex_good = re.compile('|'.join(class_good), re.I)
 
 
-tags_junk = ['script', 'head', 'iframe', 'object', 'noscript',
-    'param', 'embed', 'layer', 'applet', 'style', 'form', 'input', 'textarea',
-    'button', 'footer', 'link', 'meta']
+tags_dangerous = ['script', 'head', 'iframe', 'object', 'style', 'link', 'meta']
+
+tags_junk = tags_dangerous + ['noscript', 'param', 'embed', 'layer', 'applet',
+    'form', 'input', 'textarea', 'button', 'footer']
 
 tags_bad = tags_junk + ['a', 'aside']
 
@@ -104,6 +105,9 @@ def score_node(node):
 
     if (isinstance(node, lxml.html.HtmlComment)
             or isinstance(node, lxml.html.HtmlProcessingInstruction)):
+        return 0
+
+    if node.tag in tags_dangerous:
         return 0
 
     if node.tag in tags_junk:
@@ -187,6 +191,11 @@ def clean_node(node, keep_threshold=None):
 
     if parent is None:
         # this is <html/> (or a removed element waiting for GC)
+        return
+
+    # remove dangerous tags, no matter what
+    if node.tag in tags_dangerous:
+        parent.remove(node)
         return
 
     if keep_threshold is not None and get_score(node) >= keep_threshold:
