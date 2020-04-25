@@ -307,14 +307,14 @@ def get_best_node(ranked_grades):
     return lowest
 
 
-def get_article(data, url=None, encoding=None, debug=False):
+def get_article(data, url=None, encoding=None, debug=False, threshold=5):
     " Input a raw html string, returns a raw html string of the article "
 
     html = parse(data, encoding)
     score_all(html)
     scores = rank_grades(get_all_scores(html))
 
-    if not len(scores):
+    if not len(scores) or scores[0][1] < threshold:
         return None
 
     best = get_best_node(scores)
