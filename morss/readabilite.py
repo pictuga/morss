@@ -342,3 +342,11 @@ def get_article(data, url=None, encoding=None, debug=False, threshold=5):
         best.make_links_absolute(url)
 
     return lxml.etree.tostring(best if not debug else html, pretty_print=True)
+
+
+if __name__ == '__main__':
+    import sys
+    from . import crawler
+
+    data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
+    article = get_article(data, url=con.geturl(), encoding=encoding)

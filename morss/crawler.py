@@ -573,3 +573,7 @@ class MySQLCacheHandler(BaseCache):
         else:
             with self.cursor() as cursor:
                 cursor.execute('INSERT INTO data VALUES (%s,%s,%s,%s,%s,%s)', (url,) + value)
+
+
+if __name__ == '__main__':
+    data = get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
