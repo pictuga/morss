@@ -350,3 +350,6 @@ if __name__ == '__main__':
 
     data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
     article = get_article(data, url=con.geturl(), encoding=encoding)
+
+    if not sys.flags.interactive:
+        print(article.decode(encoding))

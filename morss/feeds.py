@@ -761,3 +761,7 @@ if __name__ == '__main__':
 
     data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://www.nytimes.com/', follow='rss')
     feed = parse(data, url=con.geturl(), mimetype=contenttype, encoding=encoding)
+
+    if not sys.flags.interactive:
+        for item in feed.items:
+            print(item.title, item.link)
