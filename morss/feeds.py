@@ -71,7 +71,7 @@ def parse_rules(filename=None):
     return rules
 
 
-def parse(data, url=None, mimetype=None, encoding=None):
+def parse(data, url=None, encoding=None):
     " Determine which ruleset to use "
 
     rulesets = parse_rules()
@@ -760,7 +760,7 @@ if __name__ == '__main__':
     from . import crawler
 
     data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://www.nytimes.com/', follow='rss')
-    feed = parse(data, url=con.geturl(), mimetype=contenttype, encoding=encoding)
+    feed = parse(data, url=con.geturl(), encoding=encoding)
 
     if not sys.flags.interactive:
         for item in feed.items:

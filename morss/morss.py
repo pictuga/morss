@@ -330,7 +330,7 @@ def FeedFetch(url, options):
 
     else:
         try:
-            rss = feeds.parse(xml, url, contenttype, encoding=encoding)
+            rss = feeds.parse(xml, url, encoding=encoding)
             rss = rss.convert(feeds.FeedXML)
                 # contains all fields, otherwise much-needed data can be lost
 
