@@ -248,17 +248,17 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = -2
 
     try:
-        data, con, contenttype, encoding = crawler.adv_get(url=link, delay=delay, timeout=TIMEOUT)
+        req = crawler.adv_get(url=link, delay=delay, timeout=TIMEOUT)
 
     except (IOError, HTTPException) as e:
         log('http error')
         return False # let's just delete errors stuff when in cache mode
 
-    if contenttype not in crawler.MIMETYPE['html'] and contenttype != 'text/plain':
+    if req['contenttype'] not in crawler.MIMETYPE['html'] and req['contenttype'] != 'text/plain':
         log('non-text page')
         return True
 
-    out = readabilite.get_article(data, url=con.geturl(), encoding_in=encoding, encoding_out='unicode')
+    out = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='unicode')
 
     if out is not None:
         item.content = out
@@ -303,14 +303,14 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        xml, con, contenttype, encoding = crawler.adv_get(url=url, follow='rss', delay=delay, timeout=TIMEOUT * 2)
+        req = crawler.adv_get(url=url, follow='rss', delay=delay, timeout=TIMEOUT * 2)
 
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
 
     if options.items:
         # using custom rules
-        rss = feeds.FeedHTML(xml, encoding=encoding)
+        rss = feeds.FeedHTML(req['data'], encoding=req['encoding'])
 
         rss.rules['title'] = options.title              if options.title        else '//head/title'
         rss.rules['desc'] = options.desc                if options.desc         else '//head/meta[@name="description"]/@content'
@@ -330,13 +330,13 @@ def FeedFetch(url, options):
 
     else:
         try:
-            rss = feeds.parse(xml, url, encoding=encoding)
+            rss = feeds.parse(req['data'], url=url, encoding=req['encoding'])
             rss = rss.convert(feeds.FeedXML)
                 # contains all fields, otherwise much-needed data can be lost
 
         except TypeError:
             log('random page')
-            log(contenttype)
+            log(req['contenttype'])
             raise MorssException('Link provided is not a valid feed')
 
     return rss
@@ -594,12 +594,12 @@ def cgi_get(environ, start_response):
     url, options = cgi_parse_environ(environ)
 
     # get page
-    data, con, contenttype, encoding = crawler.adv_get(url=url, timeout=TIMEOUT)
+    req = crawler.adv_get(url=url, timeout=TIMEOUT)
 
-    if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
+    if req['contenttype'] in ['text/html', 'application/xhtml+xml', 'application/xml']:
         if options.get == 'page':
-            html = readabilite.parse(data, encoding=encoding)
-            html.make_links_absolute(con.geturl())
+            html = readabilite.parse(req['data'], encoding=req['encoding'])
+            html.make_links_absolute(req['url'])
 
             kill_tags = ['script', 'iframe', 'noscript']
 
@@ -610,13 +610,13 @@ def cgi_get(environ, start_response):
             output = lxml.etree.tostring(html.getroottree(), encoding='utf-8')
 
         elif options.get == 'article':
-            output = readabilite.get_article(data, url=con.geturl(), encoding_in=encoding, encoding_out='utf-8', debug=options.debug)
+            output = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='utf-8', debug=options.debug)
 
         else:
             raise MorssException('no :get option passed')
 
     else:
-        output = data
+        output = req['data']
 
     # return html page
     headers = {'status': '200 OK', 'content-type': 'text/html; charset=utf-8'}

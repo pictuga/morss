@@ -759,8 +759,8 @@ class ItemJSON(Item, ParserJSON):
 if __name__ == '__main__':
     from . import crawler
 
-    data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://www.nytimes.com/', follow='rss')
-    feed = parse(data, url=con.geturl(), encoding=encoding)
+    req = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://www.nytimes.com/', follow='rss')
+    feed = parse(req['data'], url=req['url'], encoding=req['encoding'])
 
     if not sys.flags.interactive:
         for item in feed.items:

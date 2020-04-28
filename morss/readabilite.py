@@ -348,8 +348,8 @@ if __name__ == '__main__':
     import sys
     from . import crawler
 
-    data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
-    article = get_article(data, url=con.geturl(), encoding_in=encoding, encoding_out='unicode')
+    req = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
+    article = get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='unicode')
 
     if not sys.flags.interactive:
         print(article)

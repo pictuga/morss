@@ -55,7 +55,7 @@ PROTOCOL = ['http', 'https']
 
 
 def get(*args, **kwargs):
-    return adv_get(*args, **kwargs)[0]
+    return adv_get(*args, **kwargs)['data']
 
 
 def adv_get(url, timeout=None, *args, **kwargs):
@@ -72,7 +72,13 @@ def adv_get(url, timeout=None, *args, **kwargs):
     contenttype = con.info().get('Content-Type', '').split(';')[0]
     encoding= detect_encoding(data, con)
 
-    return data, con, contenttype, encoding
+    return {
+        'data':data,
+        'url': con.geturl(),
+        'con': con,
+        'contenttype': contenttype,
+        'encoding': encoding
+    }
 
 
 def custom_handler(follow=None, delay=None, encoding=None):
@@ -621,7 +627,7 @@ class MySQLCacheHandler(BaseCache):
 
 
 if __name__ == '__main__':
-    data, con, contenttype, encoding = adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
+    req = adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
 
     if not sys.flags.interactive:
-        print(data.decode(encoding))
+        print(req['data'].decode(req['encoding']))
