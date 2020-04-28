@@ -58,6 +58,10 @@ Simplest way to get these:
 pip install git+https://git.pictuga.com/pictuga/morss.git@master
 ```
 
+The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
+C code needs to be compiled). If possible on your distribution, try installing
+it with the system package manager.
+
 You may also need:
 
 - Apache, with python-cgi support, to run on a server
