@@ -12,10 +12,14 @@ import random
 try:
     # python 2
     from urllib2 import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
+    from urllib import quote
+    from urlparse import urlparse, urlunparse
     import mimetools
 except ImportError:
     # python 3
     from urllib.request import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
+    from urllib.parse import quote
+    from urllib.parse import urlparse, urlunparse
     import email
 
 try:
@@ -52,6 +56,8 @@ def get(*args, **kwargs):
 
 
 def adv_get(url, timeout=None, *args, **kwargs):
+    url = encode_url(url)
+
     if timeout is None:
         con = custom_handler(*args, **kwargs).open(url)
 
@@ -93,6 +99,34 @@ def custom_handler(follow=None, delay=None, encoding=None):
     handlers.append(CacheHandler(force_min=delay))
 
     return build_opener(*handlers)
+
+
+def is_ascii(string):
+    # there's a native function in py3, but home-made fix for backward compatibility
+    try:
+        string.encode('ascii')
+
+    except UnicodeError:
+        return False
+
+    else:
+        return True
+
+
+def encode_url(url):
+    " Escape non-ascii unicode characters "
+    # https://stackoverflow.com/a/4391299
+    parts = list(urlparse(url))
+
+    for i in range(len(parts)):
+        if not is_ascii(parts[i]):
+            if i == 1:
+                parts[i] = parts[i].encode('idna').decode('ascii')
+
+            else:
+                parts[i] = quote(parts[i].encode('utf-8'))
+
+    return urlunparse(parts)
 
 
 class DebugHandler(BaseHandler):
