@@ -260,7 +260,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
-    out = readabilite.get_article(data, url=con.geturl(), encoding=encoding)
+    out = readabilite.get_article(data, url=con.geturl(), encoding_in=encoding, encoding_out='unicode')
 
     if out is not None:
         item.content = out
@@ -635,7 +635,7 @@ def cgi_get(environ, start_response):
             output = lxml.etree.tostring(html.getroottree(), encoding='utf-8')
 
         elif options.get == 'article':
-            output = readabilite.get_article(data, url=con.geturl(), encoding=encoding, debug=options.debug)
+            output = readabilite.get_article(data, url=con.geturl(), encoding_in=encoding, encoding_out='utf-8', debug=options.debug)
 
         else:
             raise MorssException('no :get option passed')

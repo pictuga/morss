@@ -316,10 +316,10 @@ def get_best_node(ranked_grades):
     return lowest
 
 
-def get_article(data, url=None, encoding=None, debug=False, threshold=5):
+def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=False, threshold=5):
     " Input a raw html string, returns a raw html string of the article "
 
-    html = parse(data, encoding)
+    html = parse(data, encoding_in)
     score_all(html)
     scores = rank_grades(get_all_scores(html))
 
@@ -341,7 +341,7 @@ def get_article(data, url=None, encoding=None, debug=False, threshold=5):
     if url:
         best.make_links_absolute(url)
 
-    return lxml.etree.tostring(best if not debug else html, pretty_print=True)
+    return lxml.etree.tostring(best if not debug else html, pretty_print=True, encoding=encoding_out)
 
 
 if __name__ == '__main__':
@@ -349,7 +349,7 @@ if __name__ == '__main__':
     from . import crawler
 
     data, con, contenttype, encoding = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
-    article = get_article(data, url=con.geturl(), encoding=encoding)
+    article = get_article(data, url=con.geturl(), encoding_in=encoding, encoding_out='unicode')
 
     if not sys.flags.interactive:
-        print(article.decode(encoding))
+        print(article)
