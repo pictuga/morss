@@ -460,7 +460,7 @@ def process(url, cache=None, options=None):
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
 
-    return FeedFormat(rss, options)
+    return FeedFormat(rss, options, 'unicode')
 
 
 def cgi_parse_environ(environ):
