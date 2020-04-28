@@ -339,7 +339,7 @@ def FeedFetch(url, options):
             log(req['contenttype'])
             raise MorssException('Link provided is not a valid feed')
 
-    return rss
+    return req['url'], rss
 
 
 def FeedGather(rss, url, options):
@@ -438,7 +438,7 @@ def process(url, cache=None, options=None):
     if cache:
         crawler.default_cache = crawler.SQLiteCache(cache)
 
-    rss = FeedFetch(url, options)
+    url, rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
 
     return FeedFormat(rss, options, 'unicode')
@@ -510,7 +510,7 @@ def cgi_app(environ, start_response):
     crawler.default_cache = crawler.SQLiteCache(os.path.join(os.getcwd(), 'morss-cache.db'))
 
     # get the work done
-    rss = FeedFetch(url, options)
+    url, rss = FeedFetch(url, options)
 
     if headers['content-type'] == 'text/xml':
         headers['content-type'] = rss.mimetype[0]
@@ -673,7 +673,7 @@ def cli_app():
 
     crawler.default_cache = crawler.SQLiteCache(os.path.expanduser('~/.cache/morss-cache.db'))
 
-    rss = FeedFetch(url, options)
+    url, rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
     out = FeedFormat(rss, options, 'unicode')
 
