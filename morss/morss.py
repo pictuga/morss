@@ -44,8 +44,6 @@ TIMEOUT = 4  # http timeout (in sec)
 DEBUG = False
 PORT = 8080
 
-PROTOCOL = ['http', 'https']
-
 
 def filterOptions(options):
     return options
@@ -297,22 +295,6 @@ def ItemAfter(item, options):
     return item
 
 
-def UrlFix(url):
-    if url is None:
-        raise MorssException('No url provided')
-
-    if isinstance(url, bytes):
-        url = url.decode()
-
-    if urlparse(url).scheme not in PROTOCOL:
-        url = 'http://' + url
-        log(url)
-
-    url = url.replace(' ', '%20')
-
-    return url
-
-
 def FeedFetch(url, options):
     # fetch feed
     delay = DELAY
@@ -456,7 +438,6 @@ def process(url, cache=None, options=None):
     if cache:
         crawler.default_cache = crawler.SQLiteCache(cache)
 
-    url = UrlFix(url)
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
 
@@ -529,7 +510,6 @@ def cgi_app(environ, start_response):
     crawler.default_cache = crawler.SQLiteCache(os.path.join(os.getcwd(), 'morss-cache.db'))
 
     # get the work done
-    url = UrlFix(url)
     rss = FeedFetch(url, options)
 
     if headers['content-type'] == 'text/xml':
@@ -614,11 +594,6 @@ def cgi_get(environ, start_response):
     url, options = cgi_parse_environ(environ)
 
     # get page
-    PROTOCOL = ['http', 'https']
-
-    if urlparse(url).scheme not in ['http', 'https']:
-        url = 'http://' + url
-
     data, con, contenttype, encoding = crawler.adv_get(url=url, timeout=TIMEOUT)
 
     if contenttype in ['text/html', 'application/xhtml+xml', 'application/xml']:
@@ -698,7 +673,6 @@ def cli_app():
 
     crawler.default_cache = crawler.SQLiteCache(os.path.expanduser('~/.cache/morss-cache.db'))
 
-    url = UrlFix(url)
     rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
     out = FeedFormat(rss, options, 'unicode')

@@ -51,12 +51,15 @@ DEFAULT_UAS = [
     ]
 
 
+PROTOCOL = ['http', 'https']
+
+
 def get(*args, **kwargs):
     return adv_get(*args, **kwargs)[0]
 
 
 def adv_get(url, timeout=None, *args, **kwargs):
-    url = encode_url(url)
+    url = sanitize_url(url)
 
     if timeout is None:
         con = custom_handler(*args, **kwargs).open(url)
@@ -113,8 +116,16 @@ def is_ascii(string):
         return True
 
 
-def encode_url(url):
-    " Escape non-ascii unicode characters "
+def sanitize_url(url):
+    if isinstance(url, bytes):
+        url = url.decode()
+
+    if url.split(':', 1)[0] not in PROTOCOL:
+        url = 'http://' + url
+
+    url = url.replace(' ', '%20')
+
+    # Escape non-ascii unicode characters
     # https://stackoverflow.com/a/4391299
     parts = list(urlparse(url))
 
