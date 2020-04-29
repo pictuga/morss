@@ -195,7 +195,7 @@
 				<p>Click <a href="/">here</a> to go back to morss</p>
 			</header>
 
-			<div id="header">
+			<div id="header" dir="auto">
 				<h1>
 					<xsl:value-of select="rdf:RDF/rssfake:channel/rssfake:title|rss/channel/title|atom:feed/atom:title|atom03:feed/atom03:title"/>
 				</h1>
@@ -207,7 +207,7 @@
 
 			<div id="content">
 				<xsl:for-each select="rdf:RDF/rssfake:channel/rssfake:item|rss/channel/item|atom:feed/atom:entry|atom03:feed/atom03:entry">
-					<div class="item">
+					<div class="item" dir="auto">
 						<a href="/" target="_blank"><xsl:attribute name="href"><xsl:value-of select="rssfake:link|link|atom:link/@href|atom03:link/@href"/></xsl:attribute>
 								<xsl:value-of select="rssfake:title|title|atom:title|atom03:title"/>
 						</a>
