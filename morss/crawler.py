@@ -129,6 +129,9 @@ def sanitize_url(url):
     if url.split(':', 1)[0] not in PROTOCOL:
         url = 'http://' + url
 
+    # turns out some websites have really badly fomatted urls (fix http:/badurl)
+    url = re.sub('^(https?):/([^/])', r'\1://\2', url)
+
     url = url.replace(' ', '%20')
 
     # Escape non-ascii unicode characters
