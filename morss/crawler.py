@@ -123,18 +123,21 @@ def is_ascii(string):
 
 
 def sanitize_url(url):
+    # make sure the url is unicode, i.e. not bytes
     if isinstance(url, bytes):
         url = url.decode()
 
+    # make sure there's a protocol (http://)
     if url.split(':', 1)[0] not in PROTOCOL:
         url = 'http://' + url
 
     # turns out some websites have really badly fomatted urls (fix http:/badurl)
     url = re.sub('^(https?):/([^/])', r'\1://\2', url)
 
+    # escape spaces
     url = url.replace(' ', '%20')
 
-    # Escape non-ascii unicode characters
+    # escape non-ascii unicode characters
     # https://stackoverflow.com/a/4391299
     parts = list(urlparse(url))
 
