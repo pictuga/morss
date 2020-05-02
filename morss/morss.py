@@ -303,7 +303,7 @@ def FeedFetch(url, options):
         delay = 0
 
     try:
-        req = crawler.adv_get(url=url, follow='rss', delay=delay, timeout=TIMEOUT * 2)
+        req = crawler.adv_get(url=url, follow=('rss' if not options.items else None), delay=delay, timeout=TIMEOUT * 2)
 
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
