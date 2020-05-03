@@ -585,14 +585,8 @@ class SQLiteCache(BaseCache):
         value[3] = sqlite3.Binary(value[3]) # data
         value = tuple(value)
 
-        if url in self:
-            with self.con:
-                self.con.execute('UPDATE data SET code=?, msg=?, headers=?, data=?, timestamp=? WHERE url=?',
-                    value + (url,))
-
-        else:
-            with self.con:
-                self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?)', (url,) + value)
+        with self.con:
+            self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?) ON CONFLICT(url) DO UPDATE SET code=?, msg=?, headers=?, data=?, timestamp=?', (url,) + value + value)
 
 
 import pymysql.cursors
@@ -622,14 +616,9 @@ class MySQLCacheHandler(BaseCache):
         return row[1:]
 
     def __setitem__(self, url, value): # (code, msg, headers, data, timestamp)
-        if url in self:
-            with self.cursor() as cursor:
-                cursor.execute('UPDATE data SET code=%s, msg=%s, headers=%s, data=%s, timestamp=%s WHERE url=%s',
-                    value + (url,))
-
-        else:
-            with self.cursor() as cursor:
-                cursor.execute('INSERT INTO data VALUES (%s,%s,%s,%s,%s,%s)', (url,) + value)
+        with self.cursor() as cursor:
+            cursor.execute('INSERT INTO data VALUES (%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE code=%s, msg=%s, headers=%s, data=%s, timestamp=%s',
+                (url,) + value + value)
 
 
 if __name__ == '__main__':
