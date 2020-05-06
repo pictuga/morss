@@ -4,6 +4,9 @@ ErrorDocument 403 "Access forbidden"
 ErrorDocument 404 /cgi/main.py
 ErrorDocument 500 "A very nasty bug found his way onto this very server"
 
+# Work around for Safari
+Header set X-Content-Type-Options "nosniff"
+
 <Files ~ "\.(py|pyc|db|log)$">
 	deny from all
 </Files>
