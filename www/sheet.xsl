@@ -224,6 +224,7 @@
 			</div>
 
 			<script>
+			//<![CDATA[
 				document.getElementById("url").value = window.location.href
 
 				if (!/:html/.test(window.location.href))
@@ -236,12 +237,11 @@
 					for (var select of document.forms[0].elements)
 						if (select.tagName == 'SELECT')
 							for (var option of select)
-								if (option.value)
-									if (options.match(option.value)) {
-										select.value = option.value
-										options = options.replace(option.value, '')
-										break
-									}
+								if (option.value && options.match(option.value)) {
+									select.value = option.value
+									options = options.replace(option.value, '')
+									break
+								}
 
 					document.forms[0]['extra_options'].value = options
 				}
@@ -269,6 +269,7 @@
 					if (target != window.location.pathname)
 						window.location.href = target
 				}
+			//]]>
 			</script>
 		</body>
 		</html>
