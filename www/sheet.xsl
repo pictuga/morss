@@ -21,7 +21,7 @@
 				body {
 					overflow-wrap: anywhere;
 					word-wrap: anywhere;
-					font-family: sans;
+					font-family: sans-serif;
 				}
 
 				input, select {
@@ -250,6 +250,7 @@
 					input.focus()
 					input.select()
 					document.execCommand('copy')
+					input.blur()
 				}
 
 				function copy_link() {
