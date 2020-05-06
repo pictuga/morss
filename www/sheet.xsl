@@ -21,6 +21,8 @@
 				body {
 					overflow-wrap: anywhere;
 					word-wrap: anywhere;
+					word-break: break-word;
+
 					font-family: sans-serif;
 				}
 
