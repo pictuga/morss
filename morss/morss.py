@@ -487,6 +487,7 @@ def cgi_app(environ, start_response):
     # headers
     headers['status'] = '200 OK'
     headers['cache-control'] = 'max-age=%s' % DELAY
+    headers['x-content-type-options'] = 'nosniff' # safari work around
 
     if options.cors:
         headers['access-control-allow-origin'] = '*'
