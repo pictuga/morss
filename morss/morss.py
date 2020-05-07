@@ -513,9 +513,6 @@ def cgi_app(environ, start_response):
     # get the work done
     url, rss = FeedFetch(url, options)
 
-    if headers['content-type'] == 'text/xml':
-        headers['content-type'] = rss.mimetype[0]
-
     start_response(headers['status'], list(headers.items()))
 
     rss = FeedGather(rss, url, options)
