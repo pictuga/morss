@@ -387,12 +387,28 @@ default_cache = {}
 class CacheHandler(BaseHandler):
     " Cache based on etags/last-modified "
 
-    private_cache = False # False to behave like a CDN (or if you just don't care), True like a PC
+    private_cache = False # Websites can indicate whether the page should be
+                          # cached by CDNs (e.g. shouldn't be the case for
+                          # private/confidential/user-specific pages.
+                          # With this setting, decide whether (False) you want
+                          # the cache to behave like a CDN (i.e. don't cache
+                          # private pages), or (True) to behave like a end-cache
+                          # private pages. If unsure, False is the safest bet.
     handler_order = 499
 
     def __init__(self, cache=None, force_min=None):
         self.cache = cache or default_cache
-        self.force_min = force_min # force_min (seconds) to bypass http headers, -1 forever, 0 never, -2 do nothing if not in cache
+        self.force_min = force_min
+            # Servers indicate how long they think their content is "valid".
+            # With this parameter (force_min, expressed in seconds), we can
+            # override the validity period (i.e. bypassing http headers)
+            # Special values:
+            #   -1: valid forever, i.e. use the cache no matter what (and fetch
+            #       the page online if not present in cache)
+            #    0: valid zero second, i.e. force refresh
+            #   -2: same as -1, i.e. use the cache no matter what, but do NOT
+            #       fetch the page online if not present in cache, throw an
+            #       error instead
 
     def load(self, url):
         try:
@@ -422,6 +438,10 @@ class CacheHandler(BaseHandler):
         return req
 
     def http_open(self, req):
+        # Reminder of how/when this function is called by urllib2:
+        # If 'None' is returned, try your chance with the next-available handler
+        # If a 'resp' is returned, stop there, and proceed with 'http_response'
+
         (code, msg, headers, data, timestamp) = self.load(req.get_full_url())
 
         # some info needed to process everything
@@ -444,6 +464,7 @@ class CacheHandler(BaseHandler):
                 pass
 
             else:
+                # raise an error, via urllib handlers
                 headers['Morss'] = 'from_cache'
                 resp = addinfourl(BytesIO(), headers, req.get_full_url(), 409)
                 resp.msg = 'Conflict'
@@ -462,14 +483,18 @@ class CacheHandler(BaseHandler):
             return None
 
         elif code == 301 and cache_age < 7*24*3600:
-            # "301 Moved Permanently" has to be cached...as long as we want (awesome HTTP specs), let's say a week (why not?)
-            # use force_min=0 if you want to bypass this (needed for a proper refresh)
+            # "301 Moved Permanently" has to be cached...as long as we want
+            # (awesome HTTP specs), let's say a week (why not?). Use force_min=0
+            # if you want to bypass this (needed for a proper refresh)
             pass
 
         elif  self.force_min is None and ('no-cache' in cc_list
                                         or 'no-store' in cc_list
                                         or ('private' in cc_list and not self.private_cache)):
             # kindly follow web servers indications, refresh
+            # if the same settings are used all along, this section shouldn't be
+            # of any use, since the page woudln't be cached in the first place
+            # the check is only performed "just in case"
             return None
 
         elif 'max-age' in cc_values and int(cc_values['max-age']) > cache_age:
@@ -484,7 +509,7 @@ class CacheHandler(BaseHandler):
             # according to the www, we have to refresh when nothing is said
             return None
 
-        # return the cache as a response
+        # return the cache as a response. This code is reached with 'pass' above
         headers['morss'] = 'from_cache' # TODO delete the morss header from incoming pages, to avoid websites messing up with us
         resp = addinfourl(BytesIO(data), headers, req.get_full_url(), code)
         resp.msg = msg
@@ -515,6 +540,8 @@ class CacheHandler(BaseHandler):
         data = resp.read()
         self.save(req.get_full_url(), resp.code, resp.msg, resp.headers, data, time.time())
 
+        # the below is only needed because of 'resp.read()' above, as we can't
+        # seek(0) on arbitraty file-like objects (e.g. sockets)
         fp = BytesIO(data)
         old_resp = resp
         resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
@@ -534,10 +561,14 @@ class CacheHandler(BaseHandler):
                            unverifiable=True)
 
             new.add_unredirected_header('Morss', 'from_304')
+                # create a "fake" new request to just re-run through the various
+                # handlers
 
             return self.parent.open(new, timeout=req.timeout)
 
-        return None
+        return None # when returning 'None', the next-available handler is used
+                    # the 'HTTPRedirectHandler' has no 'handler_order', i.e.
+                    # uses the default of 500, therefore executed after this
 
     https_request = http_request
     https_open = http_open
