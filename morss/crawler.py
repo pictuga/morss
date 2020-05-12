@@ -93,7 +93,7 @@ def custom_handler(follow=None, delay=None, encoding=None):
     # & HTTPSHandler
 
     #handlers.append(DebugHandler())
-    handlers.append(SizeLimitHandler(100*1024)) # 100KiB
+    handlers.append(SizeLimitHandler(500*1024)) # 500KiB
     handlers.append(HTTPCookieProcessor())
     handlers.append(GZIPHandler())
     handlers.append(HTTPEquivHandler())
