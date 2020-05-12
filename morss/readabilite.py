@@ -11,7 +11,7 @@ def parse(data, encoding=None):
     else:
         data = BeautifulSoup(data, 'lxml').prettify('utf-8')
 
-    parser = lxml.html.HTMLParser(remove_blank_text=True, remove_comments=True, encoding='utf-8')
+    parser = lxml.html.HTMLParser(remove_comments=True, encoding='utf-8')
 
     return lxml.html.fromstring(data, parser=parser)
 
@@ -101,7 +101,7 @@ def score_node(node):
     " Score individual node "
 
     score = 0
-    class_id = node.get('class', '') + node.get('id', '')
+    class_id = (node.get('class') or '') + (node.get('id') or '')
 
     if (isinstance(node, lxml.html.HtmlComment)
             or isinstance(node, lxml.html.HtmlProcessingInstruction)):
