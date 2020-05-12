@@ -243,9 +243,16 @@ def ItemFill(item, options, feedurl='/', fast=False):
     # download
     delay = -1
 
-    if fast:
-        # super-fast mode
+    if fast or options.fast:
+        # force cache, don't fetch
         delay = -2
+
+    elif options.force:
+        # force refresh
+        delay = 0
+
+    else:
+        delay = 24*60*60 # 24h
 
     try:
         req = crawler.adv_get(url=link, delay=delay, timeout=TIMEOUT)
