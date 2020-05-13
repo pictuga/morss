@@ -341,7 +341,7 @@ def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=
     if url:
         best.make_links_absolute(url)
 
-    return lxml.etree.tostring(best if not debug else html, pretty_print=True, encoding=encoding_out)
+    return lxml.etree.tostring(best if not debug else html, method='html', encoding=encoding_out)
 
 
 if __name__ == '__main__':

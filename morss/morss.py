@@ -294,7 +294,7 @@ def ItemAfter(item, options):
         for link in content.xpath('//a'):
             log(link.text_content())
             link.drop_tag()
-        item.content = lxml.etree.tostring(content)
+        item.content = lxml.etree.tostring(content, method='html')
 
     if options.noref:
         item.link = ''
@@ -612,7 +612,7 @@ def cgi_get(environ, start_response):
                 for elem in html.xpath('//'+tag):
                     elem.getparent().remove(elem)
 
-            output = lxml.etree.tostring(html.getroottree(), encoding='utf-8')
+            output = lxml.etree.tostring(html.getroottree(), encoding='utf-8', method='html')
 
         elif options.get == 'article':
             output = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='utf-8', debug=options.debug)

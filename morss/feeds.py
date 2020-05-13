@@ -319,7 +319,7 @@ class ParserXML(ParserBase):
         return self.root.getparent().remove(self.root)
 
     def tostring(self, encoding='unicode', **k):
-        return etree.tostring(self.root, encoding=encoding, **k)
+        return etree.tostring(self.root, encoding=encoding, method='xml', **k)
 
     def _rule_parse(self, rule):
         test = re.search(r'^(.*)/@([a-z]+)$', rule) # to match //div/a/@href
@@ -463,7 +463,7 @@ class ParserHTML(ParserXML):
         return html_parse(raw, encoding=self.encoding)
 
     def tostring(self, encoding='unicode', **k):
-        return lxml.html.tostring(self.root, encoding=encoding, **k)
+        return lxml.html.tostring(self.root, encoding=encoding, method='html', **k)
 
     def rule_search_all(self, rule):
         try:
@@ -724,7 +724,7 @@ class FeedXML(Feed, ParserXML):
         if self.root.getprevious() is None:
             self.root.addprevious(etree.PI('xml-stylesheet', 'type="text/xsl" href="/sheet.xsl"'))
 
-        return etree.tostring(self.root.getroottree(), encoding=encoding, **k)
+        return etree.tostring(self.root.getroottree(), encoding=encoding, method='xml', **k)
 
 
 class ItemXML(Item, ParserXML):
