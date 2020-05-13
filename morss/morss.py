@@ -217,35 +217,9 @@ def ItemFill(item, options, feedurl='/', fast=False):
 
     if not item.link:
         log('no link')
-        return item
+        return True
 
     log(item.link)
-
-    link = item.link
-
-    # twitter
-    if urlparse(feedurl).netloc == 'twitter.com':
-        match = lxml.html.fromstring(item.desc).xpath('//a/@data-expanded-url')
-        if len(match):
-            link = match[0]
-            log(link)
-
-        else:
-            link = None
-
-    # facebook
-    if urlparse(feedurl).netloc == 'graph.facebook.com':
-        match = lxml.html.fromstring(item.content).xpath('//a/@href')
-        if len(match) and urlparse(match[0]).netloc != 'www.facebook.com':
-            link = match[0]
-            log(link)
-
-        else:
-            link = None
-
-    if link is None:
-        log('no used link')
-        return True
 
     # download
     delay = -1
@@ -262,7 +236,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         delay = 24*60*60 # 24h
 
     try:
-        req = crawler.adv_get(url=link, delay=delay, timeout=TIMEOUT)
+        req = crawler.adv_get(url=item.link, delay=delay, timeout=TIMEOUT)
 
     except (IOError, HTTPException) as e:
         log('http error')
