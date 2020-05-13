@@ -89,7 +89,7 @@ The arguments are:
 	- `noref`: drop items' link
 	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
 	- `debug`: to have some feedback from the script execution. Useful for debugging
-	- `theforce`: force download the rss feed and ignore cached http errros
+	- `force`: force refetch the rss feed and articles
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - http server only
 	- `callback=NAME`: for JSONP calls

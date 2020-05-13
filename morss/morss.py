@@ -306,7 +306,7 @@ def FeedFetch(url, options):
     # fetch feed
     delay = DELAY
 
-    if options.theforce:
+    if options.force:
         delay = 0
 
     try:
