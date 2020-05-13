@@ -185,6 +185,11 @@
 						<option value=":html">HTML</option>
 						<option value=":csv">CSV</option>
 					</select>
+					using 
+					<select>
+						<option value="">the standard link</option>
+						<option value=":firstlink" title="Useful for Twitter feeds for example, to get the articles referred to in tweets rather than the tweet itself">the first link from the description (?)</option>
+					</select>
 					and 
 					<select>
 						<option value="">keep</option>
