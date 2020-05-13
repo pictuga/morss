@@ -130,7 +130,7 @@ def parseOptions(options):
     return out
 
 
-def ItemFix(item, feedurl='/'):
+def ItemFix(item, options, feedurl='/'):
     """ Improves feed items (absolute links, resolve feedburner links, etc) """
 
     # check unwanted uppercase title
@@ -145,6 +145,13 @@ def ItemFix(item, feedurl='/'):
     # wikipedia daily highlight
     if fnmatch(feedurl, 'http*://*.wikipedia.org/w/api.php?*&feedformat=atom'):
         match = lxml.html.fromstring(item.desc).xpath('//b/a/@href')
+        if len(match):
+            item.link = match[0]
+            log(item.link)
+
+    # at user's election, use first <a>
+    if options.firstlink and (item.desc or item.content):
+        match = lxml.html.fromstring(item.desc or item.content).xpath('//a/@href')
         if len(match):
             item.link = match[0]
             log(item.link)
@@ -375,7 +382,7 @@ def FeedGather(rss, url, options):
         if item is None:
             continue
 
-        item = ItemFix(item, url)
+        item = ItemFix(item, options, url)
 
         if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
             if not options.proxy:
