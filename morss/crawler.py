@@ -655,5 +655,8 @@ class MySQLCacheHandler(BaseCache):
 if __name__ == '__main__':
     req = adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
 
-    if not sys.flags.interactive:
+    if sys.flags.interactive:
+        print('>>> Interactive shell: try using `req`')
+
+    else:
         print(req['data'].decode(req['encoding']))

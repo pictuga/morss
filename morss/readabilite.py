@@ -351,5 +351,8 @@ if __name__ == '__main__':
     req = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
     article = get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='unicode')
 
-    if not sys.flags.interactive:
+    if sys.flags.interactive:
+        print('>>> Interactive shell: try using `article`')
+
+    else:
         print(article)

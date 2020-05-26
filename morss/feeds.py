@@ -780,6 +780,9 @@ if __name__ == '__main__':
     req = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://www.nytimes.com/', follow='rss')
     feed = parse(req['data'], url=req['url'], encoding=req['encoding'])
 
-    if not sys.flags.interactive:
+    if sys.flags.interactive:
+        print('>>> Interactive shell: try using `feed`')
+
+    else:
         for item in feed.items:
             print(item.title, item.link)
