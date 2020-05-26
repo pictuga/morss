@@ -718,11 +718,29 @@ class Item(Uniq):
 class FeedXML(Feed, ParserXML):
     itemsClass = 'ItemXML'
 
+    def root_siblings(self):
+        out = []
+        current = self.root.getprevious()
+
+        while current is not None:
+            out.append(current)
+            current = current.getprevious()
+
+        return out
+
     def tostring(self, encoding='unicode', **k):
         # override needed due to "getroottree" inclusion
+        # and to add stylesheet
 
-        if self.root.getprevious() is None:
-            self.root.addprevious(etree.PI('xml-stylesheet', 'type="text/xsl" href="/sheet.xsl"'))
+        stylesheets = [x for x in self.root_siblings() if isinstance(x, etree.PIBase) and x.target == 'xml-stylesheet']
+
+        if len(stylesheets):
+            # remove all stylesheets present (be that ours or others')
+            for stylesheet in stylesheets:
+                self.root.append(stylesheet) # needed as we can't delete root siblings https://stackoverflow.com/a/60232366
+                self.root.remove(stylesheet)
+
+        self.root.addprevious(etree.PI('xml-stylesheet', 'type="text/xsl" href="/sheet.xsl"'))
 
         return etree.tostring(self.root.getroottree(), encoding=encoding, method='xml', **k)
 
