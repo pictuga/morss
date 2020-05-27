@@ -221,7 +221,7 @@ class GZIPHandler(BaseHandler):
 def detect_encoding(data, resp=None):
     enc = detect_raw_encoding(data, resp)
 
-    if enc == 'gb2312':
+    if enc.lower() == 'gb2312':
         enc = 'gbk'
 
     return enc
