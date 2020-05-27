@@ -176,7 +176,7 @@
 					<select>
 						<option value="">full-text</option>
 						<option value=":proxy">original</option>
-						<option value=":clip">original + full-text</option>
+						<option value=":clip" title="original + full-text: keep the original description above the full article. Useful for reddit feeds for example, to keep the comment links">combined (?)</option>
 					</select>
 					feed as 
 					<select>
@@ -185,12 +185,12 @@
 						<option value=":html">HTML</option>
 						<option value=":csv">CSV</option>
 					</select>
-					using 
+					using the 
 					<select>
-						<option value="">the standard link</option>
-						<option value=":firstlink" title="Useful for Twitter feeds for example, to get the articles referred to in tweets rather than the tweet itself">the first link from the description (?)</option>
+						<option value="">standard</option>
+						<option value=":firstlink" title="Pull the article from the first available link in the description, instead of the standard link. Useful for Twitter feeds for example, to get the articles referred to in tweets rather than the tweet itself">first (?)</option>
 					</select>
-					and 
+					link and 
 					<select>
 						<option value="">keep</option>
 						<option value=":nolink:noref">remove</option>
@@ -199,7 +199,8 @@
 					<input type="hidden" value="" name="extra_options"/>
 				</form>
 
-				<p>Click <a href="/">here</a> to go back to morss</p>
+				<p>You can find a <em>preview</em> of the feed below. You need a <em>feed reader</em> for optimal use</p>
+				<p>Click <a href="/">here</a> to go back to morss and/or to use the tool on another feed</p>
 			</header>
 
 			<div id="header" dir="auto">
