@@ -33,7 +33,8 @@
 				}
 
 				header {
-					text-align: center;
+					text-align: justify;
+					text-align-last: center;
 					border-bottom: 1px solid silver;
 				}
 
@@ -112,7 +113,6 @@
 				}
 
 				header > form {
-					text-align: center;
 					margin: 1%;
 				}
 
