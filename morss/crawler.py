@@ -261,14 +261,10 @@ class EncodingFixHandler(BaseHandler):
         if 200 <= resp.code < 300 and maintype == 'text':
             data = resp.read()
 
-            if not self.encoding:
-                enc = detect_encoding(data, resp)
-            else:
-                enc = self.encoding
+            enc = self.encoding or detect_encoding(data, resp)
 
-            if enc:
-                data = data.decode(enc, 'replace')
-                data = data.encode(enc)
+            data = data.decode(enc, 'replace')
+            data = data.encode(enc)
 
             fp = BytesIO(data)
             old_resp = resp
