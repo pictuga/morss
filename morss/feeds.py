@@ -734,11 +734,10 @@ class FeedXML(Feed, ParserXML):
 
         stylesheets = [x for x in self.root_siblings() if isinstance(x, etree.PIBase) and x.target == 'xml-stylesheet']
 
-        if len(stylesheets):
+        for stylesheet in stylesheets:
             # remove all stylesheets present (be that ours or others')
-            for stylesheet in stylesheets:
-                self.root.append(stylesheet) # needed as we can't delete root siblings https://stackoverflow.com/a/60232366
-                self.root.remove(stylesheet)
+            self.root.append(stylesheet) # needed as we can't delete root siblings https://stackoverflow.com/a/60232366
+            self.root.remove(stylesheet)
 
         self.root.addprevious(etree.PI('xml-stylesheet', 'type="text/xsl" href="/sheet.xsl"'))
 
