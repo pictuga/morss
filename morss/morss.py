@@ -305,8 +305,8 @@ def FeedFetch(url, options):
 
         rss.rules['items'] = options.items
 
-        rss.rules['item_title'] = options.item_title    if options.item_title   else './/a|.'
-        rss.rules['item_link'] = options.item_link      if options.item_link    else './@href|.//a/@href'
+        rss.rules['item_title'] = options.item_title    if options.item_title   else '.'
+        rss.rules['item_link'] = options.item_link      if options.item_link    else './@href|.//a/@href|ancestor::a/@href'
 
         if options.item_content:
             rss.rules['item_content'] = options.item_content
