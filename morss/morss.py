@@ -605,7 +605,7 @@ def cgi_get(environ, start_response):
         output = req['data']
 
     # return html page
-    headers = {'status': '200 OK', 'content-type': 'text/html; charset=utf-8'}
+    headers = {'status': '200 OK', 'content-type': 'text/html; charset=utf-8', 'X-Frame-Options': 'SAMEORIGIN'} # SAMEORIGIN to avoid potential abuse
     start_response(headers['status'], list(headers.items()))
     return [output]
 
