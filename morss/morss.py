@@ -343,14 +343,14 @@ def FeedGather(rss, url, options):
     if options.cache:
         max_time = 0
 
-    if options.first:
-        # :first to just take the first items in the feed (in sequence)
-        sorted_items = rss.items
-
-    else:
-        # otherwise, take the _newest_, i.e. sort by time
+    if options.newest:
+        # :newest take the newest items
         now = datetime.now(tz.tzutc())
         sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or now, reverse=True)
+
+    else:
+        # default behavior, take the first items (in appearing order)
+        sorted_items = rss.items
 
     for i, item in enumerate(sorted_items):
         if time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0:

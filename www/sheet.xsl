@@ -192,8 +192,8 @@
 					</select>
 					link of the 
 					<select>
-						<option value="">newest</option>
-						<option value=":first" title="Return the feed items in the order they appear in the feed (morss ohterwise shows the newest items first)">first (?)</option>
+						<option value="">first</option>
+						<option value=":newest" title="Select feed items by publication date (instead of appearing order)">newest (?)</option>
 					</select>
 					items and 
 					<select>
