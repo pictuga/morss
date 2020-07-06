@@ -350,7 +350,7 @@ def FeedGather(rss, url, options):
 
     else:
         # default behavior, take the first items (in appearing order)
-        sorted_items = rss.items
+        sorted_items = list(rss.items)
 
     for i, item in enumerate(sorted_items):
         if time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0:
