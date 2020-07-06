@@ -311,14 +311,20 @@ class AlternateHandler(BaseHandler):
             # opps, not what we were looking for, let's see if the html page suggests an alternative page of the right types
 
             data = resp.read()
-            links = lxml.html.fromstring(data[:10000]).findall('.//link[@rel="alternate"]')
 
-            for link in links:
-                if link.get('type', '') in self.follow:
-                    resp.code = 302
-                    resp.msg = 'Moved Temporarily'
-                    resp.headers['location'] = link.get('href')
-                    break
+            try:
+                links = lxml.html.fromstring(data[:10000]).findall('.//link[@rel="alternate"]')
+
+                for link in links:
+                    if link.get('type', '') in self.follow:
+                        resp.code = 302
+                        resp.msg = 'Moved Temporarily'
+                        resp.headers['location'] = link.get('href')
+                        break
+
+            except (ValueError, SyntaxError):
+                # catch parsing errors
+                pass
 
             fp = BytesIO(data)
             old_resp = resp
@@ -340,10 +346,15 @@ class HTTPEquivHandler(BaseHandler):
         if 200 <= resp.code < 300 and contenttype in MIMETYPE['html']:
             data = resp.read()
 
-            headers = lxml.html.fromstring(data[:10000]).findall('.//meta[@http-equiv]')
+            try:
+                headers = lxml.html.fromstring(data[:10000]).findall('.//meta[@http-equiv]')
 
-            for header in headers:
-                resp.headers[header.get('http-equiv').lower()] = header.get('content')
+                for header in headers:
+                    resp.headers[header.get('http-equiv').lower()] = header.get('content')
+
+            except (ValueError, SyntaxError):
+                # catch parsing errors
+                pass
 
             fp = BytesIO(data)
             old_resp = resp
