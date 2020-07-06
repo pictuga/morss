@@ -190,7 +190,12 @@
 						<option value="">standard</option>
 						<option value=":firstlink" title="Pull the article from the first available link in the description, instead of the standard link. Useful for Twitter feeds for example, to get the articles referred to in tweets rather than the tweet itself">first (?)</option>
 					</select>
-					link and 
+					link of the 
+					<select>
+						<option value="">newest</option>
+						<option value=":first" title="Return the feed items in the order they appear in the feed (morss ohterwise shows the newest items first)">first (?)</option>
+					</select>
+					items and 
 					<select>
 						<option value="">keep</option>
 						<option value=":nolink:noref">remove</option>

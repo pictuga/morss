@@ -91,6 +91,7 @@ The arguments are:
 	- `debug`: to have some feedback from the script execution. Useful for debugging
 	- `force`: force refetch the rss feed and articles
 	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
+	- `first`: return the feed items in the order they initially appear in the feed (morss ohterwise shows the newest items first)
 - http server only
 	- `callback=NAME`: for JSONP calls
 	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
