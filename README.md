@@ -168,6 +168,22 @@ In one line
 docker run -p 8080:8080 $(docker build -q https://git.pictuga.com/pictuga/morss.git)
 ```
 
+With docker-compose:
+
+```yml
+services:
+    app:
+        build: https://git.pictuga.com/pictuga/morss.git
+        ports:
+            - '8080:8080'
+```
+
+Then run
+
+```shell
+docker-compose up --build
+```
+
 #### Using morss' internal HTTP server
 
 Morss can run its own HTTP server. The later should start when you run morss
