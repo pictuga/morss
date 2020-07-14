@@ -47,12 +47,6 @@ def count_content(node):
     return count_words(node.text_content()) + len(node.findall('.//img'))
 
 
-def percentile(N, P):
-    # https://stackoverflow.com/a/7464107
-    n = max(int(round(P * len(N) + 0.5)), 2)
-    return N[n-2]
-
-
 class_bad = ['comment', 'community', 'extra', 'foot',
     'sponsor', 'pagination', 'pager', 'tweet', 'twitter', 'com-', 'masthead',
     'media', 'meta', 'related', 'shopping', 'tags', 'tool', 'author', 'about',
@@ -198,8 +192,8 @@ def clean_node(node, keep_threshold=None):
         parent.remove(node)
         return
 
+    # high score, so keep
     if keep_threshold is not None and get_score(node) >= keep_threshold:
-        # high score, so keep
         return
 
     gdparent = parent.getparent()
@@ -300,44 +294,39 @@ def lowest_common_ancestor(nodeA, nodeB, max_depth=None):
     return nodeA # should always find one tho, at least <html/>, but needed for max_depth
 
 
-def rank_grades(grades):
-    # largest score to smallest
-    return sorted(grades.items(), key=lambda x: x[1], reverse=True)
-
-
-def get_best_node(ranked_grades):
-    " To pick the best (raw) node. Another function will clean it "
-
-    if len(ranked_grades) == 1:
-        return ranked_grades[0]
-
-    lowest = lowest_common_ancestor(ranked_grades[0][0], ranked_grades[1][0], 3)
-
-    return lowest
-
-
 def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=False, threshold=5):
     " Input a raw html string, returns a raw html string of the article "
 
     html = parse(data, encoding_in)
     score_all(html)
-    scores = rank_grades(get_all_scores(html))
 
-    if not len(scores) or scores[0][1] < threshold:
+    # rank all nodes (largest to smallest)
+    ranked_nodes = sorted(html.iter(), key=lambda x: get_score(x), reverse=True)
+
+    # minimum threshold
+    if not len(ranked_nodes) or get_score(ranked_nodes[0]) < threshold:
         return None
 
-    best = get_best_node(scores)
+    # take common ancestor or the two highest rated nodes
+    if len(ranked_nodes) > 1:
+        best = lowest_common_ancestor(ranked_nodes[0], ranked_nodes[1], 3)
 
+    else:
+        best = ranked_nodes[0]
+
+    # clean up
     if not debug:
-        keep_threshold = percentile([x[1] for x in scores], 0.1)
+        keep_threshold = get_score(ranked_nodes[0]) * 3/4
         clean_root(best, keep_threshold)
 
+    # check for spammy content (links only)
     wc = count_words(best.text_content())
     wca = count_words(' '.join([x.text_content() for x in best.findall('.//a')]))
 
     if not debug and (wc - wca < 50 or float(wca) / wc > 0.3):
         return None
 
+    # fix urls
     if url:
         best.make_links_absolute(url)
 
