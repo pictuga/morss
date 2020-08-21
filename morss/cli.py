@@ -3,12 +3,12 @@ import os.path
 
 from . import crawler
 from .morss import FeedFetch, FeedGather, FeedFormat
-from .morss import Options, filterOptions, parseOptions
+from .morss import Options, parseOptions
 from .morss import log, DEBUG
 
 
 def cli_app():
-    options = Options(filterOptions(parseOptions(sys.argv[1:-1])))
+    options = Options(parseOptions(sys.argv[1:-1]))
     url = sys.argv[-1]
 
     global DEBUG

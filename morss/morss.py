@@ -36,17 +36,6 @@ TIMEOUT = 4  # http timeout (in sec)
 DEBUG = False
 
 
-def filterOptions(options):
-    return options
-
-    # example of filtering code below
-
-    #allowed = ['proxy', 'clip', 'cache', 'force', 'silent', 'pro', 'debug']
-    #filtered = dict([(key,value) for (key,value) in options.items() if key in allowed])
-
-    #return filtered
-
-
 class MorssException(Exception):
     pass
 
