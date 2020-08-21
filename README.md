@@ -112,6 +112,7 @@ custom feeds:
 misc:
   --nolink              drop links, but keeps links' inner text
   --noref               drop items' link
+  --silent              don't output the final RSS (useless on its own, but can be nice when debugging)
   --debug               to have some feedback from the script execution. Useful for debugging
 
 GNU AGPLv3 code
