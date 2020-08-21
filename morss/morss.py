@@ -87,29 +87,6 @@ class Options:
         return key in self.options
 
 
-def parseOptions(options):
-    """ Turns ['md=True'] into {'md':True} """
-    out = {}
-
-    for option in options:
-        split = option.split('=', 1)
-
-        if len(split) > 1:
-            if split[0].lower() == 'true':
-                out[split[0]] = True
-
-            elif split[0].lower() == 'false':
-                out[split[0]] = False
-
-            else:
-                out[split[0]] = split[1]
-
-        else:
-            out[split[0]] = True
-
-    return out
-
-
 def ItemFix(item, options, feedurl='/'):
     """ Improves feed items (absolute links, resolve feedburner links, etc) """
 

@@ -14,10 +14,32 @@ except ImportError:
 from . import crawler
 from . import readabilite
 from .morss import FeedFetch, FeedGather, FeedFormat
-from .morss import Options, parseOptions
-from .morss import log, DELAY, DEBUG, MorssException
+from .morss import Options, log, DELAY, DEBUG, MorssException
 
 from . import cred
+
+
+def parseOptions(options):
+    """ Turns ['md=True'] into {'md':True} """
+    out = {}
+
+    for option in options:
+        split = option.split('=', 1)
+
+        if len(split) > 1:
+            if split[0].lower() == 'true':
+                out[split[0]] = True
+
+            elif split[0].lower() == 'false':
+                out[split[0]] = False
+
+            else:
+                out[split[0]] = split[1]
+
+        else:
+            out[split[0]] = True
+
+    return out
 
 
 def cgi_parse_environ(environ):
