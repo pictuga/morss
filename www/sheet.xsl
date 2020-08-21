@@ -18,12 +18,18 @@
 			<meta name="robots" content="noindex" />
 
 			<style type="text/css">
+				body * {
+					box-sizing:  border-box;
+				}
+
 				body {
 					overflow-wrap: anywhere;
 					word-wrap: anywhere;
 					word-break: break-word;
 
 					font-family: sans-serif;
+
+					-webkit-tap-highlight-color: transparent; /* safari work around */
 				}
 
 				input, select {
@@ -131,6 +137,10 @@
 
 				.item > * {
 					padding: 1%;
+				}
+
+				.item > *:empty {
+					display: none;
 				}
 
 				.item > :not(:last-child) {
