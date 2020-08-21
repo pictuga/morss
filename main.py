@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from morss import main, cgi_standalone_app as application
+from morss.__main__ import main
+from morss.cgi import application
 
 if __name__ == '__main__':
     main()
