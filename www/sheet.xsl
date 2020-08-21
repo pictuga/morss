@@ -231,7 +231,7 @@
 			<div id="content">
 				<xsl:for-each select="rdf:RDF/rssfake:channel/rssfake:item|rss/channel/item|atom:feed/atom:entry|atom03:feed/atom03:entry">
 					<div class="item" dir="auto">
-						<a href="/" target="_blank"><xsl:attribute name="href"><xsl:value-of select="rssfake:link|link|atom:link/@href|atom03:link/@href"/></xsl:attribute>
+						<a target="_blank"><xsl:attribute name="href"><xsl:value-of select="rssfake:link|link|atom:link/@href|atom03:link/@href"/></xsl:attribute>
 								<xsl:value-of select="rssfake:title|title|atom:title|atom03:title"/>
 						</a>
 
@@ -252,7 +252,7 @@
 
 				if (!/:html/.test(window.location.href))
 					for (var content of document.querySelectorAll(".desc,.content"))
-						content.innerHTML = (content.innerText.match(/>/g) || []).length > 10 ? content.innerText : content.innerHTML
+						content.innerHTML = (content.innerText.match(/>/g) || []).length > 3 ? content.innerText : content.innerHTML
 
 				var options = parse_location()[0]
 
