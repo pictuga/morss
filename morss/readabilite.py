@@ -125,7 +125,7 @@ def score_node(node):
 
     if wc != 0:
         wca = count_words(' '.join([x.text_content() for x in node.findall('.//a')]))
-        score = score * ( 1 - float(wca)/wc )
+        score = score * ( 1 - 2 * float(wca)/wc )
 
     return score
 
