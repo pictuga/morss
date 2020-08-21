@@ -8,10 +8,6 @@ from .morss import Options
 from .morss import log, DEBUG
 
 
-
-
-#args = parser.parse_args()
-
 def cli_app():
     parser = argparse.ArgumentParser(
         prog='morss',
