@@ -68,15 +68,15 @@ def cgi_app(environ, start_response):
     if options.cors:
         headers['access-control-allow-origin'] = '*'
 
-    if options.html:
+    if options.format == 'html':
         headers['content-type'] = 'text/html'
     elif options.txt or options.silent:
         headers['content-type'] = 'text/plain'
-    elif options.json:
+    elif options.format == 'json':
         headers['content-type'] = 'application/json'
     elif options.callback:
         headers['content-type'] = 'application/javascript'
-    elif options.csv:
+    elif options.format == 'csv':
         headers['content-type'] = 'text/csv'
         headers['content-disposition'] = 'attachment; filename="feed.csv"'
     else:

@@ -379,24 +379,24 @@ def FeedFormat(rss, options, encoding='utf-8'):
         else:
             raise MorssException('Invalid callback var name')
 
-    elif options.json:
+    elif options.format == 'json':
         if options.indent:
             return rss.tojson(encoding=encoding, indent=4)
 
         else:
             return rss.tojson(encoding=encoding)
 
-    elif options.csv:
+    elif options.format == 'csv':
         return rss.tocsv(encoding=encoding)
 
-    elif options.html:
+    elif options.format == 'html':
         if options.indent:
             return rss.tohtml(encoding=encoding, pretty_print=True)
 
         else:
             return rss.tohtml(encoding=encoding)
 
-    else:
+    else: # i.e. format == 'rss'
         if options.indent:
             return rss.torss(xml_declaration=(not encoding == 'unicode'), encoding=encoding, pretty_print=True)
 

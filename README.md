@@ -73,35 +73,56 @@ morss accepts some arguments, to lightly alter the output of morss. Arguments
 may need to have a value (usually a string or a number). In the different "Use
 cases" below is detailed how to pass those arguments to morss.
 
-The arguments are:
+The list of arguments can be obtained by running `morss --help`
 
+```
+usage: morss [-h] [--format {rss,json,html,csv}] [--search STRING] [--clip] [--indent] [--cache] [--force] [--proxy] [--newest] [--firstlink] [--items XPATH] [--item_link XPATH]
+             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH] [--nolink] [--noref] [--debug]
+             url
+
+Get full-text RSS feeds
+
+positional arguments:
+  url                   feed url
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+output:
+  --format {rss,json,html,csv}
+                        output format
+  --search STRING       does a basic case-sensitive search in the feed
+  --clip                stick the full article content under the original feed content (useful for twitter)
+  --indent              returns indented XML or JSON, takes more place, but human-readable
+
+action:
+  --cache               only take articles from the cache (ie. don't grab new articles' content), so as to save time
+  --force               force refetch the rss feed and articles
+  --proxy               doesn't fill the articles
+  --newest              return the feed items in chronological order (morss ohterwise shows the items by appearing order)
+  --firstlink           pull the first article mentioned in the description instead of the default link
+
+custom feeds:
+  --items XPATH         (mandatory to activate the custom feeds function) xpath rule to match all the RSS entries
+  --item_link XPATH     xpath rule relative to items to point to the entry's link
+  --item_title XPATH    entry's title
+  --item_content XPATH  entry's content
+  --item_time XPATH     entry's date & time (accepts a wide range of time formats)
+
+misc:
+  --nolink              drop links, but keeps links' inner text
+  --noref               drop items' link
+  --debug               to have some feedback from the script execution. Useful for debugging
+
+GNU AGPLv3 code
+```
+
+Further options:
 - Change what morss does
-	- `json`: output as JSON
-	- `html`: outpout as HTML
-	- `csv`: outpout as CSV
-	- `proxy`: doesn't fill the articles
-	- `clip`: stick the full article content under the original feed content (useful for twitter)
-	- `search=STRING`: does a basic case-sensitive search in the feed
-- Advanced
-	- `csv`: export to csv
-	- `indent`: returns indented XML or JSON, takes more place, but human-readable
-	- `nolink`: drop links, but keeps links' inner text
-	- `noref`: drop items' link
-	- `cache`: only take articles from the cache (ie. don't grab new articles' content), so as to save time
-	- `debug`: to have some feedback from the script execution. Useful for debugging
-	- `force`: force refetch the rss feed and articles
-	- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
-	- `newest`: return the feed items in chronological order (morss ohterwise shows the items by appearing order)
-- http server only
-	- `callback=NAME`: for JSONP calls
-	- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
-	- `txt`: changes the http content-type to txt (for faster "`view-source:`")
-- Custom feeds: you can turn any HTML page into a RSS feed using morss, using xpath rules. The article content will be fetched as usual (with readabilite). Please note that you will have to **replace** any `/` in your rule with a `|` when using morss as a webserver
-	- `items`: (**mandatory** to activate the custom feeds function) xpath rule to match all the RSS entries
-	- `item_link`: xpath rule relative to `items` to point to the entry's link
-	- `item_title`: entry's title
-	- `item_content`: entry's description
-	- `item_time`: entry's date & time (accepts a wide range of time formats)
+- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
+- `callback=NAME`: for JSONP calls
+- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
+- `txt`: changes the http content-type to txt (for faster "`view-source:`")
 
 ## Use cases
 
@@ -213,9 +234,9 @@ Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rs
 
 Run:
 ```
-morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+morss [--argwithoutvalue] [--argwithvalue=value] [...] FEEDURL
 ```
-For example: `morss debug http://feeds.bbci.co.uk/news/rss.xml`
+For example: `morss --debug http://feeds.bbci.co.uk/news/rss.xml`
 
 *(Brackets indicate optional text)*
 
