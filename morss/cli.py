@@ -41,7 +41,7 @@ def cli_app():
     group.add_argument('--noref', action='store_true', help='drop items\' link')
     group.add_argument('--silent', action='store_true', help='don\'t output the final RSS (useless on its own, but can be nice when debugging)')
 
-    options = Options(parser.parse_args())
+    options = Options(vars(parser.parse_args()))
     url = options.url
 
     global DEBUG
