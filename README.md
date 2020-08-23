@@ -214,7 +214,7 @@ without any argument, on port 8080.
 morss
 ```
 
-You can change the port like this `morss 9000`.
+You can change the port using environment variables like this `PORT=9000 morss`.
 
 #### Passing arguments
 

@@ -12,7 +12,7 @@ import wsgiref.simple_server
 import wsgiref.handlers
 
 
-PORT = 8080
+PORT = int(os.getenv('PORT', 8080))
 
 
 def isInt(string):
@@ -26,7 +26,7 @@ def isInt(string):
 
 def main():
     if 'REQUEST_URI' in os.environ:
-        # mod_cgi
+        # mod_cgi (w/o file handler)
 
         app = wsgi.cgi_app
         app = wsgi.cgi_dispatcher(app)
@@ -35,19 +35,8 @@ def main():
 
         wsgiref.handlers.CGIHandler().run(app)
 
-    elif len(sys.argv) <= 1 or isInt(sys.argv[1]):
-        # start internal (basic) http server
-
-        if len(sys.argv) > 1 and isInt(sys.argv[1]):
-            argPort = int(sys.argv[1])
-            if argPort > 0:
-                port = argPort
-
-            else:
-                raise MorssException('Port must be positive integer')
-
-        else:
-            port = PORT
+    elif len(sys.argv) <= 1:
+        # start internal (basic) http server (w/ file handler)
 
         app = wsgi.cgi_app
         app = wsgi.cgi_file_handler(app)
@@ -56,7 +45,7 @@ def main():
         app = wsgi.cgi_encode(app)
 
         print('Serving http://localhost:%s/' % port)
-        httpd = wsgiref.simple_server.make_server('', port, app)
+        httpd = wsgiref.simple_server.make_server('', PORT, app)
         httpd.serve_forever()
 
     else:
