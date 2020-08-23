@@ -120,7 +120,6 @@ GNU AGPLv3 code
 Further options:
 - Change what morss does
 - Environment variable `DEBUG=`: to have some feedback from the script execution. Useful for debugging. On Apache, can be set via the `SetEnv` instruction
-- `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - `callback=NAME`: for JSONP calls
 - `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
 - `txt`: changes the http content-type to txt (for faster "`view-source:`")
