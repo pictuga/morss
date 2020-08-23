@@ -3,7 +3,7 @@
 import os
 import sys
 
-from . import cgi
+from . import wsgi
 from . import cli
 
 from .morss import MorssException
@@ -28,10 +28,10 @@ def main():
     if 'REQUEST_URI' in os.environ:
         # mod_cgi
 
-        app = cgi.cgi_app
-        app = cgi.cgi_dispatcher(app)
-        app = cgi.cgi_error_handler(app)
-        app = cgi.cgi_encode(app)
+        app = wsgi.cgi_app
+        app = wsgi.cgi_dispatcher(app)
+        app = wsgi.cgi_error_handler(app)
+        app = wsgi.cgi_encode(app)
 
         wsgiref.handlers.CGIHandler().run(app)
 
@@ -49,11 +49,11 @@ def main():
         else:
             port = PORT
 
-        app = cgi.cgi_app
-        app = cgi.cgi_file_handler(app)
-        app = cgi.cgi_dispatcher(app)
-        app = cgi.cgi_error_handler(app)
-        app = cgi.cgi_encode(app)
+        app = wsgi.cgi_app
+        app = wsgi.cgi_file_handler(app)
+        app = wsgi.cgi_dispatcher(app)
+        app = wsgi.cgi_error_handler(app)
+        app = wsgi.cgi_encode(app)
 
         print('Serving http://localhost:%s/' % port)
         httpd = wsgiref.simple_server.make_server('', port, app)
