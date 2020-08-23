@@ -310,7 +310,7 @@ be cleared every time the program is run
 When parsing long feeds, with a lot of items (100+), morss might take a lot of
 time to parse it, or might even run into a memory overflow on some shared
 hosting plans (limits around 10Mb), in which case you might want to adjust the
-different values at the top of the script.
+below settings via environment variables.
 
 - `MAX_TIME` sets the maximum amount of time spent *fetching* articles, more time might be spent taking older articles from cache. `-1` for unlimited.
 - `MAX_ITEM` sets the maximum number of articles to fetch. `-1` for unlimited. More articles will be taken from cache following the nexts settings.

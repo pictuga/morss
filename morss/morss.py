@@ -24,14 +24,15 @@ except ImportError:
     from http.client import HTTPException
     from urllib.parse import urlparse, urljoin, parse_qs
 
-MAX_ITEM = 5  # cache-only beyond
-MAX_TIME = 2  # cache-only after (in sec)
 
-LIM_ITEM = 10  # deletes what's beyond
-LIM_TIME = 2.5  # deletes what's after
+MAX_ITEM = int(os.getenv('MAX_ITEM', 5)) # cache-only beyond
+MAX_TIME = int(os.getenv('MAX_TIME', 2)) # cache-only after (in sec)
 
-DELAY = 10 * 60  # xml cache & ETag cache (in sec)
-TIMEOUT = 4  # http timeout (in sec)
+LIM_ITEM = int(os.getenv('LIM_ITEM', 10)) # deletes what's beyond
+LIM_TIME = int(os.getenv('LIM_TIME', 2.5)) # deletes what's after
+
+DELAY = int(os.getenv('DELAY', 10 * 60)) # xml cache & ETag cache (in sec)
+TIMEOUT = int(os.getenv('TIMEOUT', 4)) # http timeout (in sec)
 
 
 class MorssException(Exception):
