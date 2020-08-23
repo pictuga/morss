@@ -5,7 +5,6 @@ import argparse
 from . import crawler
 from .morss import FeedFetch, FeedGather, FeedFormat
 from .morss import Options
-from .morss import log
 
 
 def cli_app():
@@ -56,5 +55,3 @@ def cli_app():
 
     if not options.silent:
         print(out)
-
-    log('done')
