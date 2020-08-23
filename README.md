@@ -296,13 +296,15 @@ output = morss.FeedFormat(rss, options, 'unicode') # formats final feed
 
 ## Cache information
 
-morss uses caching to make loading faster. There are 3 possible cache backends
-(visible in `morss/crawler.py`):
+morss uses caching to make loading faster. There are 3 possible cache backends,
+which can be picked via environment variables:
 
-- `{}`: a simple python in-memory dict() object
-- `SQLiteCache`: sqlite3 cache. Default file location is in-memory (i.e. it will
-be cleared every time the program is run
-- `MySQLCacheHandler`
+- `(nothing/default)`: a simple python in-memory dict() object.
+- `CACHE=sqlite`: sqlite3 cache. Default file location is in-memory (i.e. it
+will be cleared every time the program is run). Path can be defined with
+`SQLITE_PATH`.
+- `CACHE=mysql`: MySQL cache. Connection can be defined with the following
+environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
 
 ## Configuration
 ### Length limitation

@@ -388,9 +388,6 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
-default_cache = {}
-
-
 class CacheHandler(BaseHandler):
     " Cache based on etags/last-modified "
 
@@ -657,6 +654,22 @@ class MySQLCacheHandler(BaseCache):
         with self.cursor() as cursor:
             cursor.execute('INSERT INTO data VALUES (%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE code=%s, msg=%s, headers=%s, data=%s, timestamp=%s',
                 (url,) + value + value)
+
+
+if 'CACHE' in os.environ:
+    if os.environ['CACHE'] == 'mysql':
+        default_cache = MySQLCacheHandler(
+            user = os.getenv('MYSQL_USER'),
+            password = os.getenv('MYSQL_PWD'),
+            database = os.getenv('MYSQL_DB'),
+            host = os.getenv('MYSQL_HOST')
+        )
+
+    elif os.environ['CACHE'] == 'sqlite':
+        default_cache = SQLiteCache(os.getenv('SQLITE_PATH', ':memory:'))
+
+else:
+        default_cache = {}
 
 
 if __name__ == '__main__':

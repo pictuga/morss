@@ -101,8 +101,6 @@ def cgi_app(environ, start_response):
 
     headers['content-type'] += '; charset=utf-8'
 
-    crawler.default_cache = crawler.SQLiteCache(os.path.join(os.getcwd(), 'morss-cache.db'))
-
     # get the work done
     url, rss = FeedFetch(url, options)
 

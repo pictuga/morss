@@ -2,7 +2,6 @@ import sys
 import os.path
 import argparse
 
-from . import crawler
 from .morss import FeedFetch, FeedGather, FeedFormat
 from .morss import Options
 
@@ -43,8 +42,6 @@ def cli_app():
 
     options = Options(vars(parser.parse_args()))
     url = options.url
-
-    crawler.default_cache = crawler.SQLiteCache(os.path.expanduser('~/.cache/morss-cache.db'))
 
     url, rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)
