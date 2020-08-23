@@ -119,7 +119,7 @@ GNU AGPLv3 code
 
 Further options:
 - Change what morss does
-- Environment variable `DEBUG=`: to have some feedback from the script execution. Useful for debugging. On Apache, can be set via the `SetEnv` instruction
+- Environment variable `DEBUG=`: to have some feedback from the script execution. Useful for debugging. On Apache, can be set via the `SetEnv` instruction (see sample `.htaccess` provided).
 - `callback=NAME`: for JSONP calls
 - `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
 - `txt`: changes the http content-type to txt (for faster "`view-source:`")
