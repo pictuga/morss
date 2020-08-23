@@ -39,14 +39,13 @@ class MorssException(Exception):
 
 
 def log(txt):
-    if ('DEBUG' in os.environ
-            or ':debug' in os.environ.get('REQUEST_URI', '')
-            or ':debug' in os.environ.get('PATH_INFO', '')
-            ):
+    if 'DEBUG' in os.environ:
         if 'REQUEST_URI' in os.environ:
+            # when running on Apache
             open('morss.log', 'a').write("%s\n" % repr(txt))
 
         else:
+            # when using internal server or cli
             print(repr(txt))
 
 

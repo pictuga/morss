@@ -39,8 +39,11 @@ def cgi_parse_environ(environ):
     # get options
 
     if 'REQUEST_URI' in environ:
+        # when running on Apache
         url = environ['REQUEST_URI'][1:]
+
     else:
+        # when using internal server
         url = environ['PATH_INFO'][1:]
 
         if environ['QUERY_STRING']:
