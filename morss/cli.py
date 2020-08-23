@@ -44,9 +44,6 @@ def cli_app():
     options = Options(vars(parser.parse_args()))
     url = options.url
 
-    global DEBUG
-    DEBUG = options.debug
-
     crawler.default_cache = crawler.SQLiteCache(os.path.expanduser('~/.cache/morss-cache.db'))
 
     url, rss = FeedFetch(url, options)
