@@ -19,7 +19,7 @@ from .morss import Options, log, DELAY, MorssException
 from . import cred
 
 
-def parseOptions(options):
+def parse_options(options):
     """ Turns ['md=True'] into {'md':True} """
     out = {}
 
@@ -27,14 +27,7 @@ def parseOptions(options):
         split = option.split('=', 1)
 
         if len(split) > 1:
-            if split[0].lower() == 'true':
-                out[split[0]] = True
-
-            elif split[0].lower() == 'false':
-                out[split[0]] = False
-
-            else:
-                out[split[0]] = split[1]
+            out[split[0]] = split[1]
 
         else:
             out[split[0]] = True
@@ -62,6 +55,7 @@ def cgi_parse_environ(environ):
 
         if len(split) > 1:
             url = split[1]
+
         else:
             url = ''
 
@@ -69,7 +63,7 @@ def cgi_parse_environ(environ):
         raw_options = []
 
     # init
-    options = Options(parseOptions(raw_options))
+    options = Options(parse_options(raw_options))
 
     return (url, options)
 
