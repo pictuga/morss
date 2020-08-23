@@ -8,7 +8,7 @@ ErrorDocument 500 "A very nasty bug found his way onto this very server"
 #SetEnv DEBUG 1
 
 # Uncomment below line to turn debug on for requests with :debug in the url
-#SetEnvIf Request_URI :debug DEBUG 1
+#SetEnvIf Request_URI :debug DEBUG=1
 
 <Files ~ "\.(py|pyc|db|log)$">
 	deny from all
