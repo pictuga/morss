@@ -5,7 +5,7 @@ import argparse
 from . import crawler
 from .morss import FeedFetch, FeedGather, FeedFormat
 from .morss import Options
-from .morss import log, DEBUG
+from .morss import log
 
 
 def cli_app():
@@ -41,7 +41,6 @@ def cli_app():
     group.add_argument('--nolink', action='store_true', help='drop links, but keeps links\' inner text')
     group.add_argument('--noref', action='store_true', help='drop items\' link')
     group.add_argument('--silent', action='store_true', help='don\'t output the final RSS (useless on its own, but can be nice when debugging)')
-    group.add_argument('--debug', action='store_true', help='to have some feedback from the script execution. Useful for debugging')
 
     options = Options(parser.parse_args())
     url = options.url

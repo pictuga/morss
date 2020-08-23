@@ -113,13 +113,13 @@ misc:
   --nolink              drop links, but keeps links' inner text
   --noref               drop items' link
   --silent              don't output the final RSS (useless on its own, but can be nice when debugging)
-  --debug               to have some feedback from the script execution. Useful for debugging
 
 GNU AGPLv3 code
 ```
 
 Further options:
 - Change what morss does
+- `debug`: to have some feedback from the script execution. Useful for debugging. NB. for cli use, set the environment variable `DEBUG=1`
 - `silent`: don't output the final RSS (useless on its own, but can be nice when debugging)
 - `callback=NAME`: for JSONP calls
 - `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)

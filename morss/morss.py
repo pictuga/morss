@@ -33,15 +33,16 @@ LIM_TIME = 2.5  # deletes what's after
 DELAY = 10 * 60  # xml cache & ETag cache (in sec)
 TIMEOUT = 4  # http timeout (in sec)
 
-DEBUG = False
-
 
 class MorssException(Exception):
     pass
 
 
-def log(txt, force=False):
-    if DEBUG or force:
+def log(txt):
+    if ('DEBUG' in os.environ
+            or ':debug' in os.environ.get('REQUEST_URI', '')
+            or ':debug' in os.environ.get('PATH_INFO', '')
+            ):
         if 'REQUEST_URI' in os.environ:
             open('morss.log', 'a').write("%s\n" % repr(txt))
 

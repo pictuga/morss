@@ -14,7 +14,7 @@ except ImportError:
 from . import crawler
 from . import readabilite
 from .morss import FeedFetch, FeedGather, FeedFormat
-from .morss import Options, log, DELAY, DEBUG, MorssException
+from .morss import Options, log, DELAY, MorssException
 
 from . import cred
 
@@ -70,9 +70,6 @@ def cgi_parse_environ(environ):
 
     # init
     options = Options(parseOptions(raw_options))
-
-    global DEBUG
-    DEBUG = options.debug
 
     return (url, options)
 
