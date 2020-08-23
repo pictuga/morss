@@ -15,15 +15,6 @@ import wsgiref.handlers
 PORT = int(os.getenv('PORT', 8080))
 
 
-def isInt(string):
-    try:
-        int(string)
-        return True
-
-    except ValueError:
-        return False
-
-
 def main():
     if 'REQUEST_URI' in os.environ:
         # mod_cgi (w/o file handler)
