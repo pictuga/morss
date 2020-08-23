@@ -17,8 +17,6 @@ from . import readabilite
 from .morss import FeedFetch, FeedGather, FeedFormat
 from .morss import Options, log, TIMEOUT, DELAY, MorssException
 
-from . import cred
-
 
 def parse_options(options):
     """ Turns ['md=True'] into {'md':True} """
