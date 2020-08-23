@@ -183,12 +183,6 @@ docker build https://git.pictuga.com/pictuga/morss.git -t morss
 docker run -p 8080:8080 morss
 ```
 
-In one line
-
-```shell
-docker run -p 8080:8080 $(docker build -q https://git.pictuga.com/pictuga/morss.git)
-```
-
 With docker-compose:
 
 ```yml
