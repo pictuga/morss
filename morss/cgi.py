@@ -1,6 +1,7 @@
 import sys
 import os.path
 import re
+import lxml.etree
 
 import cgitb
 
@@ -14,7 +15,7 @@ except ImportError:
 from . import crawler
 from . import readabilite
 from .morss import FeedFetch, FeedGather, FeedFormat
-from .morss import Options, log, DELAY, MorssException
+from .morss import Options, log, TIMEOUT, DELAY, MorssException
 
 from . import cred
 
