@@ -77,7 +77,7 @@ The list of arguments can be obtained by running `morss --help`
 
 ```
 usage: morss [-h] [--format {rss,json,html,csv}] [--search STRING] [--clip] [--indent] [--cache] [--force] [--proxy] [--newest] [--firstlink] [--items XPATH] [--item_link XPATH]
-             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH] [--nolink] [--noref] [--debug]
+             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH] [--nolink] [--noref] [--silent]
              url
 
 Get full-text RSS feeds
@@ -230,7 +230,7 @@ Run:
 ```
 morss [--argwithoutvalue] [--argwithvalue=value] [...] FEEDURL
 ```
-For example: `morss --debug http://feeds.bbci.co.uk/news/rss.xml`
+For example: `morss --clip http://feeds.bbci.co.uk/news/rss.xml`
 
 *(Brackets indicate optional text)*
 
