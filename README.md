@@ -335,14 +335,3 @@ morss will also try to figure out whether the full content is already in place
 (for those websites which understood the whole point of RSS feeds). However this
 detection is very simple, and only works if the actual content is put in the
 "content" section in the feed and not in the "summary" section.
-
-***
-
-## Todo
-
-You can contribute to this project. If you're not sure what to do, you can pick
-from this list:
-
-- Add ability to run morss.py as an update daemon
-- Add ability to use custom xpath rule instead of readability
-- More ideas here <https://github.com/pictuga/morss/issues/15>
