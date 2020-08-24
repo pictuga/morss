@@ -201,8 +201,9 @@ docker-compose up --build
 
 #### Using morss' internal HTTP server
 
-Morss can run its own HTTP server. The later should start when you run morss
-without any argument, on port 8080.
+Morss can run its own, very basic, HTTP server. The latter should start when you
+run morss without any argument, on port 8080. I'd highly recommend you to use
+gunicorn or something similar for better performance.
 
 ```shell
 morss
