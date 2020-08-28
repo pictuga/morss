@@ -180,7 +180,7 @@ def cgi_file_handler(environ, start_response, app):
                 # file successfully open
                 headers = {}
                 headers['status'] = '200 OK'
-                headers['content-type'] = mimetypes.guess_type(path)[0]
+                headers['content-type'] = mimetypes.guess_type(path)[0] or 'application/octet-stream'
                 start_response(headers['status'], list(headers.items()))
                 return wsgiref.util.FileWrapper(f)
 
