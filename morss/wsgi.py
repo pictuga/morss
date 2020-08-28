@@ -152,46 +152,40 @@ def middleware(func):
 def cgi_file_handler(environ, start_response, app):
     " Simple HTTP server to serve static files (.html, .css, etc.) "
 
-    files = {
-        '': 'text/html',
-        'index.html': 'text/html',
-        'sheet.xsl': 'text/xsl'}
-
     if 'REQUEST_URI' in environ:
         url = environ['REQUEST_URI'][1:]
 
     else:
         url = environ['PATH_INFO'][1:]
 
-    if url in files:
-        headers = {}
+    if url == '':
+        url = 'index.html'
 
-        if url == '':
-            url = 'index.html'
-
-        paths = [os.path.join(sys.prefix, 'share/morss/www', url),
-            os.path.join(os.path.dirname(__file__), '../www', url)]
+    if re.match(r'^/?([a-zA-Z0-9_-][a-zA-Z0-9\._-]+/?)*$', url):
+        # if it is a legitimate url (no funny relative paths)
+        paths = [
+            os.path.join(sys.prefix, 'share/morss/www', url),
+            os.path.join(os.path.dirname(__file__), '../www', url)
+            ]
 
         for path in paths:
             try:
-                body = open(path, 'rb').read()
-
-                headers['status'] = '200 OK'
-                headers['content-type'] = files[url]
-                start_response(headers['status'], list(headers.items()))
-                return [body]
+                f = open(path, 'rb')
 
             except IOError:
+                # problem with file (cannot open or not found)
                 continue
 
-        else:
-            # the for loop did not return, so here we are, i.e. no file found
-            headers['status'] = '404 Not found'
-            start_response(headers['status'], list(headers.items()))
-            return ['Error %s' % headers['status']]
+            else:
+                # file successfully open
+                headers = {}
+                headers['status'] = '200 OK'
+                headers['content-type'] = mimetypes.guess_type(path)[0]
+                start_response(headers['status'], list(headers.items()))
+                return wsgiref.util.FileWrapper(f)
 
-    else:
-        return app(environ, start_response)
+    # regex didn't validate or no file found
+    return app(environ, start_response)
 
 
 def cgi_get(environ, start_response):
