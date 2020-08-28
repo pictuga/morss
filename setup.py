@@ -20,5 +20,5 @@ setup(
         ('share/' + package_name + '/www/cgi', [])
     ],
     entry_points = {
-        'console_scripts': [package_name + '=' + package_name + ':main']
+        'console_scripts': [package_name + '=' + package_name + '.__main__:main']
     })

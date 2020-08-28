@@ -52,7 +52,7 @@ def main():
         app = wsgi.cgi_error_handler(app)
         app = wsgi.cgi_encode(app)
 
-        print('Serving http://localhost:%s/' % port)
+        print('Serving http://localhost:%s/' % PORT)
         httpd = wsgiref.simple_server.make_server('', PORT, app)
         httpd.serve_forever()
 
