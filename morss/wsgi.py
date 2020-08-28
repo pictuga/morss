@@ -21,6 +21,8 @@ import re
 import lxml.etree
 
 import cgitb
+import wsgiref.util
+import mimetypes
 
 try:
     # python 2
