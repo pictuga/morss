@@ -1,6 +1,7 @@
 # Morss - Get full-text RSS feeds
 
-_GNU AGPLv3 code_
+_GNU AGPLv3 code_  
+_Provided logo is CC BY-NC-SA 4.0_
 
 Upstream source code: https://git.pictuga.com/pictuga/morss  
 Github mirror (for Issues & Pull requests): https://github.com/pictuga/morss  
