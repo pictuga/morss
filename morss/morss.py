@@ -226,6 +226,9 @@ def ItemFill(item, options, feedurl='/', fast=False):
     if out is not None:
         item.content = out
 
+    if options.resolve:
+        item.link = req['url']
+
     return True
 
 

@@ -102,6 +102,7 @@ action:
   --proxy               doesn't fill the articles
   --newest              return the feed items in chronological order (morss ohterwise shows the items by appearing order)
   --firstlink           pull the first article mentioned in the description instead of the default link
+  --resolve             replace tracking links with direct links to articles (not compatible with --proxy)
 
 custom feeds:
   --items XPATH         (mandatory to activate the custom feeds function) xpath rule to match all the RSS entries

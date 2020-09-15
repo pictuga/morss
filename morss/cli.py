@@ -44,6 +44,7 @@ def cli_app():
     group.add_argument('--proxy', action='store_true', help='doesn\'t fill the articles')
     group.add_argument('--newest', action='store_true', help='return the feed items in chronological order (morss ohterwise shows the items by appearing order)')
     group.add_argument('--firstlink', action='store_true', help='pull the first article mentioned in the description instead of the default link')
+    group.add_argument('--resolve', action='store_true', help='replace tracking links with direct links to articles (not compatible with --proxy)')
 
     group = parser.add_argument_group('custom feeds')
     group.add_argument('--items', action='store', type=str, metavar='XPATH', help='(mandatory to activate the custom feeds function) xpath rule to match all the RSS entries')
