@@ -77,8 +77,11 @@ cases" below is detailed how to pass those arguments to morss.
 The list of arguments can be obtained by running `morss --help`
 
 ```
-usage: morss [-h] [--format {rss,json,html,csv}] [--search STRING] [--clip] [--indent] [--cache] [--force] [--proxy] [--newest] [--firstlink] [--items XPATH] [--item_link XPATH]
-             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH] [--nolink] [--noref] [--silent]
+usage: morss [-h] [--format {rss,json,html,csv}] [--search STRING] [--clip]
+             [--indent] [--cache] [--force] [--proxy] [--newest] [--firstlink]
+             [--resolve] [--items XPATH] [--item_link XPATH]
+             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH]
+             [--nolink] [--noref] [--silent]
              url
 
 Get full-text RSS feeds
@@ -93,28 +96,38 @@ output:
   --format {rss,json,html,csv}
                         output format
   --search STRING       does a basic case-sensitive search in the feed
-  --clip                stick the full article content under the original feed content (useful for twitter)
-  --indent              returns indented XML or JSON, takes more place, but human-readable
+  --clip                stick the full article content under the original feed
+                        content (useful for twitter)
+  --indent              returns indented XML or JSON, takes more place, but
+                        human-readable
 
 action:
-  --cache               only take articles from the cache (ie. don't grab new articles' content), so as to save time
+  --cache               only take articles from the cache (ie. don't grab new
+                        articles' content), so as to save time
   --force               force refetch the rss feed and articles
   --proxy               doesn't fill the articles
-  --newest              return the feed items in chronological order (morss ohterwise shows the items by appearing order)
-  --firstlink           pull the first article mentioned in the description instead of the default link
-  --resolve             replace tracking links with direct links to articles (not compatible with --proxy)
+  --newest              return the feed items in chronological order (morss
+                        ohterwise shows the items by appearing order)
+  --firstlink           pull the first article mentioned in the description
+                        instead of the default link
+  --resolve             replace tracking links with direct links to articles
+                        (not compatible with --proxy)
 
 custom feeds:
-  --items XPATH         (mandatory to activate the custom feeds function) xpath rule to match all the RSS entries
-  --item_link XPATH     xpath rule relative to items to point to the entry's link
+  --items XPATH         (mandatory to activate the custom feeds function)
+                        xpath rule to match all the RSS entries
+  --item_link XPATH     xpath rule relative to items to point to the entry's
+                        link
   --item_title XPATH    entry's title
   --item_content XPATH  entry's content
-  --item_time XPATH     entry's date & time (accepts a wide range of time formats)
+  --item_time XPATH     entry's date & time (accepts a wide range of time
+                        formats)
 
 misc:
   --nolink              drop links, but keeps links' inner text
   --noref               drop items' link
-  --silent              don't output the final RSS (useless on its own, but can be nice when debugging)
+  --silent              don't output the final RSS (useless on its own, but
+                        can be nice when debugging)
 
 GNU AGPLv3 code
 ```
