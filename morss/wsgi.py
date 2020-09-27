@@ -53,12 +53,10 @@ def parse_options(options):
     return out
 
 
-def cgi_parse_environ(environ):
-    # get options
-
+def get_path(environ):
     if 'REQUEST_URI' in environ:
         # when running on Apache
-        url = environ['REQUEST_URI'][1:]
+        url = unquote(environ['REQUEST_URI'][1:])
 
     else:
         # when using internal server
@@ -67,12 +65,19 @@ def cgi_parse_environ(environ):
         if environ['QUERY_STRING']:
             url += '?' + environ['QUERY_STRING']
 
+    return url
+
+
+def cgi_parse_environ(environ):
+    # get options
+
+    url = get_path(environ)
     url = re.sub(r'^/?(cgi/)?(morss.py|main.py)/', '', url)
 
     if url.startswith(':'):
         split = url.split('/', 1)
 
-        raw_options = unquote(split[0]).replace('|', '/').replace('\\\'', '\'').split(':')[1:]
+        raw_options = split[0].replace('|', '/').replace('\\\'', '\'').split(':')[1:]
 
         if len(split) > 1:
             url = split[1]
@@ -154,11 +159,7 @@ def middleware(func):
 def cgi_file_handler(environ, start_response, app):
     " Simple HTTP server to serve static files (.html, .css, etc.) "
 
-    if 'REQUEST_URI' in environ:
-        url = environ['REQUEST_URI'][1:]
-
-    else:
-        url = environ['PATH_INFO'][1:]
+    url = get_path(environ)
 
     if url == '':
         url = 'index.html'
