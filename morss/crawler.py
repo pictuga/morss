@@ -48,6 +48,11 @@ except NameError:
     basestring = unicode = str
 
 
+# uncomment the lines below to ignore SSL certs
+#import ssl
+#ssl._create_default_https_context = ssl._create_unverified_context
+
+
 MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml'],
     'rss': ['application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
