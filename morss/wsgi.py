@@ -22,6 +22,8 @@ import lxml.etree
 
 import cgitb
 import wsgiref.util
+import wsgiref.simple_server
+import wsgiref.handlers
 import mimetypes
 
 try:
@@ -35,6 +37,9 @@ from . import crawler
 from . import readabilite
 from .morss import FeedFetch, FeedGather, FeedFormat
 from .morss import Options, log, TIMEOUT, DELAY, MorssException
+
+
+PORT = int(os.getenv('PORT', 8080))
 
 
 def parse_options(options):
@@ -267,3 +272,18 @@ application = cgi_file_handler(application)
 application = cgi_dispatcher(application)
 application = cgi_error_handler(application)
 application = cgi_encode(application)
+
+
+def cgi_handle_request():
+    app = cgi_app
+    app = cgi_dispatcher(app)
+    app = cgi_error_handler(app)
+    app = cgi_encode(app)
+
+    wsgiref.handlers.CGIHandler().run(app)
+
+
+def cgi_start_server():
+    print('Serving http://localhost:%s/' % PORT)
+    httpd = wsgiref.simple_server.make_server('', PORT, application)
+    httpd.serve_forever()
