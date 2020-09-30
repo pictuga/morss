@@ -685,7 +685,7 @@ if 'CACHE' in os.environ:
             user = os.getenv('MYSQL_USER'),
             password = os.getenv('MYSQL_PWD'),
             database = os.getenv('MYSQL_DB'),
-            host = os.getenv('MYSQL_HOST')
+            host = os.getenv('MYSQL_HOST', 'localhost')
         )
 
     elif os.environ['CACHE'] == 'sqlite':
