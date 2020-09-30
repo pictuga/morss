@@ -186,7 +186,7 @@ uwsgi --http :8080 --plugin python --wsgi-file main.py
 #### Using Gunicorn
 
 ```shell
-gunicorn morss
+gunicorn --preload morss
 ```
 
 #### Using docker
