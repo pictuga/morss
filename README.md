@@ -317,7 +317,7 @@ will be cleared every time the program is run). Path can be defined with
 environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
 
 To limit the siz of the cache:
-' `CACHE_SIZE` sets the target number of items in the cache (further items will
+- `CACHE_SIZE` sets the target number of items in the cache (further items will
 be deleted but the cache migth be temporarily bigger than that). Defaults to 10k
 entries.
 - `CACHE_LIFESPAN` sets how often the cache must be trimmed (i.e. cut down to
