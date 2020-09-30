@@ -284,6 +284,12 @@ def cgi_handle_request():
 
 
 def cgi_start_server():
+    crawler.default_cache.autotrim()
+
     print('Serving http://localhost:%s/' % PORT)
     httpd = wsgiref.simple_server.make_server('', PORT, application)
     httpd.serve_forever()
+
+
+if "gunicorn" in os.getenv('SERVER_SOFTWARE'):
+    crawler.default_cache.autotrim()

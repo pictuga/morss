@@ -25,7 +25,9 @@ import chardet
 from cgi import parse_header
 import lxml.html
 import time
+import threading
 import random
+from collections import OrderedDict
 
 try:
     # python 2
@@ -46,6 +48,10 @@ try:
 except NameError:
     # python 3
     basestring = unicode = str
+
+
+CACHE_SIZE = int(os.getenv('CACHE_SIZE', 10000)) # max number of items in cache (default: 10k items)
+CACHE_LIFESPAN = int(os.getenv('CACHE_LIFESPAN', 60*60)) # how often to auto-clear the cache (default: 1hr)
 
 
 # uncomment the lines below to ignore SSL certs
@@ -605,6 +611,17 @@ class CacheHandler(BaseHandler):
 class BaseCache:
     """ Subclasses must behave like a dict """
 
+    def trim(self):
+        pass
+
+    def autotrim(self, delay=CACHE_LIFESPAN):
+        # trim the cache every so often
+
+        self.trim()
+
+        t = threading.Timer(delay, self.autotrim)
+        t.start()
+
     def __contains__(self, url):
         try:
             self[url]
@@ -627,8 +644,14 @@ class SQLiteCache(BaseCache):
             self.con.execute('CREATE TABLE IF NOT EXISTS data (url UNICODE PRIMARY KEY, code INT, msg UNICODE, headers UNICODE, data BLOB, timestamp INT)')
             self.con.execute('pragma journal_mode=WAL')
 
+        self.trim()
+
     def __del__(self):
         self.con.close()
+
+    def trim(self):
+        with self.con:
+            self.con.execute('DELETE FROM data WHERE timestamp <= ( SELECT timestamp FROM ( SELECT timestamp FROM data ORDER BY timestamp DESC LIMIT 1 OFFSET ? ) foo )', (CACHE_SIZE,))
 
     def __getitem__(self, url):
         row = self.con.execute('SELECT * FROM data WHERE url=?', (url,)).fetchone()
@@ -660,8 +683,14 @@ class MySQLCacheHandler(BaseCache):
         with self.cursor() as cursor:
             cursor.execute('CREATE TABLE IF NOT EXISTS data (url VARCHAR(255) NOT NULL PRIMARY KEY, code INT, msg TEXT, headers TEXT, data BLOB, timestamp INT)')
 
+        self.trim()
+
     def cursor(self):
         return pymysql.connect(host=self.host, user=self.user, password=self.password, database=self.database, charset='utf8', autocommit=True).cursor()
+
+    def trim(self):
+        with self.cursor() as cursor:
+            cursor.execute('DELETE FROM data WHERE timestamp <= ( SELECT timestamp FROM ( SELECT timestamp FROM data ORDER BY timestamp DESC LIMIT 1 OFFSET %s ) foo )', (CACHE_SIZE,))
 
     def __getitem__(self, url):
         cursor = self.cursor()
@@ -679,6 +708,19 @@ class MySQLCacheHandler(BaseCache):
                 (url,) + value + value)
 
 
+class CappedDict(OrderedDict, BaseCache):
+    def trim(self):
+        if CACHE_SIZE >= 0:
+            for i in range( max( len(self) - CACHE_SIZE , 0 )):
+                self.popitem(False)
+
+    def __setitem__(self, key, value):
+        # https://docs.python.org/2/library/collections.html#ordereddict-examples-and-recipes
+        if key in self:
+            del self[key]
+        OrderedDict.__setitem__(self, key, value)
+
+
 if 'CACHE' in os.environ:
     if os.environ['CACHE'] == 'mysql':
         default_cache = MySQLCacheHandler(
@@ -689,10 +731,16 @@ if 'CACHE' in os.environ:
         )
 
     elif os.environ['CACHE'] == 'sqlite':
-        default_cache = SQLiteCache(os.getenv('SQLITE_PATH', ':memory:'))
+        if 'SQLITE_PATH' in os.environ:
+            path = os.getenv('SQLITE_PATH') + '/morss-cache.db'
+
+        else:
+            path = ':memory:'
+
+        default_cache = SQLiteCache(path)
 
 else:
-        default_cache = {}
+        default_cache = CappedDict()
 
 
 if __name__ == '__main__':
