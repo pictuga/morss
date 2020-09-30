@@ -291,5 +291,5 @@ def cgi_start_server():
     httpd.serve_forever()
 
 
-if "gunicorn" in os.getenv('SERVER_SOFTWARE'):
+if 'gunicorn' in os.getenv('SERVER_SOFTWARE', ''):
     crawler.default_cache.autotrim()
