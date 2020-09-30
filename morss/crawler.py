@@ -620,6 +620,7 @@ class BaseCache:
         self.trim()
 
         t = threading.Timer(delay, self.autotrim)
+        t.daemon = True
         t.start()
 
     def __contains__(self, url):
