@@ -19,7 +19,7 @@ Morss also provides additional features, such as: .csv and json export, extended
 control over output. A strength of morss is its ability to deal with broken
 feeds, and to replace tracking links with direct links to the actual content.
 
-Morss can also generate feeds from html and json files (see `feedify.py`), which
+Morss can also generate feeds from html and json files (see `feeds.py`), which
 for instance makes it possible to get feeds for Facebook or Twitter, using
 hand-written rules (ie. there's no automatic detection of links to build feeds).
 Please mind that feeds based on html files may stop working unexpectedly, due to
@@ -30,6 +30,7 @@ Additionally morss can detect rss feeds in html pages' `<meta>`.
 You can use this program online for free at **[morss.it](https://morss.it/)**.
 
 Some features of morss:
+
 - Read RSS/Atom feeds
 - Create RSS feeds from json/html pages
 - Export feeds as RSS/JSON/CSV/HTML
@@ -41,9 +42,19 @@ Some features of morss:
 - Works as server/cli tool
 - Deobfuscate various tracking links
 
-## Dependencies
+## Install
 
-You do need:
+### Python package
+
+```shell
+pip install git+https://git.pictuga.com/pictuga/morss.git
+```
+
+The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
+C code needs to be compiled). If possible on your distribution, try installing
+it with the system package manager.
+
+Dependencies:
 
 - [python](http://www.python.org/) >= 2.6 (python 3 is supported)
 - [lxml](http://lxml.de/) for xml parsing
@@ -53,22 +64,204 @@ You do need:
 - [six](https://pypi.python.org/pypi/six), a dependency of chardet
 - pymysql
 
-Simplest way to get these:
-
-```shell
-pip install git+https://git.pictuga.com/pictuga/morss.git@master
-```
-
-The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
-C code needs to be compiled). If possible on your distribution, try installing
-it with the system package manager.
-
 You may also need:
-
 - Apache, with python-cgi support, to run on a server
 - a fast internet connection
 
-## Arguments
+### Docker
+
+Build & run
+
+```shell
+docker build --tag morss https://git.pictuga.com/pictuga/morss.git
+docker run -p 8080:8080 morss
+```
+
+With docker-compose:
+
+```yml
+services:
+    app:
+        build: https://git.pictuga.com/pictuga/morss.git
+        image: morss
+        ports:
+            - '8080:8080'
+```
+
+Then execute
+
+```shell
+docker-compose build
+docker-compose up
+```
+
+To update:
+
+- To get the latest code from the git repository, add `--no-cache` to the build
+commands
+- To update the base image (`alpine:latest`), add `--pull` to the build commands
+
+## Run
+
+morss will auto-detect what "mode" to use.
+
+### Running on/as a server
+
+Set up the server as indicated below, then visit:
+
+```
+http://PATH/TO/MORSS/[main.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL
+```
+
+For example: `http://morss.example/:clip/https://twitter.com/pictuga`
+
+*(Brackets indicate optional text)*
+
+The `main.py` part is only needed if your server doesn't support the Apache
+redirect rule set in the provided `.htaccess`.
+
+Works like a charm with [Tiny Tiny
+RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki), and most probably other
+clients.
+
+
+#### Via Docker
+
+See above (in Install)
+
+#### Using Gunicorn
+
+```shell
+gunicorn --preload morss
+```
+
+#### Using uWSGI
+
+Running this command should do:
+
+```shell
+uwsgi --http :8080 --plugin python --wsgi-file main.py
+```
+
+#### Using morss' internal HTTP server
+
+Morss can run its own, **very basic**, HTTP server, meant for debugging mostly.
+The latter should start when you run morss without any argument, on port 8080.
+I'd highly recommend you to use gunicorn or something similar for better
+performance.
+
+```shell
+morss
+```
+
+You can change the port using environment variables like this `PORT=9000 morss`.
+
+#### Via mod_cgi/FastCGI with Apache/nginx
+
+For this, you'll want to change a bit the architecture of the files, for example
+into something like this.
+
+```
+/
+├── cgi
+│   │
+│   ├── main.py
+│   ├── morss
+│   │   ├── __init__.py
+│   │   ├── __main__.py
+│   │   ├── morss.py
+│   │   └── ...
+│   │
+│   ├── dateutil
+│   └── ...
+│
+├── .htaccess
+├── index.html
+└── ...
+```
+
+For this, you need to make sure your host allows python script execution. This
+method uses HTTP calls to fetch the RSS feeds, which will be handled through
+`mod_cgi` for example on Apache severs.
+
+Please pay attention to `main.py` permissions for it to be executable. Also
+ensure that the provided `/www/.htaccess` works well with your server.
+
+### As a CLI application
+
+Run:
+
+```
+morss [--argwithoutvalue] [--argwithvalue=value] [...] FEEDURL
+```
+
+For example: `morss --clip http://feeds.bbci.co.uk/news/rss.xml`
+
+*(Brackets indicate optional text)*
+
+### As a newsreader hook
+
+To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required
+(unless other newsreaders provide the same kind of feature), since custom
+scripts can be run on top of the RSS feed, using its
+[output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
+
+To use this script, you have to enable "(Unix) command" in liferea feed
+settings, and use the command:
+
+```
+morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+```
+
+For example: `morss http://feeds.bbci.co.uk/news/rss.xml`
+
+*(Brackets indicate optional text)*
+
+### As a python library
+
+Quickly get a full-text feed:
+
+```python
+>>> import morss
+>>> xml_string = morss.process('http://feeds.bbci.co.uk/news/rss.xml')
+>>> xml_string[:50]
+"<?xml version='1.0' encoding='UTF-8'?>\n<?xml-style"
+```
+
+Using cache and passing arguments:
+
+```python
+>>> import morss
+>>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
+>>> cache = '/tmp/morss-cache.db' # sqlite cache location
+>>> options = {'csv':True}
+>>> xml_string = morss.process(url, cache, options)
+>>> xml_string[:50]
+'{"title": "BBC News - Home", "desc": "The latest s'
+```
+
+`morss.process` is actually a wrapper around simpler function. It's still
+possible to call the simpler functions, to have more control on what's happening
+under the hood.
+
+Doing it step-by-step:
+
+```python
+import morss, morss.crawler
+
+url = 'http://newspaper.example/feed.xml'
+options = morss.Options(csv=True) # arguments
+morss.crawler.sqlite_default = '/tmp/morss-cache.db' # sqlite cache location
+
+url, rss = morss.FeedFetch(url, options) # this only grabs the RSS feed
+rss = morss.FeedGather(rss, url, options) # this fills the feed and cleans it up
+
+output = morss.FeedFormat(rss, options, 'unicode') # formats final feed
+```
+
+## Arguments and settings
+
+### Arguments
 
 morss accepts some arguments, to lightly alter the output of morss. Arguments
 may need to have a value (usually a string or a number). In the different "Use
@@ -132,221 +325,68 @@ misc:
 GNU AGPLv3 code
 ```
 
-Further options:
-- Change what morss does
-- Environment variable `DEBUG=`: to have some feedback from the script execution. Useful for debugging. On Apache, can be set via the `SetEnv` instruction (see sample `.htaccess` provided).
+Further HTTP-only options:
+
 - `callback=NAME`: for JSONP calls
-- `cors`: allow Cross-origin resource sharing (allows XHR calls from other servers)
+- `cors`: allow Cross-origin resource sharing (allows XHR calls from other
+servers)
 - `txt`: changes the http content-type to txt (for faster "`view-source:`")
 
-## Use cases
+### Environment variables
 
-morss will auto-detect what "mode" to use.
+To pass environment variables:
 
-### Running on a server
-#### Via mod_cgi/FastCGI with Apache/nginx
+- Docker-cli: `docker run -p 8080:8080 morss --env KEY=value`
+- docker-compose: add an `environment:` section in the .yml file
+- Gunicorn/uWSGI/CLI: prepend `KEY=value` before the command
+- Apache: via the `SetEnv` instruction (see sample `.htaccess` provided)
 
-For this, you'll want to change a bit the architecture of the files, for example
-into something like this.
+Generic:
 
-```
-/
-├── cgi
-│   │
-│   ├── main.py
-│   ├── morss
-│   │   ├── __init__.py
-│   │   ├── __main__.py
-│   │   ├── morss.py
-│   │   └── ...
-│   │
-│   ├── dateutil
-│   └── ...
-│
-├── .htaccess
-├── index.html
-└── ...
-```
-
-For this, you need to make sure your host allows python script execution. This
-method uses HTTP calls to fetch the RSS feeds, which will be handled through
-`mod_cgi` for example on Apache severs.
-
-Please pay attention to `main.py` permissions for it to be executable. Also
-ensure that the provided `/www/.htaccess` works well with your server.
-
-#### Using uWSGI
-
-Running this command should do:
-
-```shell
-uwsgi --http :8080 --plugin python --wsgi-file main.py
-```
-
-#### Using Gunicorn
-
-```shell
-gunicorn --preload morss
-```
-
-#### Using docker
-
-Build & run
-
-```shell
-docker build https://git.pictuga.com/pictuga/morss.git -t morss
-docker run -p 8080:8080 morss
-```
-
-With docker-compose:
-
-```yml
-services:
-    app:
-        build: https://git.pictuga.com/pictuga/morss.git
-        ports:
-            - '8080:8080'
-```
-
-Then run
-
-```shell
-docker-compose up --build
-```
-
-#### Using morss' internal HTTP server
-
-Morss can run its own, very basic, HTTP server. The latter should start when you
-run morss without any argument, on port 8080. I'd highly recommend you to use
-gunicorn or something similar for better performance.
-
-```shell
-morss
-```
-
-You can change the port using environment variables like this `PORT=9000 morss`.
-
-#### Passing arguments
-
-Then visit:
-```
-http://PATH/TO/MORSS/[main.py/][:argwithoutvalue[:argwithvalue=value[...]]]/FEEDURL
-```
-For example: `http://morss.example/:clip/https://twitter.com/pictuga`
-
-*(Brackets indicate optional text)*
-
-The `main.py` part is only needed if your server doesn't support the Apache redirect rule set in the provided `.htaccess`.
-
-Works like a charm with [Tiny Tiny RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki), and most probably other clients.
-
-### As a CLI application
-
-Run:
-```
-morss [--argwithoutvalue] [--argwithvalue=value] [...] FEEDURL
-```
-For example: `morss --clip http://feeds.bbci.co.uk/news/rss.xml`
-
-*(Brackets indicate optional text)*
-
-### As a newsreader hook
-
-To use it, the newsreader [Liferea](http://lzone.de/liferea/) is required
-(unless other newsreaders provide the same kind of feature), since custom
-scripts can be run on top of the RSS feed, using its
-[output](http://lzone.de/liferea/scraping.htm) as an RSS feed.
-
-To use this script, you have to enable "(Unix) command" in liferea feed settings, and use the command:
-```
-morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
-```
-For example: `morss http://feeds.bbci.co.uk/news/rss.xml`
-
-*(Brackets indicate optional text)*
-
-### As a python library
-
-Quickly get a full-text feed:
-```python
->>> import morss
->>> xml_string = morss.process('http://feeds.bbci.co.uk/news/rss.xml')
->>> xml_string[:50]
-"<?xml version='1.0' encoding='UTF-8'?>\n<?xml-style"
-```
-
-Using cache and passing arguments:
-```python
->>> import morss
->>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
->>> cache = '/tmp/morss-cache.db' # sqlite cache location
->>> options = {'csv':True}
->>> xml_string = morss.process(url, cache, options)
->>> xml_string[:50]
-'{"title": "BBC News - Home", "desc": "The latest s'
-```
-
-`morss.process` is actually a wrapper around simpler function. It's still
-possible to call the simpler functions, to have more control on what's happening
-under the hood.
-
-Doing it step-by-step:
-```python
-import morss, morss.crawler
-
-url = 'http://newspaper.example/feed.xml'
-options = morss.Options(csv=True) # arguments
-morss.crawler.sqlite_default = '/tmp/morss-cache.db' # sqlite cache location
-
-url, rss = morss.FeedFetch(url, options) # this only grabs the RSS feed
-rss = morss.FeedGather(rss, url, options) # this fills the feed and cleans it up
-
-output = morss.FeedFormat(rss, options, 'unicode') # formats final feed
-```
-
-## Cache information
-
-morss uses caching to make loading faster. There are 3 possible cache backends,
-which can be picked via environment variables:
-
-- `(nothing/default)`: a simple python in-memory dict() object.
-- `CACHE=sqlite`: sqlite3 cache. Default file location is in-memory (i.e. it
-will be cleared every time the program is run). Path can be defined with
-`SQLITE_PATH`.
-- `CACHE=mysql`: MySQL cache. Connection can be defined with the following
-environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
-
-To limit the siz of the cache:
-- `CACHE_SIZE` sets the target number of items in the cache (further items will
-be deleted but the cache migth be temporarily bigger than that). Defaults to 10k
-entries.
-- `CACHE_LIFESPAN` sets how often the cache must be trimmed (i.e. cut down to
-the number of items set in `CACHE_SIZE`). Defaults to 1hr.
-
-## Configuration
-### Length limitation
+- `DEBUG=1`: to have some feedback from the script
+execution. Useful for debugging.
+- `DELAY` sets the browser cache delay, only for HTTP clients
+- `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of
 time to parse it, or might even run into a memory overflow on some shared
 hosting plans (limits around 10Mb), in which case you might want to adjust the
 below settings via environment variables.
 
-- `MAX_TIME` sets the maximum amount of time spent *fetching* articles, more time might be spent taking older articles from cache. `-1` for unlimited.
-- `MAX_ITEM` sets the maximum number of articles to fetch. `-1` for unlimited. More articles will be taken from cache following the nexts settings.
-- `LIM_TIME` sets the maximum amount of time spent working on the feed (whether or not it's already cached). Articles beyond that limit will be dropped from the feed. `-1` for unlimited.
-- `LIM_ITEM` sets the maximum number of article checked, limiting both the number of articles fetched and taken from cache. Articles beyond that limit will be dropped from the feed, even if they're cached. `-1` for unlimited.
+- `MAX_TIME` sets the maximum amount of time spent *fetching* articles, more
+time might be spent taking older articles from cache. `-1` for unlimited.
+- `MAX_ITEM` sets the maximum number of articles to fetch. `-1` for unlimited.
+More articles will be taken from cache following the nexts settings.
+- `LIM_TIME` sets the maximum amount of time spent working on the feed (whether
+or not it's already cached). Articles beyond that limit will be dropped from the
+feed. `-1` for unlimited.
+- `LIM_ITEM` sets the maximum number of article checked, limiting both the
+number of articles fetched and taken from cache. Articles beyond that limit will
+be dropped from the feed, even if they're cached. `-1` for unlimited.
 
-### Other settings
+morss uses caching to make loading faster. There are 3 possible cache backends:
 
-- `DELAY` sets the browser cache delay, only for HTTP clients
-- `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
+- `(nothing/default)`: a simple python in-memory dict-like object.
+- `CACHE=sqlite`: sqlite3 cache. Default file location is in-memory (i.e. it
+will be cleared every time the program is run). Path can be defined with
+`SQLITE_PATH`.
+- `CACHE=mysql`: MySQL cache. Connection can be defined with the following
+environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
+
+To limit the size of the cache:
+
+- `CACHE_SIZE` sets the target number of items in the cache (further items will
+be deleted but the cache might be temporarily bigger than that). Defaults to 10k
+entries.
+- `CACHE_LIFESPAN` sets how often the cache must be trimmed (i.e. cut down to
+the number of items set in `CACHE_SIZE`). Defaults to 1hr.
 
 ### Content matching
 
 The content of articles is grabbed with our own readability fork. This means
 that most of the time the right content is matched. However sometimes it fails,
 therefore some tweaking is required. Most of the time, what has to be done is to
-add some "rules" in the main script file in *readability* (not in morss).
+add some "rules" in the main script file in `readabilite.py` (not in morss).
 
 Most of the time when hardly nothing is matched, it means that the main content
 of the article is made of images, videos, pictures, etc., which readability
