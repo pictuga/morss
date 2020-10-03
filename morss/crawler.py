@@ -53,10 +53,6 @@ except NameError:
 CACHE_SIZE = int(os.getenv('CACHE_SIZE', 1000)) # max number of items in cache (default: 1k items)
 CACHE_LIFESPAN = int(os.getenv('CACHE_LIFESPAN', 60)) # how often to auto-clear the cache (default: 1min)
 
-# uncomment the lines below to ignore SSL certs
-#import ssl
-#ssl._create_default_https_context = ssl._create_unverified_context
-
 
 MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml'],
@@ -741,6 +737,11 @@ if 'CACHE' in os.environ:
 
 else:
         default_cache = CappedDict()
+
+
+if 'IGNORE_SSL' in os.environ:
+    import ssl
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 
 if __name__ == '__main__':

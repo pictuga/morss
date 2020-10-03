@@ -345,6 +345,7 @@ Generic:
 
 - `DEBUG=1`: to have some feedback from the script
 execution. Useful for debugging.
+- `IGNORE_SSL=1`: to ignore SSL certs when fetch feeds and articles
 - `DELAY` sets the browser cache delay, only for HTTP clients
 - `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
 
