@@ -264,8 +264,8 @@ output = morss.FeedFormat(rss, options, 'unicode') # formats final feed
 ### Arguments
 
 morss accepts some arguments, to lightly alter the output of morss. Arguments
-may need to have a value (usually a string or a number). In the different "Use
-cases" below is detailed how to pass those arguments to morss.
+may need to have a value (usually a string or a number). How to pass those
+arguments to morss is explained in Run above.
 
 The list of arguments can be obtained by running `morss --help`
 
@@ -343,8 +343,8 @@ To pass environment variables:
 
 Generic:
 
-- `DEBUG=1`: to have some feedback from the script
-execution. Useful for debugging.
+- `DEBUG=1`: to have some feedback from the script execution. Useful for
+debugging.
 - `IGNORE_SSL=1`: to ignore SSL certs when fetch feeds and articles
 - `DELAY` sets the browser cache delay, only for HTTP clients
 - `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
