@@ -340,21 +340,22 @@ Generic:
 - `DEBUG=1`: to have some feedback from the script execution. Useful for
 debugging.
 - `IGNORE_SSL=1`: to ignore SSL certs when fetch feeds and articles
-- `DELAY` sets the browser cache delay, only for HTTP clients
-- `TIMEOUT` sets the HTTP timeout when fetching rss feeds and articles
+- `DELAY` (seconds) sets the browser cache delay, only for HTTP clients
+- `TIMEOUT` (seconds) sets the HTTP timeout when fetching rss feeds and articles
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of
 time to parse it, or might even run into a memory overflow on some shared
 hosting plans (limits around 10Mb), in which case you might want to adjust the
 below settings via environment variables.
 
-- `MAX_TIME` sets the maximum amount of time spent *fetching* articles, more
-time might be spent taking older articles from cache. `-1` for unlimited.
+- `MAX_TIME` (seconds) sets the maximum amount of time spent *fetching*
+articles, more time might be spent taking older articles from cache. `-1` for
+unlimited.
 - `MAX_ITEM` sets the maximum number of articles to fetch. `-1` for unlimited.
 More articles will be taken from cache following the nexts settings.
-- `LIM_TIME` sets the maximum amount of time spent working on the feed (whether
-or not it's already cached). Articles beyond that limit will be dropped from the
-feed. `-1` for unlimited.
+- `LIM_TIME` (seconds) sets the maximum amount of time spent working on the feed
+(whether or not it's already cached). Articles beyond that limit will be dropped
+from the feed. `-1` for unlimited.
 - `LIM_ITEM` sets the maximum number of article checked, limiting both the
 number of articles fetched and taken from cache. Articles beyond that limit will
 be dropped from the feed, even if they're cached. `-1` for unlimited.
@@ -373,8 +374,8 @@ To limit the size of the cache:
 - `CACHE_SIZE` sets the target number of items in the cache (further items will
 be deleted but the cache might be temporarily bigger than that). Defaults to 1k
 entries.
-- `CACHE_LIFESPAN` sets how often the cache must be trimmed (i.e. cut down to
-the number of items set in `CACHE_SIZE`). Defaults to 1min.
+- `CACHE_LIFESPAN` (seconds) sets how often the cache must be trimmed (i.e. cut
+down to the number of items set in `CACHE_SIZE`). Defaults to 1min.
 
 ### Content matching
 
