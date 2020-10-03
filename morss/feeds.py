@@ -647,12 +647,11 @@ class Uniq(object):
 
 
 class Feed(object):
-    itemsClass = 'Item'
+    itemsClass = property(lambda x: Item) # because Item is define below, i.e. afterwards
     dic = ('title', 'desc', 'items')
 
     def wrap_items(self, items):
-        itemsClass = globals()[self.itemsClass]
-        return [itemsClass(x, self.rules, self) for x in items]
+        return [self.itemsClass(x, self.rules, self) for x in items]
 
     title = property(
         lambda f:   f.get('title'),
@@ -672,7 +671,7 @@ class Feed(object):
         if new is None:
             return
 
-        for attr in globals()[self.itemsClass].dic:
+        for attr in self.itemsClass.dic:
             try:
                 setattr(item, attr, getattr(new, attr))
 
@@ -732,8 +731,12 @@ class Item(Uniq):
         lambda f:   f.rmv('item_updated') )
 
 
+class ItemXML(Item, ParserXML):
+    pass
+
+
 class FeedXML(Feed, ParserXML):
-    itemsClass = 'ItemXML'
+    itemsClass = ItemXML
 
     def root_siblings(self):
         out = []
@@ -761,20 +764,12 @@ class FeedXML(Feed, ParserXML):
         return etree.tostring(self.root.getroottree(), encoding=encoding, method='xml', **k)
 
 
-class ItemXML(Item, ParserXML):
-    pass
-
-
-class FeedHTML(Feed, ParserHTML):
-    itemsClass = 'ItemHTML'
-
-
 class ItemHTML(Item, ParserHTML):
     pass
 
 
-class FeedJSON(Feed, ParserJSON):
-    itemsClass = 'ItemJSON'
+class FeedHTML(Feed, ParserHTML):
+    itemsClass = ItemHTML
 
 
 class ItemJSON(Item, ParserJSON):
@@ -788,6 +783,9 @@ class ItemJSON(Item, ParserJSON):
                 return
 
             cur = cur[node]
+
+class FeedJSON(Feed, ParserJSON):
+    itemsClass = ItemJSON
 
 
 if __name__ == '__main__':
