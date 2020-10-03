@@ -73,7 +73,7 @@ You may also need:
 Build & run
 
 ```shell
-docker build --tag morss https://git.pictuga.com/pictuga/morss.git
+docker build --tag morss https://git.pictuga.com/pictuga/morss.git --no-cache --pull
 docker run -p 8080:8080 morss
 ```
 
@@ -91,15 +91,9 @@ services:
 Then execute
 
 ```shell
-docker-compose build
+docker-compose build --no-cache --pull
 docker-compose up
 ```
-
-To update:
-
-- To get the latest code from the git repository, add `--no-cache` to the build
-commands
-- To update the base image (`alpine:latest`), add `--pull` to the build commands
 
 ## Run
 
