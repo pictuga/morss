@@ -50,9 +50,8 @@ except NameError:
     basestring = unicode = str
 
 
-CACHE_SIZE = int(os.getenv('CACHE_SIZE', 10000)) # max number of items in cache (default: 10k items)
-CACHE_LIFESPAN = int(os.getenv('CACHE_LIFESPAN', 60*60)) # how often to auto-clear the cache (default: 1hr)
-
+CACHE_SIZE = int(os.getenv('CACHE_SIZE', 1000)) # max number of items in cache (default: 1k items)
+CACHE_LIFESPAN = int(os.getenv('CACHE_LIFESPAN', 60)) # how often to auto-clear the cache (default: 1min)
 
 # uncomment the lines below to ignore SSL certs
 #import ssl

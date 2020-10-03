@@ -376,10 +376,10 @@ environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
 To limit the size of the cache:
 
 - `CACHE_SIZE` sets the target number of items in the cache (further items will
-be deleted but the cache might be temporarily bigger than that). Defaults to 10k
+be deleted but the cache might be temporarily bigger than that). Defaults to 1k
 entries.
 - `CACHE_LIFESPAN` sets how often the cache must be trimmed (i.e. cut down to
-the number of items set in `CACHE_SIZE`). Defaults to 1hr.
+the number of items set in `CACHE_SIZE`). Defaults to 1min.
 
 ### Content matching
 
