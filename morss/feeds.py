@@ -626,32 +626,40 @@ class ParserJSON(ParserBase):
         return out.replace('\n', '<br/>') if out else out
 
 
-class Uniq(object):
-    _map = {}
-    _id = None
+def wrap_uniq(wrapper_fn_name):
+    " Wraps the output of the function with the specified function "
+    # This is called when parsing "wrap_uniq('wrap_item')"
 
-    def __new__(cls, *args, **kwargs):
-        # check if a wrapper was already created for it
-        # if so, reuse it
-        # if not, create a new one
-        # note that the item itself (the tree node) is created beforehands
+    def decorator(func):
+        # This is called when parsing "@wrap_uniq('wrap_item')"
 
-        tmp_id = cls._gen_id(*args, **kwargs)
-        if tmp_id in cls._map:
-            return cls._map[tmp_id]
+        def wrapped_func(self, *args, **kwargs):
+            # This is called when the wrapped function is called
 
-        else:
-            obj = object.__new__(cls) #, *args, **kwargs)
-            cls._map[tmp_id] = obj
-            return obj
+            output = func(self, *args, **kwargs)
+            output_id = id(output)
+
+            try:
+                return self._map[output_id]
+
+            except (KeyError, AttributeError):
+                if not hasattr(self, '_map'):
+                    self._map = {}
+
+                wrapper_fn = getattr(self, wrapper_fn_name)
+                obj = wrapper_fn(output)
+                self._map[output_id] = obj
+
+                return obj
+
+        return wrapped_func
+
+    return decorator
 
 
 class Feed(object):
     itemsClass = property(lambda x: Item) # because Item is define below, i.e. afterwards
     dic = ('title', 'desc', 'items')
-
-    def wrap_items(self, items):
-        return [self.itemsClass(x, self.rules, self) for x in items]
 
     title = property(
         lambda f:   f.get('title'),
@@ -681,8 +689,12 @@ class Feed(object):
 
         return item
 
+    def wrap_item(self, item):
+        return self.itemsClass(item, self.rules, self)
+
+    @wrap_uniq('wrap_item')
     def __getitem__(self, key):
-        return self.wrap_items(self.get_raw('items'))[key]
+        return self.get_raw('items')[key]
 
     def __delitem__(self, key):
         self[key].remove()
@@ -691,7 +703,7 @@ class Feed(object):
         return len(self.get_raw('items'))
 
 
-class Item(Uniq):
+class Item(object):
     dic = ('title', 'link', 'desc', 'content', 'time', 'updated')
 
     def __init__(self, xml=None, rules=None, parent=None):
