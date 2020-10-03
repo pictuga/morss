@@ -668,9 +668,6 @@ class Feed(object):
         self.rule_create(self.rules['items'])
         item = self.items[-1]
 
-        if new is None:
-            return
-
         for attr in self.itemsClass.dic:
             try:
                 setattr(item, attr, getattr(new, attr))
@@ -681,6 +678,8 @@ class Feed(object):
 
                 except (IndexError, TypeError):
                     pass
+
+        return item
 
     def __getitem__(self, key):
         return self.wrap_items(self.get_raw('items'))[key]
