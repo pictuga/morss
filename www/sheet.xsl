@@ -191,9 +191,9 @@
 					feed as 
 					<select>
 						<option value="">RSS</option>
-						<option value=":json:cors">JSON</option>
-						<option value=":html">HTML</option>
-						<option value=":csv">CSV</option>
+						<option value=":format=json:cors">JSON</option>
+						<option value=":format=html">HTML</option>
+						<option value=":format=csv">CSV</option>
 					</select>
 					using the 
 					<select>
