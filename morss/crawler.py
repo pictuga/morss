@@ -262,29 +262,17 @@ def UnGzip(data):
     return zlib.decompressobj(zlib.MAX_WBITS | 32).decompress(data)
 
 
-class GZIPHandler(BaseHandler):
+class GZIPHandler(RespDataHandler):
     def http_request(self, req):
         req.add_unredirected_header('Accept-Encoding', 'gzip')
         return req
 
-    def http_response(self, req, resp):
+    def data_response(self, req, resp, data):
         if 200 <= resp.code < 300:
             if resp.headers.get('Content-Encoding') == 'gzip':
-                data = resp.read()
-
-                data = UnGzip(data)
-
                 resp.headers['Content-Encoding'] = 'identity'
 
-                fp = BytesIO(data)
-                old_resp = resp
-                resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-                resp.msg = old_resp.msg
-
-        return resp
-
-    https_response = http_response
-    https_request = http_request
+                return UnGzip(data)
 
 
 def detect_encoding(data, resp=None):
@@ -321,28 +309,9 @@ def detect_raw_encoding(data, resp=None):
     return 'utf-8'
 
 
-class EncodingFixHandler(BaseHandler):
-    def __init__(self, encoding=None):
-        self.encoding = encoding
-
-    def http_response(self, req, resp):
-        maintype = resp.info().get('Content-Type', '').split('/')[0]
-        if 200 <= resp.code < 300 and maintype == 'text':
-            data = resp.read()
-
-            enc = self.encoding or detect_encoding(data, resp)
-
-            data = data.decode(enc, 'replace')
-            data = data.encode(enc)
-
-            fp = BytesIO(data)
-            old_resp = resp
-            resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-            resp.msg = old_resp.msg
-
-        return resp
-
-    https_response = http_response
+class EncodingFixHandler(RespStrHandler):
+    def str_response(self, req, resp, data_str):
+        return data_str
 
 
 class UAHandler(BaseHandler):
