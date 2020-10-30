@@ -104,7 +104,7 @@ def adv_get(url, timeout=None, *args, **kwargs):
     }
 
 
-def custom_handler(follow=None, delay=None, encoding=None):
+def custom_handler(follow=None, delay=None):
     handlers = []
 
     # as per urllib2 source code, these Handelers are added first
@@ -123,7 +123,7 @@ def custom_handler(follow=None, delay=None, encoding=None):
     handlers.append(HTTPRefreshHandler())
     handlers.append(UAHandler(random.choice(DEFAULT_UAS)))
     handlers.append(BrowserlyHeaderHandler())
-    handlers.append(EncodingFixHandler(encoding))
+    handlers.append(EncodingFixHandler())
 
     if follow:
         handlers.append(AlternateHandler(MIMETYPE[follow]))
