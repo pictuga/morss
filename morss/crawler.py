@@ -176,6 +176,51 @@ def sanitize_url(url):
     return urlunparse(parts)
 
 
+class RespDataHandler(BaseHandler):
+    " Make it easier to use the reponse body "
+
+    def data_reponse(self, req, resp, data):
+        pass
+
+    def http_response(self, req, resp):
+        # read data
+        data = resp.read()
+
+        # process data and use returned content (if any)
+        data = self.data_response(req, resp, data) or data
+
+        # reformat the stuff
+        fp = BytesIO(data)
+        old_resp = resp
+        resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+        resp.msg = old_resp.msg
+
+        return resp
+
+    https_response = http_response
+
+
+class RespStrHandler(RespDataHandler):
+    " Make it easier to use the _decoded_ reponse body "
+
+    def str_reponse(self, req, resp, data_str):
+        pass
+
+    def data_response(self, req, resp, data):
+        #decode
+        enc = detect_encoding(data, resp)
+        data_str = data.decode(enc, 'replace')
+
+        #process
+        data_str = self.str_response(req, resp, data_str)
+
+        # return
+        data = data_str.encode(enc) if data_str is not None else data
+
+        #return
+        return data
+
+
 class DebugHandler(BaseHandler):
     handler_order = 2000
 
