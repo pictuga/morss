@@ -23,7 +23,6 @@ from io import BytesIO, StringIO
 import re
 import chardet
 from cgi import parse_header
-import lxml.html
 import time
 import threading
 import random
@@ -337,71 +336,51 @@ class BrowserlyHeaderHandler(BaseHandler):
     https_request = http_request
 
 
-class AlternateHandler(BaseHandler):
+def iter_html_tag(html_str, tag_name):
+    re_tag = r'<%s(\s*[^>])*>' % tag_name
+    re_attr = r'(?P<key>[^=\s]+)=[\'"](?P<value>[^\'"]+)[\'"]'
+
+    for tag_match in re.finditer(re_tag, html_str):
+        attr_match = re.findall(re_attr, tag_match.group(0))
+
+        if attr_match is not None:
+            yield dict(attr_match)
+
+
+class AlternateHandler(RespStrHandler):
     " Follow <link rel='alternate' type='application/rss+xml' href='...' /> "
 
     def __init__(self, follow=None):
         self.follow = follow or []
 
-    def http_response(self, req, resp):
+    def str_response(self, req, resp, data_str):
         contenttype = resp.info().get('Content-Type', '').split(';')[0]
+
         if 200 <= resp.code < 300 and len(self.follow) and contenttype in MIMETYPE['html'] and contenttype not in self.follow:
             # opps, not what we were looking for, let's see if the html page suggests an alternative page of the right types
 
-            data = resp.read()
-
-            try:
-                links = lxml.html.fromstring(data[:10000]).findall('.//link[@rel="alternate"]')
-
-                for link in links:
-                    if link.get('type', '') in self.follow:
-                        resp.code = 302
-                        resp.msg = 'Moved Temporarily'
-                        resp.headers['location'] = link.get('href')
-                        break
-
-            except (ValueError, SyntaxError):
-                # catch parsing errors
-                pass
-
-            fp = BytesIO(data)
-            old_resp = resp
-            resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-            resp.msg = old_resp.msg
-
-        return resp
-
-    https_response = http_response
+            for link in iter_html_tag(data_str[:10000], 'link'):
+                if (link.get('rel') == 'alternate'
+                        and link.get('type') in self.follow
+                        and 'href' in link):
+                    resp.code = 302
+                    resp.msg = 'Moved Temporarily'
+                    resp.headers['location'] = link.get('href')
+                    break
 
 
-class HTTPEquivHandler(BaseHandler):
+class HTTPEquivHandler(RespStrHandler):
     " Handler to support <meta http-equiv='...' content='...' />, since it defines HTTP headers "
 
     handler_order = 600
 
-    def http_response(self, req, resp):
+    def str_response(self, req, resp, data_str):
         contenttype = resp.info().get('Content-Type', '').split(';')[0]
         if 200 <= resp.code < 300 and contenttype in MIMETYPE['html']:
-            data = resp.read()
 
-            try:
-                headers = lxml.html.fromstring(data[:10000]).findall('.//meta[@http-equiv]')
-
-                for header in headers:
-                    resp.headers[header.get('http-equiv').lower()] = header.get('content')
-
-            except (ValueError, SyntaxError):
-                # catch parsing errors
-                pass
-
-            fp = BytesIO(data)
-            old_resp = resp
-            resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-            resp.msg = old_resp.msg
-
-        return resp
-
-    https_response = http_response
+            for meta in iter_html_tag(data_str[:10000], 'meta'):
+                if 'http-equiv' in meta and 'content' in meta:
+                    resp.headers[meta.get('http-equiv').lower()] = meta.get('content')
 
 
 class HTTPRefreshHandler(BaseHandler):
