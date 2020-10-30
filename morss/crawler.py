@@ -196,7 +196,7 @@ class SizeLimitHandler(BaseHandler):
 
     handler_order = 450
 
-    def __init__(self, limit=5*1024^2):
+    def __init__(self, limit=5*1024**2):
         self.limit = limit
 
     def http_response(self, req, resp):
