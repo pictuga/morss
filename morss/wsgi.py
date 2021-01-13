@@ -257,7 +257,7 @@ def cgi_error_handler(environ, start_response, app):
     except Exception as e:
         headers = {'status': '500 Oops', 'content-type': 'text/html'}
         start_response(headers['status'], list(headers.items()), sys.exc_info())
-        log('ERROR: %s' % repr(e), force=True)
+        log('ERROR: %s' % repr(e))
         return [cgitb.html(sys.exc_info())]
 
 
