@@ -348,6 +348,11 @@ time to parse it, or might even run into a memory overflow on some shared
 hosting plans (limits around 10Mb), in which case you might want to adjust the
 below settings via environment variables.
 
+Also, if the request takes too long to process, the http request might be
+discarded. See relevant config for
+[gunicorn](https://docs.gunicorn.org/en/stable/settings.html#timeout) or
+[nginx](http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_read_timeout).
+
 - `MAX_TIME` (seconds) sets the maximum amount of time spent *fetching*
 articles, more time might be spent taking older articles from cache. `-1` for
 unlimited.
