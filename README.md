@@ -204,7 +204,7 @@ To use this script, you have to enable "(Unix) command" in liferea feed
 settings, and use the command:
 
 ```
-morss [argwithoutvalue] [argwithvalue=value] [...] FEEDURL
+morss [--argwithoutvalue] [--argwithvalue=value] [...] FEEDURL
 ```
 
 For example: `morss http://feeds.bbci.co.uk/news/rss.xml`
