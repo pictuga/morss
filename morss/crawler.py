@@ -721,7 +721,7 @@ if 'CACHE' in os.environ:
 
     elif os.environ['CACHE'] == 'sqlite':
         if 'SQLITE_PATH' in os.environ:
-            path = os.getenv('SQLITE_PATH') + '/morss-cache.db'
+            path = os.getenv('SQLITE_PATH')
 
         else:
             path = ':memory:'
