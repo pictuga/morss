@@ -114,6 +114,15 @@ def custom_handler(follow=None, delay=None):
     # HTTPDefaultErrorHandler, HTTPRedirectHandler,
     # FTPHandler, FileHandler, HTTPErrorProcessor]
     # & HTTPSHandler
+    #
+    # when processing a request:
+    # (1) all the *_request are run
+    # (2) the *_open are run until sth is returned (other than None)
+    # (3) all the *_response are run
+    #
+    # During (3), if an http error occurs (i.e. not a 2XX response code), the
+    # http_error_* are run until sth is returned (other than None). If they all
+    # return nothing, a python error is raised
 
     #handlers.append(DebugHandler())
     handlers.append(SizeLimitHandler(500*1024)) # 500KiB
