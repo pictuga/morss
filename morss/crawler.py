@@ -456,6 +456,31 @@ class CacheHandler(BaseHandler):
     def save(self, url, code, msg, headers, data, timestamp):
         self.cache[url] = (code, msg, unicode(headers), data, timestamp)
 
+    def is_cached(self, url):
+        return self.load(url)[0] is not None
+
+    def cached_response(self, req):
+        # this does NOT check whether it's already cached, use with care
+        (code, msg, headers, data, timestamp) = self.load(req.get_full_url())
+
+        # return the cache as a response
+        resp = addinfourl(BytesIO(data), headers, req.get_full_url(), code)
+        resp.msg = msg
+
+        return resp
+
+    def save_response(self, req, resp):
+        data = resp.read()
+
+        self.save(req.get_full_url(), resp.code, resp.msg, resp.headers, data, time.time())
+
+        fp = BytesIO(data)
+        old_resp = resp
+        resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
+        resp.msg = old_resp.msg
+
+        return resp
+
     def http_request(self, req):
         (code, msg, headers, data, timestamp) = self.load(req.get_full_url())
 
@@ -484,18 +509,13 @@ class CacheHandler(BaseHandler):
         cache_age = time.time() - timestamp
 
         # list in a simple way what to do when
-        if req.get_header('Morss') == 'from_304': # for whatever reason, we need an uppercase
-            # we're just in the middle of a dirty trick, use cache
-            pass
-
-        elif self.force_min == -2:
+        if self.force_min == -2:
             if code is not None:
                 # already in cache, perfect, use cache
-                pass
+                return self.cached_response(req)
 
             else:
                 # raise an error, via urllib handlers
-                headers['Morss'] = 'from_cache'
                 resp = addinfourl(BytesIO(), headers, req.get_full_url(), 409)
                 resp.msg = 'Conflict'
                 return resp
@@ -506,7 +526,7 @@ class CacheHandler(BaseHandler):
 
         elif self.force_min == -1:
             # force use cache
-            pass
+            return self.cached_response(req)
 
         elif self.force_min == 0:
             # force refresh
@@ -516,11 +536,9 @@ class CacheHandler(BaseHandler):
             # "301 Moved Permanently" has to be cached...as long as we want
             # (awesome HTTP specs), let's say a week (why not?). Use force_min=0
             # if you want to bypass this (needed for a proper refresh)
-            pass
+            return self.cached_response(req)
 
-        elif  self.force_min is None and ('no-cache' in cc_list
-                                        or 'no-store' in cc_list
-                                        or ('private' in cc_list and not self.private_cache)):
+        elif (self.force_min is None or self.force_min > 0) and ('no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private_cache)):
             # kindly follow web servers indications, refresh
             # if the same settings are used all along, this section shouldn't be
             # of any use, since the page woudln't be cached in the first place
@@ -529,76 +547,42 @@ class CacheHandler(BaseHandler):
 
         elif 'max-age' in cc_values and int(cc_values['max-age']) > cache_age:
             # server says it's still fine (and we trust him, if not, use force_min=0), use cache
-            pass
+            return self.cached_response(req)
 
         elif self.force_min is not None and self.force_min > cache_age:
             # still recent enough for us, use cache
-            pass
+            return self.cached_response(req)
 
         else:
             # according to the www, we have to refresh when nothing is said
             return None
 
-        # return the cache as a response. This code is reached with 'pass' above
-        headers['morss'] = 'from_cache' # TODO delete the morss header from incoming pages, to avoid websites messing up with us
-        resp = addinfourl(BytesIO(data), headers, req.get_full_url(), code)
-        resp.msg = msg
-
-        return resp
-
     def http_response(self, req, resp):
         # code for after-fetch, to know whether to save to hard-drive (if stiking to http headers' will)
+        # NB. It might re-save requests pulled from cache, which will re-set the time() to the latest, i.e. lenghten its useful life
 
-        if resp.code == 304:
-            return resp
+        if resp.code == 304 and self.is_cached(resp.url):
+            # we are hopefully the first after the HTTP handler, so no need
+            # to re-run all the *_response
+            # here: cached page, returning from cache
+            return self.cached_response(req)
 
-        if ('cache-control' in resp.headers or 'pragma' in resp.headers) and self.force_min is None:
+        elif ('cache-control' in resp.headers or 'pragma' in resp.headers) and self.force_min is None:
             cache_control = parse_http_list(resp.headers.get('cache-control', ()))
             cache_control += parse_http_list(resp.headers.get('pragma', ()))
 
             cc_list = [x for x in cache_control if '=' not in x]
 
             if 'no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private_cache):
-                # kindly follow web servers indications
+                # kindly follow web servers indications (do not save & return)
                 return resp
 
-        if resp.headers.get('Morss') == 'from_cache':
-            # it comes from cache, so no need to save it again
-            return resp
+            else:
+                # save
+                return self.save_response(req, resp)
 
-        # save to disk
-        data = resp.read()
-        self.save(req.get_full_url(), resp.code, resp.msg, resp.headers, data, time.time())
-
-        # the below is only needed because of 'resp.read()' above, as we can't
-        # seek(0) on arbitraty file-like objects (e.g. sockets)
-        fp = BytesIO(data)
-        old_resp = resp
-        resp = addinfourl(fp, old_resp.headers, old_resp.url, old_resp.code)
-        resp.msg = old_resp.msg
-
-        return resp
-
-    def http_error_304(self, req, fp, code, msg, headers):
-        cache = list(self.load(req.get_full_url()))
-
-        if cache[0]:
-            cache[-1] = time.time()
-            self.save(req.get_full_url(), *cache)
-
-            new = Request(req.get_full_url(),
-                           headers=req.headers,
-                           unverifiable=True)
-
-            new.add_unredirected_header('Morss', 'from_304')
-                # create a "fake" new request to just re-run through the various
-                # handlers
-
-            return self.parent.open(new, timeout=req.timeout)
-
-        return None # when returning 'None', the next-available handler is used
-                    # the 'HTTPRedirectHandler' has no 'handler_order', i.e.
-                    # uses the default of 500, therefore executed after this
+        else:
+            return self.save_response(req, resp)
 
     https_request = http_request
     https_open = http_open
