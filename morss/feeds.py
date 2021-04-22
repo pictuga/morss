@@ -525,6 +525,9 @@ def parse_time(value):
     elif isinstance(value, datetime):
         time = value
 
+    else:
+        time = None
+
     # add default time zone if none set
     if time is not None and time.tzinfo is None:
             time = time.replace(tzinfo=tz.tzutc())
