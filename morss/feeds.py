@@ -508,24 +508,28 @@ class ParserHTML(ParserXML):
 
 
 def parse_time(value):
+    # parsing per se
     if value is None or value == 0:
-        return None
+        time = None
 
     elif isinstance(value, basestring):
         if re.match(r'^[0-9]+$', value):
-            return datetime.fromtimestamp(int(value), tz.tzutc())
+            time = datetime.fromtimestamp(int(value))
 
         else:
-            return dateutil.parser.parse(value).replace(tzinfo=tz.tzutc())
+            time = dateutil.parser.parse(value)
 
     elif isinstance(value, int):
-        return datetime.fromtimestamp(value, tz.tzutc())
+        time = datetime.fromtimestamp(value)
 
     elif isinstance(value, datetime):
-        return value
+        time = value
 
-    else:
-        return None
+    # add default time zone if none set
+    if time is not None and time.tzinfo is None:
+            time = time.replace(tzinfo=tz.tzutc())
+
+    return time
 
 
 class ParserJSON(ParserBase):
