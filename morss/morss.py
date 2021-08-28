@@ -96,7 +96,7 @@ class Options:
             return self.options[key]
 
         else:
-            return False
+            return None
 
     def __setitem__(self, key, value):
         self.options[key] = value
