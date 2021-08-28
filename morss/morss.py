@@ -104,6 +104,13 @@ class Options:
     def __contains__(self, key):
         return key in self.options
 
+    def get(self, key, default=None):
+        if key in self.options:
+            return self.options[key]
+
+        else:
+            return default
+
 
 def ItemFix(item, options, feedurl='/'):
     """ Improves feed items (absolute links, resolve feedburner links, etc) """
@@ -276,22 +283,23 @@ def FeedFetch(url, options):
 
     if options.items:
         # using custom rules
-        rss = feeds.FeedHTML(req['data'], encoding=req['encoding'])
+        ruleset = {}
 
-        rss.rules['title'] = options.title              if options.title        else '//head/title'
-        rss.rules['desc'] = options.desc                if options.desc         else '//head/meta[@name="description"]/@content'
+        ruleset['items'] = options.items
 
-        rss.rules['items'] = options.items
+        ruleset['title'] = options.get('title', '//head/title')
+        ruleset['desc'] = options.get('desc', '//head/meta[@name="description"]/@content')
 
-        rss.rules['item_title'] = options.item_title    if options.item_title   else '.'
-        rss.rules['item_link'] = options.item_link      if options.item_link    else './@href|.//a/@href|ancestor::a/@href'
+        ruleset['item_title'] = options.get('item_title', '.')
+        ruleset['item_link'] = options.get('item_link', './@href|.//a/@href|ancestor::a/@href')
 
         if options.item_content:
-            rss.rules['item_content'] = options.item_content
+            ruleset['item_content'] = options.item_content
 
         if options.item_time:
-            rss.rules['item_time'] = options.item_time
+            ruleset['item_time'] = options.item_time
 
+        rss = feeds.parse(req['data'], encoding=req['encoding'], ruleset=ruleset)
         rss = rss.convert(feeds.FeedXML)
 
     else:

@@ -88,16 +88,21 @@ def parse_rules(filename=None):
     return rules
 
 
-def parse(data, url=None, encoding=None):
+def parse(data, url=None, encoding=None, ruleset=None):
     " Determine which ruleset to use "
 
-    rulesets = parse_rules()
+    if ruleset is not None:
+        rulesets = [ruleset]
+
+    else:
+        rulesets = parse_rules().values()
+
     parsers = [FeedXML, FeedHTML, FeedJSON]
 
     # 1) Look for a ruleset based on path
 
     if url is not None:
-        for ruleset in rulesets.values():
+        for ruleset in rulesets:
             if 'path' in ruleset:
                 for path in ruleset['path']:
                     if fnmatch(url, path):
@@ -111,9 +116,6 @@ def parse(data, url=None, encoding=None):
         # 3b) See if .items matches anything
 
     for parser in parsers:
-        ruleset_candidates = [x for x in rulesets.values() if x['mode'] == parser.mode and 'path' not in x]
-            # 'path' as they should have been caught beforehands
-
         try:
             feed = parser(data, encoding=encoding)
 
@@ -124,13 +126,17 @@ def parse(data, url=None, encoding=None):
         else:
             # parsing worked, now we try the rulesets
 
+            ruleset_candidates = [x for x in rulesets if x.get('mode', None) in (parser.mode, None) and 'path' not in x]
+                # 'path' as they should have been caught beforehands
+                # try anyway if no 'mode' specified
+
             for ruleset in ruleset_candidates:
                 feed.rules = ruleset
 
                 try:
                     feed.items[0]
 
-                except (AttributeError, IndexError):
+                except (AttributeError, IndexError, TypeError):
                     # parsing and or item picking did not work out
                     pass
 
