@@ -85,10 +85,10 @@ def adv_get(url, timeout=None, *args, **kwargs):
     url = sanitize_url(url)
 
     if timeout is None:
-        con = custom_handler(*args, **kwargs).open(url)
+        con = custom_opener(*args, **kwargs).open(url)
 
     else:
-        con = custom_handler(*args, **kwargs).open(url, timeout=timeout)
+        con = custom_opener(*args, **kwargs).open(url, timeout=timeout)
 
     data = con.read()
 
@@ -104,7 +104,7 @@ def adv_get(url, timeout=None, *args, **kwargs):
     }
 
 
-def custom_handler(follow=None, delay=None):
+def custom_opener(follow=None, delay=None):
     handlers = []
 
     # as per urllib2 source code, these Handelers are added first
