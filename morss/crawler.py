@@ -346,6 +346,8 @@ class BrowserlyHeaderHandler(BaseHandler):
 
 
 def iter_html_tag(html_str, tag_name):
+    " To avoid parsing whole pages when looking for a simple tag "
+
     re_tag = r'<%s(\s*[^>])*>' % tag_name
     re_attr = r'(?P<key>[^=\s]+)=[\'"](?P<value>[^\'"]+)[\'"]'
 
