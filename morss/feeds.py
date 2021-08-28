@@ -462,7 +462,7 @@ class ParserXML(ParserBase):
     def rule_str(self, rule):
         match = self.rule_search(rule)
 
-        html_rich = ('atom' in rule or self.rules['mode'] == 'html') \
+        html_rich = ('atom' in rule or self.mode == 'html') \
             and rule in [self.rules.get('item_desc'), self.rules.get('item_content')]
 
         if isinstance(match, etree._Element):
