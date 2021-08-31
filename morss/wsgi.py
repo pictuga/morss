@@ -50,7 +50,7 @@ def parse_options(options):
         split = option.split('=', 1)
 
         if len(split) > 1:
-            out[split[0]] = split[1]
+            out[split[0]] = unquote(split[1])
 
         else:
             out[split[0]] = True
@@ -58,14 +58,18 @@ def parse_options(options):
     return out
 
 
-def get_path(environ):
+def request_uri(environ):
     if 'REQUEST_URI' in environ:
-        # when running on Apache
-        url = unquote(environ['REQUEST_URI'][1:])
+        # when running on Apache/uwsgi
+        url = environ['REQUEST_URI']
+
+    elif 'RAW_URI' in environ:
+        # gunicorn
+        url = environ['RAW_URI']
 
     else:
-        # when using internal server
-        url = environ['PATH_INFO'][1:]
+        # when using other servers
+        url = environ['PATH_INFO']
 
         if environ['QUERY_STRING']:
             url += '?' + environ['QUERY_STRING']
@@ -76,19 +80,13 @@ def get_path(environ):
 def cgi_parse_environ(environ):
     # get options
 
-    url = get_path(environ)
-    url = re.sub(r'^/?(cgi/)?(morss.py|main.py)/', '', url)
+    url = request_uri(environ)[1:]
+    url = re.sub(r'^(cgi/)?(morss.py|main.py)/', '', url)
 
     if url.startswith(':'):
-        split = url.split('/', 1)
-
-        raw_options = split[0].replace('|', '/').replace('\\\'', '\'').split(':')[1:]
-
-        if len(split) > 1:
-            url = split[1]
-
-        else:
-            url = ''
+        parts = url.split('/', 1)
+        raw_options = parts[0].replace('|', '/').split(':')[1:]# | -> / for backward compatibility
+        url = parts[1] if len(parts) > 1 else ''
 
     else:
         raw_options = []
@@ -164,7 +162,7 @@ def middleware(func):
 def cgi_file_handler(environ, start_response, app):
     " Simple HTTP server to serve static files (.html, .css, etc.) "
 
-    url = get_path(environ)
+    url = request_uri(environ)[1:]
 
     if url == '':
         url = 'index.html'
@@ -283,11 +281,18 @@ def cgi_handle_request():
     wsgiref.handlers.CGIHandler().run(app)
 
 
+class WSGIRequestHandlerRequestUri(wsgiref.simple_server.WSGIRequestHandler):
+    def get_environ(self):
+        env = super().get_environ()
+        env['REQUEST_URI'] = self.path
+        return env
+
+
 def cgi_start_server():
     crawler.default_cache.autotrim()
 
     print('Serving http://localhost:%s/' % PORT)
-    httpd = wsgiref.simple_server.make_server('', PORT, application)
+    httpd = wsgiref.simple_server.make_server('', PORT, application, handler_class=WSGIRequestHandlerRequestUri)
     httpd.serve_forever()
 
 
