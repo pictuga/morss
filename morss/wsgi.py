@@ -50,7 +50,7 @@ def parse_options(options):
         split = option.split('=', 1)
 
         if len(split) > 1:
-            out[split[0]] = unquote(split[1])
+            out[split[0]] = unquote(split[1]).replace('|', '/') # | -> / for backward compatibility (and Apache)
 
         else:
             out[split[0]] = True
@@ -85,7 +85,7 @@ def cgi_parse_environ(environ):
 
     if url.startswith(':'):
         parts = url.split('/', 1)
-        raw_options = parts[0].replace('|', '/').split(':')[1:]# | -> / for backward compatibility
+        raw_options = parts[0].split(':')[1:]
         url = parts[1] if len(parts) > 1 else ''
 
     else:
