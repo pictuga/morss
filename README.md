@@ -115,7 +115,7 @@ The `main.py` part is only needed if your server doesn't support the Apache
 redirect rule set in the provided `.htaccess`.
 
 Works like a charm with [Tiny Tiny
-RSS](http://tt-rss.org/redmine/projects/tt-rss/wiki), and most probably other
+RSS](http://tt-rss.org/), and most probably other
 clients.
 
 
