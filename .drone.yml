@@ -10,6 +10,6 @@ steps:
 - name: pylint
   image: alpine
   commands:
-  - apk add --no-cache python3 py3-lxml py3-pip py3-wheel py3-pylint
+  - apk add --no-cache python3 py3-lxml py3-pip py3-wheel py3-pylint py3-enchant
   - pip3 install --no-cache-dir .
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
