@@ -1,0 +1,9 @@
+kind: pipeline
+name: default
+
+steps:
+- name: lint
+  image: python:alpine
+  commands:
+  - pip install isort
+  - isort --check-only --diff --recursive .
