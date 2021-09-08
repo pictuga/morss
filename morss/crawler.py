@@ -16,30 +16,33 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import sys
-
-import zlib
-from io import BytesIO, StringIO
-import re
-import chardet
-from cgi import parse_header
-import time
-import threading
 import random
+import re
+import sys
+import threading
+import time
+import zlib
+from cgi import parse_header
 from collections import OrderedDict
+from io import BytesIO, StringIO
+
+import chardet
 
 try:
     # python 2
-    from urllib2 import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
     from urllib import quote
-    from urlparse import urlparse, urlunparse
+
     import mimetools
+    from urllib2 import (BaseHandler, HTTPCookieProcessor, Request, addinfourl,
+                         build_opener, parse_http_list, parse_keqv_list)
+    from urlparse import urlparse, urlunparse
 except ImportError:
     # python 3
-    from urllib.request import BaseHandler, HTTPCookieProcessor, Request, addinfourl, parse_keqv_list, parse_http_list, build_opener
-    from urllib.parse import quote
-    from urllib.parse import urlparse, urlunparse
     import email
+    from urllib.parse import quote, urlparse, urlunparse
+    from urllib.request import (BaseHandler, HTTPCookieProcessor, Request,
+                                addinfourl, build_opener, parse_http_list,
+                                parse_keqv_list)
 
 try:
     # python 2
@@ -620,7 +623,7 @@ class BaseCache:
             return True
 
 
-import sqlite3
+import sqlite3 # isort:skip
 
 
 class SQLiteCache(BaseCache):
@@ -657,7 +660,7 @@ class SQLiteCache(BaseCache):
             self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?) ON CONFLICT(url) DO UPDATE SET code=?, msg=?, headers=?, data=?, timestamp=?', (url,) + value + value)
 
 
-import pymysql.cursors
+import pymysql.cursors # isort:skip
 
 
 class MySQLCacheHandler(BaseCache):

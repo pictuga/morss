@@ -20,9 +20,7 @@
 import os
 import sys
 
-from . import wsgi
-from . import cli
-
+from . import cli, wsgi
 from .morss import MorssException
 
 

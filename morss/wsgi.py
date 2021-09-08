@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import sys
+import cgitb
+import mimetypes
 import os.path
 import re
-import lxml.etree
-
-import cgitb
-import wsgiref.util
-import wsgiref.simple_server
+import sys
 import wsgiref.handlers
-import mimetypes
+import wsgiref.simple_server
+import wsgiref.util
+
+import lxml.etree
 
 try:
     # python 2
@@ -33,11 +33,9 @@ except ImportError:
     # python 3
     from urllib.parse import unquote
 
-from . import crawler
-from . import readabilite
-from .morss import FeedFetch, FeedGather, FeedFormat
-from .morss import Options, log, TIMEOUT, DELAY, MorssException
-
+from . import crawler, readabilite
+from .morss import (DELAY, TIMEOUT, FeedFetch, FeedFormat, FeedGather,
+                    MorssException, Options, log)
 
 PORT = int(os.getenv('PORT', 8080))
 

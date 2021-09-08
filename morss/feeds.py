@@ -15,35 +15,33 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import sys
 import os.path
+import sys
 
-from datetime import datetime
-
-import re
-import json
 import csv
-
+import json
+import re
+from copy import deepcopy
+from datetime import datetime
 from fnmatch import fnmatch
 
-from lxml import etree
-from dateutil import tz
 import dateutil.parser
-from copy import deepcopy
-
 import lxml.html
+from dateutil import tz
+from lxml import etree
+
 from .readabilite import parse as html_parse
 
 json.encoder.c_make_encoder = None
 
 try:
     # python 2
-    from StringIO import StringIO
     from ConfigParser import RawConfigParser
+    from StringIO import StringIO
 except ImportError:
     # python 3
-    from io import StringIO
     from configparser import RawConfigParser
+    from io import StringIO
 
 try:
     # python 2

@@ -16,30 +16,25 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
-
+import re
 import time
 from datetime import datetime
-from dateutil import tz
-
 from fnmatch import fnmatch
-import re
 
 import lxml.etree
 import lxml.html
+from dateutil import tz
 
-from . import feeds
-from . import crawler
-from . import readabilite
-
+from . import crawler, feeds, readabilite
 
 try:
     # python 2
     from httplib import HTTPException
-    from urlparse import urlparse, urljoin, parse_qs
+    from urlparse import parse_qs, urljoin, urlparse
 except ImportError:
     # python 3
     from http.client import HTTPException
-    from urllib.parse import urlparse, urljoin, parse_qs
+    from urllib.parse import parse_qs, urljoin, urlparse
 
 
 MAX_ITEM = int(os.getenv('MAX_ITEM', 5)) # cache-only beyond
