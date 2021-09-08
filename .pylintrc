@@ -1,0 +1,50 @@
+[MASTER]
+ignore=CVS
+suggestion-mode=yes
+extension-pkg-allow-list=lxml.etree
+
+[MESSAGES CONTROL]
+disable=missing-function-docstring,
+        missing-class-docstring,
+        missing-module-docstring,
+        wrong-spelling-in-comment,
+
+[REPORTS]
+reports=yes
+score=yes
+
+[SPELLING]
+spelling-dict=en_GB
+spelling-ignore-words=morss
+
+[STRING]
+check-quote-consistency=yes
+check-str-concat-over-line-jumps=yes
+
+[VARIABLES]
+allow-global-unused-variables=no
+init-import=no
+
+[FORMAT]
+expected-line-ending-format=LF
+indent-string='    '
+max-line-length=120
+max-module-lines=1000
+
+[BASIC]
+argument-naming-style=snake_case
+attr-naming-style=snake_case
+class-attribute-naming-style=snake_case
+class-const-naming-style=UPPER_CASE
+class-naming-style=PascalCase
+const-naming-style=UPPER_CASE
+function-naming-style=snake_case
+inlinevar-naming-style=snake_case
+method-naming-style=snake_case
+module-naming-style=snake_case
+variable-naming-style=snake_case
+
+include-naming-hint=yes
+
+bad-names=foo, bar
+good-names=i, j, k

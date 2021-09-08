@@ -2,8 +2,14 @@ kind: pipeline
 name: default
 
 steps:
-- name: lint
+- name: isort
   image: python:alpine
   commands:
   - pip install isort
   - isort --check-only --diff .
+- name: pylint
+  image: python:alpine
+  commands:
+  - apk add --no-cache py3-lxml
+  - pip install .
+  - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8

@@ -16,5 +16,8 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # ran on `import morss`
+
+# pylint: disable=unused-import,unused-variable
+
 from .morss import *
 from .wsgi import application
