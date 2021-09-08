@@ -15,12 +15,11 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import sys
-import os.path
 import argparse
+import os.path
+import sys
 
-from .morss import FeedFetch, FeedGather, FeedFormat
-from .morss import Options
+from .morss import FeedFetch, FeedFormat, FeedGather, Options
 
 
 def cli_app():

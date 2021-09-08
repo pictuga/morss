@@ -15,10 +15,11 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import re
+
 import lxml.etree
 import lxml.html
 from bs4 import BeautifulSoup
-import re
 
 
 def parse(data, encoding=None):
@@ -352,6 +353,7 @@ def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=
 
 if __name__ == '__main__':
     import sys
+
     from . import crawler
 
     req = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
