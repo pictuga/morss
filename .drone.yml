@@ -8,8 +8,8 @@ steps:
   - pip install isort
   - isort --check-only --diff .
 - name: pylint
-  image: python:alpine
+  image: alpine
   commands:
-  - apk add --no-cache py3-lxml
-  - pip install .
+  - apk add --no-cache python3 py3-lxml py3-pip py3-wheel
+  - pip3 install --no-cache-dir .
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
