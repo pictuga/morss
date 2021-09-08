@@ -6,4 +6,4 @@ steps:
   image: python:alpine
   commands:
   - pip install isort
-  - isort --check-only --diff --recursive .
+  - isort --check-only --diff .
