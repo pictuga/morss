@@ -1,5 +1,7 @@
 # Morss - Get full-text RSS feeds
 
+[![Build Status](https://ci.pictuga.com/api/badges/pictuga/morss/status.svg)](https://ci.pictuga.com/pictuga/morss)
+
 _GNU AGPLv3 code_  
 _Provided logo is CC BY-NC-SA 4.0_
 
