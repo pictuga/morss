@@ -32,6 +32,8 @@ def cli_app():
 
     parser.add_argument('url', help='feed url')
 
+    parser.add_argument('--post', action='store', type=str, metavar='STRING', help='POST request')
+
     group = parser.add_argument_group('output')
     group.add_argument('--format', default='rss', choices=('rss', 'json', 'html', 'csv'), help='output format')
     group.add_argument('--search', action='store', type=str, metavar='STRING', help='does a basic case-sensitive search in the feed')

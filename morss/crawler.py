@@ -81,14 +81,17 @@ def get(*args, **kwargs):
     return adv_get(*args, **kwargs)['data']
 
 
-def adv_get(url, timeout=None, *args, **kwargs):
+def adv_get(url, post=None, timeout=None, *args, **kwargs):
     url = sanitize_url(url)
 
+    if post is not None:
+        post = post.encode('utf-8')
+
     if timeout is None:
-        con = custom_opener(*args, **kwargs).open(url)
+        con = custom_opener(*args, **kwargs).open(url, data=post)
 
     else:
-        con = custom_opener(*args, **kwargs).open(url, timeout=timeout)
+        con = custom_opener(*args, **kwargs).open(url, data=post, timeout=timeout)
 
     data = con.read()
 
