@@ -218,6 +218,10 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('non-text page')
         return True
 
+    if not req['data']:
+        log('empty page')
+        return True
+
     out = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='unicode')
 
     if out is not None:
