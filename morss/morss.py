@@ -86,12 +86,12 @@ class Options:
         else:
             self.options = options or {}
 
-    def __getattr__(self, key):
+    def __getattr__(self, key, default=None):
         if key in self.options:
             return self.options[key]
 
         else:
-            return None
+            return default
 
     def __setitem__(self, key, value):
         self.options[key] = value
@@ -99,12 +99,7 @@ class Options:
     def __contains__(self, key):
         return key in self.options
 
-    def get(self, key, default=None):
-        if key in self.options:
-            return self.options[key]
-
-        else:
-            return default
+    get = __getitem__ = __getattr__
 
 
 def ItemFix(item, options, feedurl='/'):

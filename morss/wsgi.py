@@ -199,7 +199,7 @@ def cgi_get(environ, start_response):
     req = crawler.adv_get(url=url, timeout=TIMEOUT)
 
     if req['contenttype'] in ['text/html', 'application/xhtml+xml', 'application/xml']:
-        if options.get == 'page':
+        if options['get'] == 'page':
             html = readabilite.parse(req['data'], encoding=req['encoding'])
             html.make_links_absolute(req['url'])
 
@@ -211,7 +211,7 @@ def cgi_get(environ, start_response):
 
             output = lxml.etree.tostring(html.getroottree(), encoding='utf-8', method='html')
 
-        elif options.get == 'article':
+        elif options['get'] == 'article':
             output = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='utf-8', debug=options.debug)
 
         else:
