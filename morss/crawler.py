@@ -33,16 +33,17 @@ try:
     from urllib import quote
 
     import mimetools
-    from urllib2 import (BaseHandler, HTTPCookieProcessor, Request, addinfourl,
-                         build_opener, parse_http_list, parse_keqv_list)
+    from urllib2 import (BaseHandler, HTTPCookieProcessor, HTTPRedirectHandler,
+                         Request, addinfourl, build_opener, parse_http_list,
+                         parse_keqv_list)
     from urlparse import urlparse, urlunparse
 except ImportError:
     # python 3
     import email
     from urllib.parse import quote, urlparse, urlunparse
-    from urllib.request import (BaseHandler, HTTPCookieProcessor, Request,
-                                addinfourl, build_opener, parse_http_list,
-                                parse_keqv_list)
+    from urllib.request import (BaseHandler, HTTPCookieProcessor,
+                                HTTPRedirectHandler, Request, addinfourl,
+                                build_opener, parse_http_list, parse_keqv_list)
 
 try:
     # python 2
@@ -134,6 +135,7 @@ def custom_opener(follow=None, delay=None):
     handlers.append(SizeLimitHandler(500*1024)) # 500KiB
     handlers.append(HTTPCookieProcessor())
     handlers.append(GZIPHandler())
+    handlers.append(HTTPAllRedirectHandler())
     handlers.append(HTTPEquivHandler())
     handlers.append(HTTPRefreshHandler())
     handlers.append(UAHandler(random.choice(DEFAULT_UAS)))
@@ -398,6 +400,11 @@ class HTTPEquivHandler(RespStrHandler):
             for meta in iter_html_tag(data_str[:10000], 'meta'):
                 if 'http-equiv' in meta and 'content' in meta:
                     resp.headers[meta.get('http-equiv').lower()] = meta.get('content')
+
+
+class HTTPAllRedirectHandler(HTTPRedirectHandler):
+    def http_error_308(self, req, fp, code, msg, headers):
+        return self.http_error_301(req, fp, 301, msg, headers)
 
 
 class HTTPRefreshHandler(BaseHandler):
