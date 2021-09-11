@@ -13,7 +13,8 @@ setup(
     download_url = 'https://git.pictuga.com/pictuga/morss',
     license = 'AGPL v3',
     packages = [package_name],
-    install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet', 'pymysql'],
+    install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet'],
+    extras_require = {'full': ['pymysql']},
     package_data = {package_name: ['feedify.ini']},
     data_files = [
         ('share/' + package_name, ['README.md', 'LICENSE']),

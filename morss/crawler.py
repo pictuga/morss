@@ -630,7 +630,10 @@ class BaseCache:
             return True
 
 
-import sqlite3 # isort:skip
+try:
+    import sqlite3 # isort:skip
+except ImportError:
+    pass
 
 
 class SQLiteCache(BaseCache):
@@ -667,7 +670,10 @@ class SQLiteCache(BaseCache):
             self.con.execute('INSERT INTO data VALUES (?,?,?,?,?,?) ON CONFLICT(url) DO UPDATE SET code=?, msg=?, headers=?, data=?, timestamp=?', (url,) + value + value)
 
 
-import pymysql.cursors # isort:skip
+try:
+    import pymysql.cursors # isort:skip
+except ImportError:
+    pass
 
 
 class MySQLCacheHandler(BaseCache):
