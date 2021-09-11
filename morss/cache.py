@@ -17,8 +17,8 @@
 
 import os
 import pickle
-import time
 import threading
+import time
 from collections import OrderedDict
 
 CACHE_SIZE = int(os.getenv('CACHE_SIZE', 1000)) # max number of items in cache (default: 1k items)
