@@ -20,7 +20,6 @@ import pickle
 import random
 import re
 import sys
-import threading
 import time
 import zlib
 from cgi import parse_header
@@ -28,6 +27,8 @@ from collections import OrderedDict
 from io import BytesIO, StringIO
 
 import chardet
+
+from .cache import default_cache
 
 try:
     # python 2
@@ -52,10 +53,6 @@ try:
 except NameError:
     # python 3
     basestring = unicode = str
-
-
-CACHE_SIZE = int(os.getenv('CACHE_SIZE', 1000)) # max number of items in cache (default: 1k items)
-CACHE_LIFESPAN = int(os.getenv('CACHE_LIFESPAN', 60)) # how often to auto-clear the cache (default: 1min)
 
 
 MIMETYPE = {
@@ -613,144 +610,6 @@ class CacheHandler(BaseHandler):
     https_request = http_request
     https_open = http_open
     https_response = http_response
-
-
-class BaseCache:
-    """ Subclasses must behave like a dict """
-
-    def trim(self):
-        pass
-
-    def autotrim(self, delay=CACHE_LIFESPAN):
-        # trim the cache every so often
-
-        self.trim()
-
-        t = threading.Timer(delay, self.autotrim)
-        t.daemon = True
-        t.start()
-
-    def __contains__(self, url):
-        try:
-            self[url]
-
-        except KeyError:
-            return False
-
-        else:
-            return True
-
-
-try:
-    import sqlite3 # isort:skip
-except ImportError:
-    pass
-
-
-class SQLiteCache(BaseCache):
-    def __init__(self, filename=':memory:'):
-        self.con = sqlite3.connect(filename, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
-
-        with self.con:
-            self.con.execute('CREATE TABLE IF NOT EXISTS data (ky UNICODE PRIMARY KEY, data BLOB, timestamp INT)')
-            self.con.execute('pragma journal_mode=WAL')
-
-        self.trim()
-
-    def __del__(self):
-        self.con.close()
-
-    def trim(self):
-        with self.con:
-            self.con.execute('DELETE FROM data WHERE timestamp <= ( SELECT timestamp FROM ( SELECT timestamp FROM data ORDER BY timestamp DESC LIMIT 1 OFFSET ? ) foo )', (CACHE_SIZE,))
-
-    def __getitem__(self, key):
-        row = self.con.execute('SELECT * FROM data WHERE ky=?', (key,)).fetchone()
-
-        if not row:
-            raise KeyError
-
-        return row[1]
-
-    def __setitem__(self, key, data):
-        with self.con:
-            self.con.execute('INSERT INTO data VALUES (?,?,?) ON CONFLICT(ky) DO UPDATE SET data=?, timestamp=?', (key, data, time.time(), data, time.time()))
-
-
-try:
-    import pymysql.cursors # isort:skip
-except ImportError:
-    pass
-
-
-class MySQLCacheHandler(BaseCache):
-    def __init__(self, user, password, database, host='localhost'):
-        self.user = user
-        self.password = password
-        self.database = database
-        self.host = host
-
-        with self.cursor() as cursor:
-            cursor.execute('CREATE TABLE IF NOT EXISTS data (ky VARCHAR(255) NOT NULL PRIMARY KEY, data MEDIUMBLOB, timestamp INT)')
-
-        self.trim()
-
-    def cursor(self):
-        return pymysql.connect(host=self.host, user=self.user, password=self.password, database=self.database, charset='utf8', autocommit=True).cursor()
-
-    def trim(self):
-        with self.cursor() as cursor:
-            cursor.execute('DELETE FROM data WHERE timestamp <= ( SELECT timestamp FROM ( SELECT timestamp FROM data ORDER BY timestamp DESC LIMIT 1 OFFSET %s ) foo )', (CACHE_SIZE,))
-
-    def __getitem__(self, key):
-        cursor = self.cursor()
-        cursor.execute('SELECT * FROM data WHERE ky=%s', (key,))
-        row = cursor.fetchone()
-
-        if not row:
-            raise KeyError
-
-        return row[1]
-
-    def __setitem__(self, key, data):
-        with self.cursor() as cursor:
-            cursor.execute('INSERT INTO data VALUES (%s,%s,%s) ON DUPLICATE KEY UPDATE data=%s, timestamp=%s',
-                (key, data, time.time(), data, time.time()))
-
-
-class CappedDict(OrderedDict, BaseCache):
-    def trim(self):
-        if CACHE_SIZE >= 0:
-            for i in range( max( len(self) - CACHE_SIZE , 0 )):
-                self.popitem(False)
-
-    def __setitem__(self, key, data):
-        # https://docs.python.org/2/library/collections.html#ordereddict-examples-and-recipes
-        if key in self:
-            del self[key]
-        OrderedDict.__setitem__(self, key, data)
-
-
-if 'CACHE' in os.environ:
-    if os.environ['CACHE'] == 'mysql':
-        default_cache = MySQLCacheHandler(
-            user = os.getenv('MYSQL_USER'),
-            password = os.getenv('MYSQL_PWD'),
-            database = os.getenv('MYSQL_DB'),
-            host = os.getenv('MYSQL_HOST', 'localhost')
-        )
-
-    elif os.environ['CACHE'] == 'sqlite':
-        if 'SQLITE_PATH' in os.environ:
-            path = os.getenv('SQLITE_PATH')
-
-        else:
-            path = ':memory:'
-
-        default_cache = SQLiteCache(path)
-
-else:
-        default_cache = CappedDict()
 
 
 if 'IGNORE_SSL' in os.environ:
