@@ -11,5 +11,5 @@ steps:
   image: alpine
   commands:
   - apk add --no-cache python3 py3-lxml py3-pip py3-wheel py3-pylint py3-enchant hunspell-en
-  - pip3 install --no-cache-dir .
+  - pip3 install --no-cache-dir .[full]
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
