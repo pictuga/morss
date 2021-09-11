@@ -141,6 +141,23 @@ class CappedDict(OrderedDict, BaseCache):
         OrderedDict.__setitem__(self, key, data)
 
 
+try:
+    import redis # isort:skip
+except ImportError:
+    pass
+
+
+class RedisCacheHandler(BaseCache):
+    def __init__(self, host='localhost', port=6379, db=0, password=None):
+        self.r = redis.Redis(host=host, port=port, db=db, password=password)
+
+    def __getitem__(self, key):
+        return self.r.get(key)
+
+    def __setitem__(self, key, data):
+        self.r.set(key, data)
+
+
 if 'CACHE' in os.environ:
     if os.environ['CACHE'] == 'mysql':
         default_cache = MySQLCacheHandler(
@@ -158,6 +175,14 @@ if 'CACHE' in os.environ:
             path = ':memory:'
 
         default_cache = SQLiteCache(path)
+
+    elif os.environ['CACHE'] == 'redis':
+        default_cache = RedisCacheHandler(
+            host = os.getenv('REDIS_HOST', 'localhost'),
+            port = int(os.getenv('REDIS_PORT', 6379)),
+            db = int(os.getenv('REDIS_DB', 0)),
+            password = os.getenv('REDIS_PWD', None)
+        )
 
 else:
         default_cache = CappedDict()

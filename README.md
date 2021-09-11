@@ -60,8 +60,8 @@ Full installation (including optional dependencies)
 pip install git+https://git.pictuga.com/pictuga/morss.git#[full]
 ```
 
-The full install includes mysql (possible cache backend). Otherwise, only
-in-memory and sqlite3 caches are available.
+The full install includes mysql and redis (possible cache backends). Otherwise,
+only in-memory and sqlite3 caches are available.
 
 The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
 C code needs to be compiled). If possible on your distribution, try installing
@@ -372,6 +372,8 @@ will be cleared every time the program is run). Path can be defined with
 `SQLITE_PATH`.
 - `CACHE=mysql`: MySQL cache. Connection can be defined with the following
 environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
+- `CACHE=redis`: Redis cache. Connection can be defined with the following
+environment variables: `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`, `REDIS_PWD`
 
 To limit the size of the cache:
 
