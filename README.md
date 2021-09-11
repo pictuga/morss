@@ -48,27 +48,24 @@ Some features of morss:
 
 ### Python package
 
+Simple install (without optional dependencies)
+
 ```shell
 pip install git+https://git.pictuga.com/pictuga/morss.git
 ```
 
+Full installation (including optional dependencies)
+
+```shell
+pip install git+https://git.pictuga.com/pictuga/morss.git#[full]
+```
+
+The full install includes mysql (possible cache backend). Otherwise, only
+in-memory and sqlite3 caches are available.
+
 The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
 C code needs to be compiled). If possible on your distribution, try installing
 it with the system package manager.
-
-Dependencies:
-
-- [python](http://www.python.org/) >= 2.6 (python 3 is supported)
-- [lxml](http://lxml.de/) for xml parsing
-- [bs4](https://pypi.org/project/bs4/) for badly-formatted html pages
-- [dateutil](http://labix.org/python-dateutil) to parse feed dates
-- [chardet](https://pypi.python.org/pypi/chardet)
-- [six](https://pypi.python.org/pypi/six), a dependency of chardet
-- pymysql
-
-You may also need:
-- Apache, with python-cgi support, to run on a server
-- a fast internet connection
 
 ### Docker
 
