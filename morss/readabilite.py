@@ -294,22 +294,22 @@ def clean_node(node, keep_threshold=None):
             gdparent.insert(gdparent.index(parent)+1, new_node)
 
 
-def lowest_common_ancestor(nodeA, nodeB, max_depth=None):
-    ancestorsA = list(nodeA.iterancestors())
-    ancestorsB = list(nodeB.iterancestors())
+def lowest_common_ancestor(node_a, node_b, max_depth=None):
+    ancestors_a = list(node_a.iterancestors())
+    ancestors_b = list(node_b.iterancestors())
 
     if max_depth is not None:
-        ancestorsA = ancestorsA[:max_depth]
-        ancestorsB = ancestorsB[:max_depth]
+        ancestors_a = ancestors_a[:max_depth]
+        ancestors_b = ancestors_b[:max_depth]
 
-    ancestorsA.insert(0, nodeA)
-    ancestorsB.insert(0, nodeB)
+    ancestors_a.insert(0, node_a)
+    ancestors_b.insert(0, node_b)
 
-    for ancestorA in ancestorsA:
-        if ancestorA in ancestorsB:
-            return ancestorA
+    for ancestor_a in ancestors_a:
+        if ancestor_a in ancestors_b:
+            return ancestor_a
 
-    return nodeA # should always find one tho, at least <html/>, but needed for max_depth
+    return node_a # should always find one tho, at least <html/>, but needed for max_depth
 
 
 def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=False, threshold=5):
