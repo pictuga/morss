@@ -222,7 +222,7 @@ def ItemFill(item, options, feedurl='/', fast=False):
         log('empty page')
         return True
 
-    out = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='unicode')
+    out = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='unicode', xpath=options.xpath)
 
     if out is not None:
         item.content = out

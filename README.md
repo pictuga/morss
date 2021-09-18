@@ -262,11 +262,12 @@ arguments to morss is explained in Run above.
 The list of arguments can be obtained by running `morss --help`
 
 ```
-usage: morss [-h] [--post STRING] [--format {rss,json,html,csv}]
-             [--search STRING] [--clip] [--indent] [--cache] [--force]
-             [--proxy] [--newest] [--firstlink] [--resolve] [--items XPATH]
-             [--item_link XPATH] [--item_title XPATH] [--item_content XPATH]
-             [--item_time XPATH] [--nolink] [--noref] [--silent]
+usage: morss [-h] [--post STRING] [--xpath XPATH]
+             [--format {rss,json,html,csv}] [--search STRING] [--clip]
+             [--indent] [--cache] [--force] [--proxy] [--newest] [--firstlink]
+             [--resolve] [--items XPATH] [--item_link XPATH]
+             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH]
+             [--nolink] [--noref] [--silent]
              url
 
 Get full-text RSS feeds
@@ -277,6 +278,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --post STRING         POST request
+  --xpath XPATH         xpath rule to manually detect the article
 
 output:
   --format {rss,json,html,csv}

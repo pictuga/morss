@@ -211,7 +211,7 @@ def clean_node(node, keep_threshold=None):
         return
 
     # high score, so keep
-    if keep_threshold is not None and get_score(node) >= keep_threshold:
+    if keep_threshold is not None and keep_threshold > 0 and get_score(node) >= keep_threshold:
         return
 
     gdparent = parent.getparent()
@@ -312,10 +312,8 @@ def lowest_common_ancestor(node_a, node_b, max_depth=None):
     return node_a # should always find one tho, at least <html/>, but needed for max_depth
 
 
-def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=False, threshold=5):
-    " Input a raw html string, returns a raw html string of the article "
-
-    html = parse(data, encoding_in)
+def get_best_node(html, threshold=5):
+    # score all nodes
     score_all(html)
 
     # rank all nodes (largest to smallest)
@@ -332,9 +330,29 @@ def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=
     else:
         best = ranked_nodes[0]
 
+    return best
+
+
+def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=False, threshold=5, xpath=None):
+    " Input a raw html string, returns a raw html string of the article "
+
+    html = parse(data, encoding_in)
+
+    if xpath is not None:
+        xpath_match = html.xpath(xpath)
+
+        if len(xpath_match):
+            best = xpath_match[0]
+
+        else:
+            best = get_best_node(html, threshold)
+
+    else:
+        best = get_best_node(html, threshold)
+
     # clean up
     if not debug:
-        keep_threshold = get_score(ranked_nodes[0]) * 3/4
+        keep_threshold = get_score(best) * 3/4
         clean_root(best, keep_threshold)
 
     # check for spammy content (links only)
