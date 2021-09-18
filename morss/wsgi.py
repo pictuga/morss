@@ -33,7 +33,7 @@ except ImportError:
     # python 3
     from urllib.parse import unquote
 
-from . import crawler, readabilite
+from . import caching, crawler, readabilite
 from .morss import (DELAY, TIMEOUT, FeedFetch, FeedFormat, FeedGather,
                     MorssException, Options, log)
 
@@ -287,7 +287,7 @@ class WSGIRequestHandlerRequestUri(wsgiref.simple_server.WSGIRequestHandler):
 
 
 def cgi_start_server():
-    crawler.default_cache.autotrim()
+    caching.default_cache.autotrim()
 
     print('Serving http://localhost:%s/' % PORT)
     httpd = wsgiref.simple_server.make_server('', PORT, application, handler_class=WSGIRequestHandlerRequestUri)
@@ -295,4 +295,4 @@ def cgi_start_server():
 
 
 if 'gunicorn' in os.getenv('SERVER_SOFTWARE', ''):
-    crawler.default_cache.autotrim()
+    caching.default_cache.autotrim()

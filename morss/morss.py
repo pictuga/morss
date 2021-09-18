@@ -25,7 +25,7 @@ import lxml.etree
 import lxml.html
 from dateutil import tz
 
-from . import crawler, feeds, readabilite
+from . import caching, crawler, feeds, readabilite
 
 try:
     # python 2
@@ -411,7 +411,7 @@ def process(url, cache=None, options=None):
     options = Options(options)
 
     if cache:
-        crawler.default_cache = crawler.SQLiteCache(cache)
+        caching.default_cache = caching.SQLiteCache(cache)
 
     url, rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)

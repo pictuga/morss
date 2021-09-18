@@ -28,7 +28,7 @@ from io import BytesIO, StringIO
 
 import chardet
 
-from .cache import default_cache
+from .caching import default_cache
 
 try:
     # python 2
