@@ -15,12 +15,11 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import os.path
-import sys
-
 import csv
 import json
+import os.path
 import re
+import sys
 from copy import deepcopy
 from datetime import datetime
 from fnmatch import fnmatch
