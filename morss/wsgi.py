@@ -37,7 +37,7 @@ from . import caching, crawler, readabilite
 from .morss import (DELAY, TIMEOUT, FeedFetch, FeedFormat, FeedGather,
                     MorssException, Options, log)
 
-PORT = int(os.getenv('PORT', 8080))
+PORT = int(os.getenv('PORT', 8000))
 
 
 def parse_options(options):

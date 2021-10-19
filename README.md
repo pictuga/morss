@@ -73,7 +73,7 @@ Build & run
 
 ```shell
 docker build --tag morss https://git.pictuga.com/pictuga/morss.git --no-cache --pull
-docker run -p 8080:8080 morss
+docker run -p 8000:8000 morss
 ```
 
 With docker-compose:
@@ -84,7 +84,7 @@ services:
         build: https://git.pictuga.com/pictuga/morss.git
         image: morss
         ports:
-            - '8080:8080'
+            - '8000:8000'
 ```
 
 Then execute
@@ -132,13 +132,13 @@ gunicorn --preload morss
 Running this command should do:
 
 ```shell
-uwsgi --http :8080 --plugin python --wsgi-file main.py
+uwsgi --http :8000 --plugin python --wsgi-file main.py
 ```
 
 #### Using morss' internal HTTP server
 
 Morss can run its own, **very basic**, HTTP server, meant for debugging mostly.
-The latter should start when you run morss without any argument, on port 8080.
+The latter should start when you run morss without any argument, on port 8000.
 I'd highly recommend you to use gunicorn or something similar for better
 performance.
 
@@ -331,7 +331,7 @@ servers)
 
 To pass environment variables:
 
-- Docker-cli: `docker run -p 8080:8080 morss --env KEY=value`
+- Docker-cli: `docker run -p 8000:8000 morss --env KEY=value`
 - docker-compose: add an `environment:` section in the .yml file
 - Gunicorn/uWSGI/CLI: prepend `KEY=value` before the command
 - Apache: via the `SetEnv` instruction (see sample `.htaccess` provided)
