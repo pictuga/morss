@@ -69,11 +69,10 @@ it with the system package manager.
 
 ### Docker
 
-Build & run
+Build
 
 ```shell
 docker build --tag morss https://git.pictuga.com/pictuga/morss.git --no-cache --pull
-docker run -p 8000:8000 morss
 ```
 
 With docker-compose:
@@ -91,7 +90,6 @@ Then execute
 
 ```shell
 docker-compose build --no-cache --pull
-docker-compose up
 ```
 
 ## Run
@@ -117,9 +115,19 @@ Works like a charm with [Tiny Tiny RSS](https://tt-rss.org/), and most probably
 other clients.
 
 
-#### Via Docker
+#### Using Docker
 
-See above (in Install)
+Run
+
+```shell
+docker run -p 8000:8000 morss
+```
+
+With docker-compose:
+
+```shell
+docker-compose up
+```
 
 #### Using Gunicorn
 
@@ -190,6 +198,12 @@ morss [--argwithoutvalue] [--argwithvalue=value] [...] FEEDURL
 For example: `morss --clip http://feeds.bbci.co.uk/news/rss.xml`
 
 *(Brackets indicate optional text)*
+
+If using Docker:
+
+```shell
+docker run morss --clip http://feeds.bbci.co.uk/news/rss.xml
+```
 
 ### As a newsreader hook
 
