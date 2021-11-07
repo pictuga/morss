@@ -58,8 +58,8 @@ except ImportError:
 
 
 class SQLiteCache(BaseCache):
-    def __init__(self, filename=':memory:'):
-        self.con = sqlite3.connect(filename, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
+    def __init__(self, path=':memory:'):
+        self.con = sqlite3.connect(path, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
 
         with self.con:
             self.con.execute('CREATE TABLE IF NOT EXISTS data (ky UNICODE PRIMARY KEY, data BLOB, timestamp INT)')
@@ -168,13 +168,9 @@ if 'CACHE' in os.environ:
         )
 
     elif os.environ['CACHE'] == 'sqlite':
-        if 'SQLITE_PATH' in os.environ:
-            path = os.getenv('SQLITE_PATH')
-
-        else:
-            path = ':memory:'
-
-        default_cache = SQLiteCache(path)
+        default_cache = SQLiteCache(
+            os.getenv('SQLITE_PATH', ':memory:')
+        )
 
     elif os.environ['CACHE'] == 'redis':
         default_cache = RedisCacheHandler(
