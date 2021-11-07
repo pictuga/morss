@@ -19,7 +19,6 @@ import os
 import pickle
 import random
 import re
-import sys
 import time
 import zlib
 from cgi import parse_header
@@ -34,14 +33,14 @@ try:
     # python 2
     from urllib import quote
 
-    import mimetools
+    from mimetools import Message as message_from_string
     from urllib2 import (BaseHandler, HTTPCookieProcessor, HTTPRedirectHandler,
                          Request, addinfourl, build_opener, parse_http_list,
                          parse_keqv_list)
     from urlparse import urlparse, urlunparse
 except ImportError:
     # python 3
-    import email
+    from email import message_from_string
     from urllib.parse import quote, urlparse, urlunparse
     from urllib.request import (BaseHandler, HTTPCookieProcessor,
                                 HTTPRedirectHandler, Request, addinfourl,
@@ -461,10 +460,7 @@ class CacheHandler(BaseHandler):
             data = None
 
         else:
-            if sys.version_info[0] >= 3:
-                data['headers'] = email.message_from_string(data['headers'] or unicode()) # headers
-            else:
-                data['headers'] = mimetools.Message(StringIO(data['headers'] or unicode()))
+            data['headers'] = message_from_string(data['headers'] or unicode()) # headers
 
         return data
 
@@ -618,6 +614,8 @@ if 'IGNORE_SSL' in os.environ:
 
 
 if __name__ == '__main__':
+    import sys
+
     req = adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
 
     if sys.flags.interactive:
