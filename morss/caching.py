@@ -158,6 +158,26 @@ class RedisCacheHandler(BaseCache):
         self.r.set(key, data)
 
 
+try:
+    import diskcache # isort:skip
+except ImportError:
+    pass
+
+
+class DiskCacheHandler(BaseCache):
+    def __init__(self, directory=None, **kwargs):
+        self.cache = diskcache.Cache(directory=directory, eviction_policy='least-frequently-used', **kwargs)
+
+    def trim(self):
+        self.cache.cull()
+
+    def __getitem__(self, key):
+        return self.cache['key']
+
+    def __setitem__(self, key, data):
+        self.cache.set(key, data)
+
+
 if 'CACHE' in os.environ:
     if os.environ['CACHE'] == 'mysql':
         default_cache = MySQLCacheHandler(
@@ -178,6 +198,12 @@ if 'CACHE' in os.environ:
             port = int(os.getenv('REDIS_PORT', 6379)),
             db = int(os.getenv('REDIS_DB', 0)),
             password = os.getenv('REDIS_PWD', None)
+        )
+
+    elif os.environ['CACHE'] == 'diskcache':
+        default_cache = DiskCacheHandler(
+            directory = os.getenv('DISKCAHE_DIR', '/tmp/morss-diskcache'),
+            size_limit = CACHE_SIZE * 102400 # assuming 1 cache item is 100kiB
         )
 
 else:
