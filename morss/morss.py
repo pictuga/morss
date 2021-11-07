@@ -324,7 +324,7 @@ def FeedGather(rss, url, options):
         max_time = 0
 
     if options.newest:
-        # :newest take the newest items
+        # :newest take the newest items (instead of appearing order)
         now = datetime.now(tz.tzutc())
         sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or now, reverse=True)
 
@@ -333,6 +333,7 @@ def FeedGather(rss, url, options):
         sorted_items = list(rss.items)
 
     for i, item in enumerate(sorted_items):
+        # hard cap
         if time.time() - start_time > lim_time >= 0 or i + 1 > lim_item >= 0:
             log('dropped')
             item.remove()
@@ -345,6 +346,7 @@ def FeedGather(rss, url, options):
 
         item = ItemFix(item, options, url)
 
+        # soft cap
         if time.time() - start_time > max_time >= 0 or i + 1 > max_item >= 0:
             if not options.proxy:
                 if ItemFill(item, options, url, True) is False:
