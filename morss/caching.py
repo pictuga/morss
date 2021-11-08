@@ -168,11 +168,14 @@ class DiskCacheHandler(BaseCache):
     def __init__(self, directory=None, **kwargs):
         self.cache = diskcache.Cache(directory=directory, eviction_policy='least-frequently-used', **kwargs)
 
+    def __del__(self):
+        self.cache.close()
+
     def trim(self):
         self.cache.cull()
 
     def __getitem__(self, key):
-        return self.cache['key']
+        return self.cache[key]
 
     def __setitem__(self, key, data):
         self.cache.set(key, data)
@@ -203,7 +206,7 @@ if 'CACHE' in os.environ:
     elif os.environ['CACHE'] == 'diskcache':
         default_cache = DiskCacheHandler(
             directory = os.getenv('DISKCAHE_DIR', '/tmp/morss-diskcache'),
-            size_limit = CACHE_SIZE * 102400 # assuming 1 cache item is 100kiB
+            size_limit = CACHE_SIZE # in Bytes
         )
 
 else:
