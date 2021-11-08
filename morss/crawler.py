@@ -108,7 +108,7 @@ def adv_get(url, post=None, timeout=None, *args, **kwargs):
     }
 
 
-def custom_opener(follow=None, delay=None):
+def custom_opener(follow=None, policy=None, force_min=None, force_max=None):
     handlers = []
 
     # as per urllib2 source code, these Handelers are added first
@@ -142,7 +142,7 @@ def custom_opener(follow=None, delay=None):
     if follow:
         handlers.append(AlternateHandler(MIMETYPE[follow]))
 
-    handlers.append(CacheHandler(force_min=delay))
+    handlers.append(CacheHandler(policy=policy, force_min=force_min, force_max=force_max))
 
     return build_opener(*handlers)
 
@@ -426,31 +426,50 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
+def error_response(code, msg, url=''):
+    # return an error as a response
+    resp = addinfourl(BytesIO(), message_from_string('\n\n'), url, code)
+    resp.msg = msg
+    return resp
+
+
 class CacheHandler(BaseHandler):
     " Cache based on etags/last-modified "
 
-    private_cache = False # Websites can indicate whether the page should be
-                          # cached by CDNs (e.g. shouldn't be the case for
-                          # private/confidential/user-specific pages.
-                          # With this setting, decide whether (False) you want
-                          # the cache to behave like a CDN (i.e. don't cache
-                          # private pages), or (True) to behave like a end-cache
-                          # private pages. If unsure, False is the safest bet.
+    privacy = 'private' # Websites can indicate whether the page should be cached
+                        # by CDNs (e.g. shouldn't be the case for
+                        # private/confidential/user-specific pages. With this
+                        # setting, decide whether you want the cache to behave
+                        # like a CDN (i.e. don't cache private pages, 'public'),
+                        # or to behave like a end-user private pages
+                        # ('private'). If unsure, 'public' is the safest bet,
+                        # but many websites abuse this feature...
+
+                      # NB. This overrides all the other min/max/policy settings.
     handler_order = 499
 
-    def __init__(self, cache=None, force_min=None):
+    def __init__(self, cache=None, force_min=None, force_max=None, policy=None):
         self.cache = cache or default_cache
         self.force_min = force_min
-            # Servers indicate how long they think their content is "valid".
-            # With this parameter (force_min, expressed in seconds), we can
-            # override the validity period (i.e. bypassing http headers)
-            # Special values:
-            #   -1: valid forever, i.e. use the cache no matter what (and fetch
-            #       the page online if not present in cache)
-            #    0: valid zero second, i.e. force refresh
-            #   -2: same as -1, i.e. use the cache no matter what, but do NOT
-            #       fetch the page online if not present in cache, throw an
-            #       error instead
+        self.force_max = force_max
+        self.policy = policy # can be cached/refresh/offline/None (default)
+
+        # Servers indicate how long they think their content is "valid". With
+        # this parameter (force_min/max, expressed in seconds), we can override
+        # the validity period (i.e. bypassing http headers)
+        # Special choices, via "policy":
+        #   cached: use the cache no matter what (and fetch the page online if
+        #           not present in cache)
+        #   refresh: valid zero second, i.e. force refresh
+        #   offline: same as cached, i.e. use the cache no matter what, but do
+        #            NOT fetch the page online if not present in cache, throw an
+        #            error instead
+        #   None: just follow protocols
+
+        # sanity checks
+        assert self.force_max is None or self.force_max >= 0
+        assert self.force_min is None or self.force_min >= 0
+        assert self.force_max is None or self.force_min is None or self.force_max >= self.force_min
 
     def load(self, url):
         try:
@@ -468,18 +487,17 @@ class CacheHandler(BaseHandler):
         data['headers'] = unicode(data['headers'])
         self.cache[key] = pickle.dumps(data, 0)
 
-    def is_cached(self, key):
-        return self.load(key) is not None
-
-    def cached_response(self, req):
-        # this does NOT check whether it's already cached, use with care
+    def cached_response(self, req, fallback=None):
         data = self.load(req.get_full_url())
 
-        # return the cache as a response
-        resp = addinfourl(BytesIO(data['data']), data['headers'], req.get_full_url(), data['code'])
-        resp.msg = data['msg']
+        if data is not None:
+            # return the cache as a response
+            resp = addinfourl(BytesIO(data['data']), data['headers'], req.get_full_url(), data['code'])
+            resp.msg = data['msg']
+            return resp
 
-        return resp
+        else:
+            return fallback
 
     def save_response(self, req, resp):
         data = resp.read()
@@ -487,7 +505,7 @@ class CacheHandler(BaseHandler):
         self.save(req.get_full_url(), {
             'code': resp.code,
             'msg': resp.msg,
-            'headers': resp.headers,
+            'headers': str(resp.headers),
             'data': data,
             'timestamp': time.time()
             })
@@ -516,40 +534,57 @@ class CacheHandler(BaseHandler):
         # If 'None' is returned, try your chance with the next-available handler
         # If a 'resp' is returned, stop there, and proceed with 'http_response'
 
+        # Here, we try to see whether we want to use data from cache (i.e.
+        # return 'resp'), or whether we want to refresh the content (return
+        # 'None')
+
         data = self.load(req.get_full_url())
 
-        if data is None:
-            # cache empty, refresh
+        if data is not None:
+            # some info needed to process everything
+            cache_control = parse_http_list(data['headers'].get('cache-control', ()))
+            cache_control += parse_http_list(data['headers'].get('pragma', ()))
+
+            cc_list = [x for x in cache_control if '=' not in x]
+            cc_values = parse_keqv_list([x for x in cache_control if '=' in x])
+
+            cache_age = time.time() - data['timestamp']
+
+        # list in a simple way what to do in special cases
+
+        if data is not None and 'private' in cc_list and self.privacy == 'public':
+            # private data but public cache, do not use cache
+            # privacy concern, so handled first and foremost
+            # (and doesn't need to be addressed anymore afterwards)
             return None
 
-        # some info needed to process everything
-        cache_control = parse_http_list(data['headers'].get('cache-control', ()))
-        cache_control += parse_http_list(data['headers'].get('pragma', ()))
+        elif self.policy == 'offline':
+            # use cache, or return an error
+            return self.cached_response(
+                req,
+                error_response(409, 'Conflict', req.get_full_url())
+            )
 
-        cc_list = [x for x in cache_control if '=' not in x]
-        cc_values = parse_keqv_list([x for x in cache_control if '=' in x])
+        elif self.policy == 'cached':
+            # use cache, or fetch online
+            return self.cached_response(req, None)
 
-        cache_age = time.time() - data['timestamp']
-
-        # list in a simple way what to do when
-        if self.force_min == -2:
-            if data['code'] is not None:
-                # already in cache, perfect, use cache
-                return self.cached_response(req)
-
-            else:
-                # raise an error, via urllib handlers
-                resp = addinfourl(BytesIO(), data['headers'], req.get_full_url(), 409)
-                resp.msg = 'Conflict'
-                return resp
-
-        elif self.force_min == -1:
-            # force use cache
-            return self.cached_response(req)
-
-        elif self.force_min == 0:
+        elif self.policy == 'refresh':
             # force refresh
             return None
+
+        elif data is None:
+            # we have already settled all the cases that don't need the cache.
+            # all the following ones need the cached item
+            return None
+
+        elif self.force_max is not None and cache_age > self.force_max:
+            # older than we want, refresh
+            return None
+
+        elif self.force_min is not None and cache_age < self.force_min:
+            # recent enough, use cache
+            return self.cached_response(req)
 
         elif data['code'] == 301 and cache_age < 7*24*3600:
             # "301 Moved Permanently" has to be cached...as long as we want
@@ -557,19 +592,16 @@ class CacheHandler(BaseHandler):
             # if you want to bypass this (needed for a proper refresh)
             return self.cached_response(req)
 
-        elif (self.force_min is None or self.force_min > 0) and ('no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private_cache)):
-            # kindly follow web servers indications, refresh
-            # if the same settings are used all along, this section shouldn't be
-            # of any use, since the page woudln't be cached in the first place
-            # the check is only performed "just in case"
+        elif self.force_min is None and ('no-cache' in cc_list or 'no-store' in cc_list):
+            # kindly follow web servers indications, refresh if the same
+            # settings are used all along, this section shouldn't be of any use,
+            # since the page woudln't be cached in the first place the check is
+            # only performed "just in case"
+            # NB. NOT respected if force_min is set
             return None
 
         elif 'max-age' in cc_values and int(cc_values['max-age']) > cache_age:
-            # server says it's still fine (and we trust him, if not, use force_min=0), use cache
-            return self.cached_response(req)
-
-        elif self.force_min is not None and self.force_min > cache_age:
-            # still recent enough for us, use cache
+            # server says it's still fine (and we trust him, if not, use overrides), use cache
             return self.cached_response(req)
 
         else:
@@ -580,19 +612,19 @@ class CacheHandler(BaseHandler):
         # code for after-fetch, to know whether to save to hard-drive (if stiking to http headers' will)
         # NB. It might re-save requests pulled from cache, which will re-set the time() to the latest, i.e. lenghten its useful life
 
-        if resp.code == 304 and self.is_cached(resp.url):
+        if resp.code == 304 and resp.url in self.cache:
             # we are hopefully the first after the HTTP handler, so no need
             # to re-run all the *_response
             # here: cached page, returning from cache
             return self.cached_response(req)
 
-        elif ('cache-control' in resp.headers or 'pragma' in resp.headers) and self.force_min is None:
+        elif self.force_min is None and ('cache-control' in resp.headers or 'pragma' in resp.headers):
             cache_control = parse_http_list(resp.headers.get('cache-control', ()))
             cache_control += parse_http_list(resp.headers.get('pragma', ()))
 
             cc_list = [x for x in cache_control if '=' not in x]
 
-            if 'no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and not self.private_cache):
+            if 'no-cache' in cc_list or 'no-store' in cc_list or ('private' in cc_list and self.privacy == 'public'):
                 # kindly follow web servers indications (do not save & return)
                 return resp
 

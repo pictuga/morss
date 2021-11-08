@@ -194,21 +194,20 @@ def ItemFill(item, options, feedurl='/', fast=False):
     log(item.link)
 
     # download
-    delay = -1
 
-    if fast or options.fast:
+    if fast or options.cache:
         # force cache, don't fetch
-        delay = -2
+        policy = 'offline'
 
     elif options.force:
         # force refresh
-        delay = 0
+        policy = 'refresh'
 
     else:
-        delay = 24*60*60 # 24h
+        policy = None
 
     try:
-        req = crawler.adv_get(url=item.link, delay=delay, timeout=TIMEOUT)
+        req = crawler.adv_get(url=item.link, policy=policy, force_min=24*60*60, timeout=TIMEOUT)
 
     except (IOError, HTTPException) as e:
         log('http error')
@@ -266,11 +265,17 @@ def FeedFetch(url, options):
     # fetch feed
     delay = DELAY
 
-    if options.force:
-        delay = 0
+    if options.cache:
+        policy = 'offline'
+
+    elif options.force:
+        policy = 'refresh'
+
+    else:
+        policy = None
 
     try:
-        req = crawler.adv_get(url=url, post=options.post, follow=('rss' if not options.items else None), delay=delay, timeout=TIMEOUT * 2)
+        req = crawler.adv_get(url=url, post=options.post, follow=('rss' if not options.items else None), policy=policy, force_min=5*60, force_max=60*60, timeout=TIMEOUT * 2)
 
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
