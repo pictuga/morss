@@ -102,7 +102,7 @@ def adv_get(url, post=None, timeout=None, *args, **kwargs):
     encoding= detect_encoding(data, con)
 
     return {
-        'data':data,
+        'data': data,
         'url': con.geturl(),
         'con': con,
         'contenttype': contenttype,
@@ -428,7 +428,7 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
-def parse_headers(text=u'\n\''):
+def parse_headers(text=u'\n\n'):
     if sys.version_info[0] >= 3:
         # python 3
         return message_from_string(text)
