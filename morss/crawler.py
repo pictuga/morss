@@ -19,6 +19,7 @@ import os
 import pickle
 import random
 import re
+import sys
 import time
 import zlib
 from cgi import parse_header
@@ -33,7 +34,7 @@ try:
     # python 2
     from urllib import quote
 
-    from mimetools import Message as message_from_string
+    from httplib import HTTPMessage
     from urllib2 import (BaseHandler, HTTPCookieProcessor, HTTPRedirectHandler,
                          Request, addinfourl, build_opener, parse_http_list,
                          parse_keqv_list)
@@ -41,6 +42,7 @@ try:
 except ImportError:
     # python 3
     from email import message_from_string
+    from http.client import HTTPMessage
     from urllib.parse import quote, urlparse, urlunparse
     from urllib.request import (BaseHandler, HTTPCookieProcessor,
                                 HTTPRedirectHandler, Request, addinfourl,
@@ -426,9 +428,19 @@ class HTTPRefreshHandler(BaseHandler):
     https_response = http_response
 
 
+def parse_headers(text=u'\n\''):
+    if sys.version_info[0] >= 3:
+        # python 3
+        return message_from_string(text)
+
+    else:
+        # python 2
+        return HTTPMessage(StringIO(text))
+
+
 def error_response(code, msg, url=''):
     # return an error as a response
-    resp = addinfourl(BytesIO(), message_from_string('\n\n'), url, code)
+    resp = addinfourl(BytesIO(), parse_headers(), url, code)
     resp.msg = msg
     return resp
 
@@ -479,7 +491,7 @@ class CacheHandler(BaseHandler):
             data = None
 
         else:
-            data['headers'] = message_from_string(data['headers'] or unicode()) # headers
+            data['headers'] = parse_headers(data['headers'] or unicode())
 
         return data
 
@@ -505,7 +517,7 @@ class CacheHandler(BaseHandler):
         self.save(req.get_full_url(), {
             'code': resp.code,
             'msg': resp.msg,
-            'headers': str(resp.headers),
+            'headers': resp.headers,
             'data': data,
             'timestamp': time.time()
             })
@@ -646,8 +658,6 @@ if 'IGNORE_SSL' in os.environ:
 
 
 if __name__ == '__main__':
-    import sys
-
     req = adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://morss.it')
 
     if sys.flags.interactive:
