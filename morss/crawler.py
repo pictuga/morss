@@ -431,7 +431,7 @@ class HTTPRefreshHandler(BaseHandler):
 def parse_headers(text=u'\n\n'):
     if sys.version_info[0] >= 3:
         # python 3
-        return message_from_string(text)
+        return message_from_string(text, _class=HTTPMessage)
 
     else:
         # python 2
