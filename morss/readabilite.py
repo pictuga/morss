@@ -44,6 +44,8 @@ def count_words(string):
     if string is None:
         return 0
 
+    string = string.strip()
+
     i = 0
     count = 0
 
