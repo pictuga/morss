@@ -92,6 +92,8 @@ Then execute
 docker-compose build --no-cache --pull
 ```
 
+One-click Heroku deployment: https://heroku.com/deploy?template=https://github.com/pictuga/morss
+
 ## Run
 
 morss will auto-detect what "mode" to use.

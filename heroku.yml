@@ -1,0 +1,9 @@
+setup:
+  config:
+    DEBUG: 1
+    CACHE: diskcache
+    CACHE_SIZE: 1073741824
+
+build: 
+  docker:
+    web: Dockerfile

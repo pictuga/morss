@@ -7,4 +7,5 @@ RUN pip3 install --no-cache-dir /app[full] gunicorn
 
 USER 1000:1000
 
-ENTRYPOINT ["/app/docker-entry.sh"]
+ENTRYPOINT ["/bin/sh", "/app/docker-entry.sh"]
+CMD ["run"]
