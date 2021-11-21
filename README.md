@@ -92,7 +92,53 @@ Then execute
 docker-compose build --no-cache --pull
 ```
 
-One-click Heroku deployment: https://heroku.com/deploy?template=https://github.com/pictuga/morss
+### Cloud providers
+
+One-click deployment:
+
+* Heroku: <https://heroku.com/deploy?template=https://github.com/pictuga/morss>
+* Google Cloud: <https://deploy.cloud.run/?git_repo=https://github.com/pictuga/morss.git>
+
+Providers supporting `cloud-init`, based on Ubuntu:
+
+``` yml
+#cloud-config
+
+packages:
+  - docker.io
+  - docker-compose
+  - git
+  - ca-certificates
+
+groups:
+  - docker
+
+system_info:
+  default_user:
+    groups: [docker]
+
+write_files:
+  - path: /docker-compose.yml
+    permissions: "0644"
+    content: |
+      version: '3.7'
+      services:
+        app:
+          build: 'https://git.pictuga.com/pictuga/morss.git#master'
+          image: morss
+          ports:
+            - 80:8000
+          environment:
+            - DEBUG=1
+            - CACHE=diskcache
+            - CACHE_SIZE=1073741824
+          restart: always
+
+runcmd:
+  - update-ca-certificates
+  - docker-compose -f /docker-compose.yml build --no-cache
+  - docker-compose -f /docker-compose.yml up -dV
+```
 
 ## Run
 
