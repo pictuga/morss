@@ -108,6 +108,7 @@ packages:
   - python3-pip
   - python3-wheels
   - python3-lxml
+  - python3-gevent
   - git
   - ca-certificates
 

@@ -1,9 +1,9 @@
 FROM alpine:latest
 
-RUN apk add --no-cache python3 py3-lxml py3-pip py3-wheel git
+RUN apk add --no-cache python3 py3-pip py3-wheel git py3-lxml py3-gevent
 
 ADD . /app
-RUN pip3 install --no-cache-dir /app[full] gunicorn gevent
+RUN pip3 install --no-cache-dir /app[full] gunicorn
 
 USER 1000:1000
 
