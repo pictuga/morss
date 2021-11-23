@@ -61,7 +61,8 @@ pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
 ```
 
 The full install includes mysql, redis and diskcache (possible cache backends).
-Otherwise, only in-memory and sqlite3 caches are available.
+Otherwise, only in-memory and sqlite3 caches are available. The full install
+also includes gunicorn and gevent (for more efficient HTTP handling).
 
 The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
 C code needs to be compiled). If possible on your distribution, try installing
@@ -123,7 +124,7 @@ write_files:
 
 runcmd:
   - update-ca-certificates
-  - pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full] gunicorn gevent
+  - pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
   - gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --worker-class=gevent --preload --access-logfile - morss
 ```
 
