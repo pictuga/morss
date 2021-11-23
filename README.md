@@ -120,7 +120,7 @@ write_files:
 
 runcmd:
   - update-ca-certificates
-  - pip install git+https://git.pictuga.com/pictuga/morss.git#[full] gunicorn
+  - pip install git+https://git.pictuga.com/pictuga/morss.git#[full] gunicorn gevent
   - gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --worker-class=gevent --preload --access-logfile - morss
 ```
 
