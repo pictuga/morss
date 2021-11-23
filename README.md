@@ -105,9 +105,9 @@ Providers supporting `cloud-init` (AWS, Oracle Cloud Infrastructure), based on U
 #cloud-config
 
 packages:
-  - python-pip
-  - python-lxml
-  - python-wheels
+  - python3-pip
+  - python3-wheels
+  - python3-lxml
   - git
   - ca-certificates
 
