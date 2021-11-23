@@ -352,6 +352,10 @@ def get_article(data, url=None, encoding_in=None, encoding_out='unicode', debug=
     else:
         best = get_best_node(html, threshold)
 
+    if best is None:
+        # if threshold not met
+        return None
+
     # clean up
     if not debug:
         keep_threshold = get_score(best) * 3/4
