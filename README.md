@@ -109,6 +109,8 @@ packages:
   - python3-wheels
   - python3-lxml
   - python3-gevent
+  - python3-zope.interface
+  - python3-zope.event
   - git
   - ca-certificates
 
