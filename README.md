@@ -121,7 +121,7 @@ write_files:
 runcmd:
   - update-ca-certificates
   - pip install git+https://git.pictuga.com/pictuga/morss.git#[full] gunicorn
-  - gunicorn --bind 0.0.0.0:${PORT:-8000} -w 4 --preload --access-logfile - morss
+  - gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --worker-class=gevent --preload --access-logfile - morss
 ```
 
 ## Run
