@@ -5,6 +5,10 @@
 			"value": 1,
 			"required": false
 		},
+		"WORKERS": {
+			"value": 4,
+			"required": false
+		},
 		"CACHE": {
 			"value": "diskcache",
 			"required": false
