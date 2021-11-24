@@ -125,7 +125,7 @@ write_files:
 runcmd:
   - update-ca-certificates
   - pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
-  - gunicorn --bind 0.0.0.0:${PORT:-8000} --workers 4 --worker-class=gevent --preload --access-logfile - morss
+  - gunicorn --bind 0.0.0.0:${PORT:-8000} --workers ${WORKERS:-4} --worker-class=gevent --preload --access-logfile - morss
 ```
 
 ## Run
@@ -393,6 +393,7 @@ debugging.
 - `IGNORE_SSL=1`: to ignore SSL certs when fetch feeds and articles
 - `DELAY` (seconds) sets the browser cache delay, only for HTTP clients
 - `TIMEOUT` (seconds) sets the HTTP timeout when fetching rss feeds and articles
+- `WORKERS` (number) sets the number of gunicorn workers to use
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of
 time to parse it, or might even run into a memory overflow on some shared
