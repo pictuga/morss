@@ -251,7 +251,7 @@ def cgi_error_handler(environ, start_response, app):
         raise
 
     except Exception as e:
-        headers = {'status': '500 Oops', 'content-type': 'text/html', 'x-morss-error': repr(e)}
+        headers = {'status': '404 Not Found', 'content-type': 'text/html', 'x-morss-error': repr(e)}
         start_response(headers['status'], list(headers.items()), sys.exc_info())
         log('ERROR: %s' % repr(e))
         return [cgitb.html(sys.exc_info())]
