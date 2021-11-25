@@ -275,7 +275,7 @@ def FeedFetch(url, options):
         policy = None
 
     try:
-        req = crawler.adv_get(url=url, post=options.post, follow=('rss' if not options.items else None), policy=policy, force_min=5*60, force_max=60*60, timeout=TIMEOUT * 2)
+        req = crawler.adv_get(url=url, post=options.post, follow=('rss' if not options.items else None), policy=policy, force_min=5*60, force_max=60*60, timeout=TIMEOUT)
 
     except (IOError, HTTPException):
         raise MorssException('Error downloading feed')
