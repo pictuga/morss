@@ -5,8 +5,8 @@
 			"value": 1,
 			"required": false
 		},
-		"WORKERS": {
-			"value": 4,
+		"GUNICORN": {
+			"value": "",
 			"required": false
 		},
 		"CACHE": {
