@@ -14,7 +14,10 @@ setup(
     license = 'AGPL v3',
     packages = [package_name],
     install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet'],
-    extras_require = {'full': ['pymysql', 'redis', 'diskcache', 'gunicorn']},
+    extras_require = {
+        'full': ['pymysql', 'redis', 'diskcache', 'gunicorn'],
+        'dev': ['pylint']
+    },
     package_data = {package_name: ['feedify.ini']},
     data_files = [
         ('share/' + package_name, ['README.md', 'LICENSE']),
