@@ -9,3 +9,16 @@ steps:
   - isort --check-only --diff .
   - pip3 install --no-cache-dir .[full] .[dev]
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
+
+- name: pypy
+  image: plugins/pypi
+  settings:
+    username:
+      from_secret: pypy_user
+    password:
+      from_secret: pypy_pwd
+  when:
+    branch:
+    - master
+    event:
+    - push
