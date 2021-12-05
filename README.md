@@ -50,11 +50,27 @@ Some features of morss:
 
 Simple install (without optional dependencies)
 
+From pip
+
+```shell
+pip install morss
+```
+
+From git
+
 ```shell
 pip install git+https://git.pictuga.com/pictuga/morss.git
 ```
 
 Full installation (including optional dependencies)
+
+From pip
+
+```shell
+pip install morss[full]
+```
+
+From git
 
 ```shell
 pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
