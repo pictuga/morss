@@ -10,13 +10,13 @@ steps:
   - isort --check-only --diff .
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
 
-- name: pypy
+- name: pypi
   image: plugins/pypi
   settings:
     username:
-      from_secret: pypy_user
+      from_secret: pypi_user
     password:
-      from_secret: pypy_pwd
+      from_secret: pypi_pwd
   when:
     branch:
     - master
