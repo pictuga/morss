@@ -9,7 +9,7 @@ setup(
     name = package_name,
     version = datetime.now().strftime('%Y%m%d.%H%M'),
     description = 'Get full-text RSS feeds',
-    author = 'pictuga, Samuel Marks',
+    author = 'pictuga',
     author_email = 'contact@pictuga.com',
     url = 'http://morss.it/',
     download_url = 'https://git.pictuga.com/pictuga/morss',
