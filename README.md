@@ -118,13 +118,17 @@ write_files:
       DEBUG=1
       CACHE=diskcache
       CACHE_SIZE=1073741824
+  - path: /var/lib/cloud/scripts/per-boot/morss.sh
+    permissions: 744
+    content: |
+      #!/bin/sh
+      gunicorn --bind 0.0.0.0:${PORT:-8000} ${GUNICORN} --preload --access-logfile - --daemon morss
 
 runcmd:
   - update-ca-certificates
   - iptables -I INPUT 6 -m state --state NEW -p tcp --dport {PORT:-8000} -j ACCEPT
   - netfilter-persistent save
   - pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
-  - gunicorn --bind 0.0.0.0:${PORT:-8000} ${GUNICORN} --preload --access-logfile - morss
 ```
 
 ## Run
