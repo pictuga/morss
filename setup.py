@@ -10,6 +10,7 @@ setup(
     version = datetime.now().strftime('%Y%m%d.%H%M'),
     description = 'Get full-text RSS feeds',
     long_description = open('README.md').read(),
+    long_description_content_type = 'text/markdown',
     author = 'pictuga',
     author_email = 'contact@pictuga.com',
     url = 'http://morss.it/',
