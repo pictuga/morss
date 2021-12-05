@@ -86,13 +86,33 @@ it with the system package manager.
 
 ### Docker
 
-Build
+From docker hub
+
+With cli
+
+```shell
+docker pull pictuga/morss
+```
+
+With docker-compose
+
+```yml
+services:
+    app:
+        image: pictuga/morss
+        ports:
+            - '8000:8000'
+```
+
+Build from source
+
+With cli
 
 ```shell
 docker build --tag morss https://git.pictuga.com/pictuga/morss.git --no-cache --pull
 ```
 
-With docker-compose:
+With docker-compose
 
 ```yml
 services:
@@ -172,13 +192,19 @@ other clients.
 
 #### Using Docker
 
-Run
+From docker hub
+
+```shell
+docker run -p 8000:8000 pictuga/morss
+```
+
+From source
 
 ```shell
 docker run -p 8000:8000 morss
 ```
 
-With docker-compose:
+With docker-compose
 
 ```shell
 docker-compose up
