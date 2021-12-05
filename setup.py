@@ -8,7 +8,7 @@ setup(
     name = package_name,
     description = 'Get full-text RSS feeds',
     author = 'pictuga, Samuel Marks',
-    author_email = 'contact at pictuga dot com',
+    author_email = 'contact@pictuga.com',
     url = 'http://morss.it/',
     download_url = 'https://git.pictuga.com/pictuga/morss',
     license = 'AGPL v3',
