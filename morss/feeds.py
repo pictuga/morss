@@ -17,9 +17,7 @@
 
 import csv
 import json
-import os.path
 import re
-import sys
 from copy import deepcopy
 from datetime import datetime
 from fnmatch import fnmatch
@@ -30,6 +28,7 @@ from dateutil import tz
 from lxml import etree
 
 from .readabilite import parse as html_parse
+from .util import *
 
 json.encoder.c_make_encoder = None
 
@@ -52,7 +51,7 @@ except NameError:
 
 def parse_rules(filename=None):
     if not filename:
-        filename = os.path.join(os.path.dirname(__file__), 'feedify.ini')
+        filename = pkg_path('feedify.ini')
 
     config = RawConfigParser()
     config.read(filename)
@@ -66,18 +65,9 @@ def parse_rules(filename=None):
             # for each rule
 
             if rules[section][arg].startswith('file:'):
-                paths = [os.path.join(sys.prefix, 'share/morss/www', rules[section][arg][5:]),
-                    os.path.join(os.path.dirname(__file__), '../www', rules[section][arg][5:]),
-                    os.path.join(os.path.dirname(__file__), '../..', rules[section][arg][5:])]
-
-                for path in paths:
-                    try:
-                        file_raw = open(path).read()
-                        file_clean = re.sub('<[/?]?(xsl|xml)[^>]+?>', '', file_raw)
-                        rules[section][arg] = file_clean
-
-                    except IOError:
-                        pass
+                file_raw = open(data_path(rules[section][arg][5:])).read()
+                file_clean = re.sub('<[/?]?(xsl|xml)[^>]+?>', '', file_raw)
+                rules[section][arg] = file_clean
 
             elif '\n' in rules[section][arg]:
                 rules[section][arg] = rules[section][arg].split('\n')[1:]
@@ -810,6 +800,8 @@ class FeedJSON(Feed, ParserJSON):
 
 
 if __name__ == '__main__':
+    import sys
+
     from . import crawler
 
     req = crawler.adv_get(sys.argv[1] if len(sys.argv) > 1 else 'https://www.nytimes.com/', follow='rss')
