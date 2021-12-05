@@ -9,6 +9,7 @@ setup(
     name = package_name,
     version = datetime.now().strftime('%Y%m%d.%H%M'),
     description = 'Get full-text RSS feeds',
+    long_description = open('README.md').read(),
     author = 'pictuga',
     author_email = 'contact@pictuga.com',
     url = 'http://morss.it/',
