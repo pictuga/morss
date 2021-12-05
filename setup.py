@@ -1,3 +1,4 @@
+from datetime import datetime
 from glob import glob
 
 from setuptools import setup
@@ -6,6 +7,7 @@ package_name = 'morss'
 
 setup(
     name = package_name,
+    version = datetime.now().strftime('%Y%m%d.%H%M'),
     description = 'Get full-text RSS feeds',
     author = 'pictuga, Samuel Marks',
     author_email = 'contact@pictuga.com',
