@@ -1,5 +1,5 @@
 kind: pipeline
-name: default
+name: test
 
 steps:
 - name: lint
@@ -10,20 +10,32 @@ steps:
   - isort --check-only --diff .
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
 
-- name: pypi
+---
+kind: pipeline
+name: python
+
+- name: publish
   image: plugins/pypi
   settings:
     username:
       from_secret: pypi_user
     password:
       from_secret: pypi_pwd
-  when:
-    branch:
-    - master
-    event:
-    - push
 
-- name: docker
+trigger:
+  branch:
+  - master
+  event:
+  - push
+
+depends_on:
+- test
+
+---
+kind: pipeline
+name: docker
+
+- name: publish
   image: plugins/docker
   settings:
     username:
@@ -33,3 +45,12 @@ steps:
     repo:
       from_secret: docker_repo
     tags: latest
+
+trigger:
+  branch:
+  - master
+  event:
+  - push
+
+depends_on:
+- test
