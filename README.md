@@ -6,7 +6,7 @@ _GNU AGPLv3 code_
 _Provided logo is CC BY-NC-SA 4.0_
 
 [Homepage](https://morss.it/) • 
-[Upstream source code](https://git.pictuga.com/pictuga/morss>) • 
+[Upstream source code](https://git.pictuga.com/pictuga/morss) • 
 [Github mirror](https://github.com/pictuga/morss) (for Issues & Pull requests)
 
 [PyPI](https://pypi.org/project/morss/) • 
