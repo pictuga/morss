@@ -5,12 +5,12 @@
 _GNU AGPLv3 code_  
 _Provided logo is CC BY-NC-SA 4.0_
 
-Upstream source code: <https://git.pictuga.com/pictuga/morss>  
-Github mirror (for Issues & Pull requests): <https://github.com/pictuga/morss>  
-Homepage: <https://morss.it/>
+[Homepage](https://morss.it/) • 
+[Upstream source code](https://git.pictuga.com/pictuga/morss>) • 
+[Github mirror](https://github.com/pictuga/morss) (for Issues & Pull requests)
 
-PyPI package: <https://pypi.org/project/morss/>  
-Docker Hub: <https://hub.docker.com/r/pictuga/morss>
+[PyPI](https://pypi.org/project/morss/) • 
+[Docker Hub](https://hub.docker.com/r/pictuga/morss)
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds,
 commonly available on internet. Indeed most newspapers only make a small
@@ -136,8 +136,8 @@ docker-compose build --no-cache --pull
 
 One-click deployment:
 
-* Heroku: <https://heroku.com/deploy?template=https://github.com/pictuga/morss>
-* Google Cloud: <https://deploy.cloud.run/?git_repo=https://github.com/pictuga/morss.git>
+* [Heroku](https://heroku.com/deploy?template=https://github.com/pictuga/morss)
+* [Google Cloud](https://deploy.cloud.run/?git_repo=https://github.com/pictuga/morss.git)
 
 Providers supporting `cloud-init` (AWS, Oracle Cloud Infrastructure), based on Ubuntu:
 
