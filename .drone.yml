@@ -40,6 +40,7 @@ name: docker
 steps:
 - name: publish
   image: thegeeklab/drone-docker-buildx
+  # NB. this requires qemu installed on host
   privileged: true
   settings:
     username:
