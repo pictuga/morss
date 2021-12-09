@@ -14,7 +14,10 @@ setup(
     author = 'pictuga',
     author_email = 'contact@pictuga.com',
     url = 'http://morss.it/',
-    download_url = 'https://git.pictuga.com/pictuga/morss',
+    project_urls = {
+        'Source': 'https://git.pictuga.com/pictuga/morss',
+        'Bug Tracker': 'https://github.com/pictuga/morss/issues',
+    },
     license = 'AGPL v3',
     packages = [package_name],
     install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet'],
