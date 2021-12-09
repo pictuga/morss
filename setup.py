@@ -25,6 +25,7 @@ setup(
         'full': ['pymysql', 'redis', 'diskcache', 'gunicorn'],
         'dev': ['pylint']
     },
+    python_requires = '>=2.7',
     package_data = {package_name: ['feedify.ini']},
     data_files = [
         ('share/' + package_name, ['README.md', 'LICENSE']),
