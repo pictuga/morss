@@ -141,8 +141,8 @@ docker-compose build --no-cache --pull
 
 One-click deployment:
 
-* [Heroku](https://heroku.com/deploy?template=https://github.com/pictuga/morss)
-* [Google Cloud](https://deploy.cloud.run/?git_repo=https://github.com/pictuga/morss.git)
+[![Heroku](https://img.shields.io/static/v1?label=deploy%20to&message=heroku&logo=heroku&color=79589F)](https://heroku.com/deploy?template=https://github.com/pictuga/morss)
+[![Google Cloud](https://img.shields.io/static/v1?label=deploy%20to&message=google&logo=google&color=4285F4)](https://deploy.cloud.run/?git_repo=https://github.com/pictuga/morss.git)
 
 Providers supporting `cloud-init` (AWS, Oracle Cloud Infrastructure), based on Ubuntu:
 
