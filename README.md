@@ -153,7 +153,6 @@ packages:
   - python3-pip
   - python3-wheel
   - python3-lxml
-  - git
   - ca-certificates
 
 write_files:
@@ -170,9 +169,9 @@ write_files:
 
 runcmd:
   - update-ca-certificates
-  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport {PORT:-8000} -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport ${PORT:-8000} -j ACCEPT
   - netfilter-persistent save
-  - pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
+  - pip install morss[full]
 ```
 
 ## Run
