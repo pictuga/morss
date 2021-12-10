@@ -1,16 +1,14 @@
 # Morss - Get full-text RSS feeds
 
-[![Build Status](https://ci.pictuga.com/api/badges/pictuga/morss/status.svg)](https://ci.pictuga.com/pictuga/morss)
-
-_GNU AGPLv3 code_  
-_Provided logo is CC BY-NC-SA 4.0_
-
 [Homepage](https://morss.it/) • 
 [Upstream source code](https://git.pictuga.com/pictuga/morss) • 
 [Github mirror](https://github.com/pictuga/morss) (for Issues & Pull requests)
 
-[PyPI](https://pypi.org/project/morss/) • 
-[Docker Hub](https://hub.docker.com/r/pictuga/morss)
+[![Build Status](https://ci.pictuga.com/api/badges/pictuga/morss/status.svg)](https://ci.pictuga.com/pictuga/morss)
+[![Github Stars](https://img.shields.io/github/stars/pictuga/morss?logo=github)](https://github.com/pictuga/morss/stargazers)
+[![Github Forks](https://img.shields.io/github/forks/pictuga/morss?logo=github)](https://github.com/pictuga/morss/network/members)
+[![GNU AGPLv3 code](https://img.shields.io/static/v1?label=license&message=AGPLv3&logo=opensourceinitiative)](https://git.pictuga.com/pictuga/morss/src/branch/master/LICENSE)
+[![Logo is CC BY-NC-SA 4.0](https://img.shields.io/static/v1?label=CC&message=BY-NC-SA%204.0&logo=creativecommons)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds,
 commonly available on internet. Indeed most newspapers only make a small
@@ -51,6 +49,9 @@ Some features of morss:
 
 ### Python package
 
+![Build Python](https://img.shields.io/badge/dynamic/json?logo=drone&label=build%20python&query=$.stages[?(@.name=='python')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
+[![PyPI](https://img.shields.io/pypi/v/morss?logo=pypi)](https://pypi.org/project/morss/)
+
 Simple install (without optional dependencies)
 
 From pip
@@ -88,6 +89,9 @@ C code needs to be compiled). If possible on your distribution, try installing
 it with the system package manager.
 
 ### Docker
+
+![Build Docker](https://img.shields.io/badge/dynamic/json?logo=drone&label=build%20docker&query=$.stages[?(@.name=='docker')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
+[![Docker Hub](https://img.shields.io/docker/pulls/pictuga/morss?logo=docker)](https://hub.docker.com/r/pictuga/morss)
 
 From docker hub
 
