@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache python3 py3-pip py3-wheel git py3-lxml
+RUN apk add --no-cache python3 py3-pip py3-wheel py3-lxml
 
 ADD . /app
 RUN pip3 install --no-cache-dir /app[full]
