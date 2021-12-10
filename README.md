@@ -92,6 +92,7 @@ it with the system package manager.
 
 ![Build Docker](https://img.shields.io/badge/dynamic/json?logo=drone&label=build%20docker&query=$.stages[?(@.name=='docker')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
 [![Docker Hub](https://img.shields.io/docker/pulls/pictuga/morss?logo=docker)](https://hub.docker.com/r/pictuga/morss)
+[![Docker Arch](https://img.shields.io/badge/dynamic/json?color=blue&label=docker%20arch&query=$.results[0].images[*].architecture&url=https://hub.docker.com/v2/repositories/pictuga/morss/tags&logo=docker)](https://hub.docker.com/r/pictuga/morss/tags)
 
 From docker hub
 
