@@ -153,6 +153,7 @@ packages:
   - python3-pip
   - python3-wheel
   - python3-lxml
+  - python3-setproctitle
   - ca-certificates
 
 write_files:
