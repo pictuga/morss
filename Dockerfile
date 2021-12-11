@@ -1,9 +1,13 @@
 FROM alpine:latest
 
-RUN apk add --no-cache python3 py3-pip py3-wheel py3-lxml
-
 ADD . /app
-RUN pip3 install --no-cache-dir /app[full]
+
+RUN set -ex; \
+	apk add --no-cache --virtual .run-deps python3 py3-lxml; \
+	apk add --no-cache --virtual .build-deps py3-pip py3-wheel; \
+	pip3 install --no-cache-dir /app[full]; \
+	apk del .build-deps; \
+	rm -r /app
 
 USER 1000:1000
 
