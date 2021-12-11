@@ -22,7 +22,7 @@ setup(
     packages = [package_name],
     install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet'],
     extras_require = {
-        'full': ['pymysql', 'redis', 'diskcache', 'gunicorn'],
+        'full': ['pymysql', 'redis', 'diskcache', 'gunicorn', 'setproctitle'],
         'dev': ['pylint']
     },
     python_requires = '>=2.7',
