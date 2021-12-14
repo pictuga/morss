@@ -173,7 +173,7 @@ def cgi_file_handler(environ, start_response, app):
 
         except IOError:
             # problem with file (cannot open or not found)
-            continue
+            pass
 
         else:
             # file successfully open
