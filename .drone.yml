@@ -63,28 +63,27 @@ depends_on:
 
 ---
 kind: pipeline
-type: ssh
-name: prod
+name: ssh
 
-server:
-  host:
-    from_secret: ssh_host
-  user:
-    from_secret: ssh_user
-  ssh_key:
-    from_secret: ssh_key
+clone:
+  disable: true
 
 steps:
-- name: install
-  commands:
-  - sudo pip install --upgrade morss[full]
-
-- name: reload
-  commands:
-  - "pid=$$(sudo pidof 'gunicorn: master [morss]')"
-  - sudo kill -s USR2 $$pid
-  - sudo kill -s WINCH $$pid
-  - sudo kill -s TERM $$pid
+- name: deploy
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: ssh_host
+    username:
+      from_secret: ssh_user
+    key:
+      from_secret: ssh_key
+    script_stop: true
+    script:
+      - "pid=$$(sudo pidof 'gunicorn: master [morss]')"
+      - sudo kill -s USR2 $$pid
+      - sudo kill -s WINCH $$pid
+      - sudo kill -s TERM $$pid
   
 trigger:
   branch:
