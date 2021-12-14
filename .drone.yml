@@ -80,6 +80,7 @@ steps:
       from_secret: ssh_key
     script_stop: true
     script:
+      - sudo pip install --upgrade morss[full]
       - "pid=$$(sudo pidof 'gunicorn: master [morss]')"
       - sudo kill -s USR2 $$pid
       - sudo kill -s WINCH $$pid
