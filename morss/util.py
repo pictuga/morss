@@ -34,7 +34,8 @@ def data_path(path=''):
 
     bases = [
         os.path.join(sys.prefix, 'share/morss/www'),
-        os.path.join(pkg_path(), './../../../../share/morss/www'),
+        os.path.join(pkg_path(), '../../../share/morss/www'),
+        os.path.join(pkg_path(), '../../../../share/morss/www'),
         os.path.join(pkg_path(), '../www'),
         os.path.join(pkg_path(), '../..')
     ]
