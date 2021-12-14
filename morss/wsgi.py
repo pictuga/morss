@@ -36,6 +36,7 @@ except ImportError:
 from . import caching, crawler, readabilite
 from .morss import (DELAY, TIMEOUT, FeedFetch, FeedFormat, FeedGather,
                     MorssException, Options, log)
+from .util import data_path
 
 PORT = int(os.getenv('PORT', 8000))
 
@@ -167,26 +168,20 @@ def cgi_file_handler(environ, start_response, app):
 
     if re.match(r'^/?([a-zA-Z0-9_-][a-zA-Z0-9\._-]+/?)*$', url):
         # if it is a legitimate url (no funny relative paths)
-        paths = [
-            os.path.join(sys.prefix, 'share/morss/www', url),
-            os.path.join(os.path.dirname(__file__), '../www', url)
-            ]
+        try:
+            f = open(data_path(url), 'rb')
 
-        for path in paths:
-            try:
-                f = open(path, 'rb')
+        except IOError:
+            # problem with file (cannot open or not found)
+            continue
 
-            except IOError:
-                # problem with file (cannot open or not found)
-                continue
-
-            else:
-                # file successfully open
-                headers = {}
-                headers['status'] = '200 OK'
-                headers['content-type'] = mimetypes.guess_type(path)[0] or 'application/octet-stream'
-                start_response(headers['status'], list(headers.items()))
-                return wsgiref.util.FileWrapper(f)
+        else:
+            # file successfully open
+            headers = {}
+            headers['status'] = '200 OK'
+            headers['content-type'] = mimetypes.guess_type(path)[0] or 'application/octet-stream'
+            start_response(headers['status'], list(headers.items()))
+            return wsgiref.util.FileWrapper(f)
 
     # regex didn't validate or no file found
     return app(environ, start_response)
