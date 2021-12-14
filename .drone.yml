@@ -60,3 +60,37 @@ trigger:
 
 depends_on:
 - test
+
+---
+kind: pipeline
+type: ssh
+name: prod
+
+server:
+  host:
+    from_secret: ssh_host
+  user:
+    from_secret: ssh_user
+  ssh_key:
+    from_secret: ssh_key
+
+steps:
+- name: install
+  commands:
+  - sudo pip install --upgrade morss[full]
+
+- name: reload
+  commands:
+  - pid=$(sudo pidof 'gunicorn: master [morss]')
+  - sudo kill -s USR2 $pid
+  - sudo kill -s WINCH $pid
+  - sudo kill -s TERM $pid
+  
+trigger:
+  branch:
+  - master
+  event:
+  - push
+
+depends_on:
+- python
