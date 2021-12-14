@@ -169,7 +169,8 @@ def cgi_file_handler(environ, start_response, app):
     if re.match(r'^/?([a-zA-Z0-9_-][a-zA-Z0-9\._-]+/?)*$', url):
         # if it is a legitimate url (no funny relative paths)
         try:
-            f = open(data_path(url), 'rb')
+            path = data_path(url)
+            f = open(path, 'rb')
 
         except IOError:
             # problem with file (cannot open or not found)
