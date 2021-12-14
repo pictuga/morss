@@ -51,6 +51,7 @@ Some features of morss:
 
 ![Build Python](https://img.shields.io/badge/dynamic/json?logo=drone&label=build%20python&query=$.stages[?(@.name=='python')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
 [![PyPI](https://img.shields.io/pypi/v/morss?logo=pypi)](https://pypi.org/project/morss/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/morss)](https://pypistats.org/packages/morss)
 
 Simple install (without optional dependencies)
 
