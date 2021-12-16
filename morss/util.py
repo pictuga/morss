@@ -34,17 +34,17 @@ def data_path(path=''):
 
     bases = [
         os.path.join(sys.prefix, 'share/morss/www'),
-        os.path.join(pkg_path(), '../../../share/morss/www'),
-        os.path.join(pkg_path(), '../../../../share/morss/www'),
-        os.path.join(pkg_path(), '../www'),
-        os.path.join(pkg_path(), '../..')
+        pkg_path('../../../share/morss/www'),
+        pkg_path('../../../../share/morss/www'),
+        pkg_path('../www'),
+        pkg_path('../..')
     ]
 
     for base in bases:
         full_path = os.path.join(base, path)
 
         if os.path.isfile(full_path):
-            data_path_base = base
+            data_path_base = os.path.abspath(base)
             return data_path(path)
 
     else:
