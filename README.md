@@ -7,8 +7,8 @@
 [![Build Status](https://ci.pictuga.com/api/badges/pictuga/morss/status.svg)](https://ci.pictuga.com/pictuga/morss)
 [![Github Stars](https://img.shields.io/github/stars/pictuga/morss?logo=github)](https://github.com/pictuga/morss/stargazers)
 [![Github Forks](https://img.shields.io/github/forks/pictuga/morss?logo=github)](https://github.com/pictuga/morss/network/members)
-[![GNU AGPLv3 code](https://img.shields.io/static/v1?label=license&message=AGPLv3&logo=opensourceinitiative)](https://git.pictuga.com/pictuga/morss/src/branch/master/LICENSE)
-[![Logo is CC BY-NC-SA 4.0](https://img.shields.io/static/v1?label=CC&message=BY-NC-SA%204.0&logo=creativecommons)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![GNU AGPLv3 code](https://img.shields.io/static/v1?label=license&message=AGPLv3)](https://git.pictuga.com/pictuga/morss/src/branch/master/LICENSE)
+[![Logo is CC BY-NC-SA 4.0](https://img.shields.io/static/v1?label=CC&message=BY-NC-SA%204.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 This tool's goal is to get full-text RSS feeds out of striped RSS feeds,
 commonly available on internet. Indeed most newspapers only make a small
@@ -49,8 +49,8 @@ Some features of morss:
 
 ### Python package
 
-![Build Python](https://img.shields.io/badge/dynamic/json?logo=drone&label=build%20python&query=$.stages[?(@.name=='python')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
-[![PyPI](https://img.shields.io/pypi/v/morss?logo=pypi)](https://pypi.org/project/morss/)
+![Build Python](https://img.shields.io/badge/dynamic/json?label=build%20python&query=$.stages[?(@.name=='python')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
+[![PyPI](https://img.shields.io/pypi/v/morss)](https://pypi.org/project/morss/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/morss)](https://pypistats.org/packages/morss)
 
 Simple install (without optional dependencies)
@@ -91,9 +91,9 @@ it with the system package manager.
 
 ### Docker
 
-![Build Docker](https://img.shields.io/badge/dynamic/json?logo=drone&label=build%20docker&query=$.stages[?(@.name=='docker')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
-[![Docker Hub](https://img.shields.io/docker/pulls/pictuga/morss?logo=docker)](https://hub.docker.com/r/pictuga/morss)
-[![Docker Arch](https://img.shields.io/badge/dynamic/json?color=blue&label=docker%20arch&query=$.results[0].images[*].architecture&url=https://hub.docker.com/v2/repositories/pictuga/morss/tags&logo=docker)](https://hub.docker.com/r/pictuga/morss/tags)
+![Build Docker](https://img.shields.io/badge/dynamic/json?label=build%20docker&query=$.stages[?(@.name=='docker')].status&url=https://ci.pictuga.com/api/repos/pictuga/morss/builds/latest)
+[![Docker Hub](https://img.shields.io/docker/pulls/pictuga/morss)](https://hub.docker.com/r/pictuga/morss)
+[![Docker Arch](https://img.shields.io/badge/dynamic/json?color=blue&label=docker%20arch&query=$.results[0].images[*].architecture&url=https://hub.docker.com/v2/repositories/pictuga/morss/tags)](https://hub.docker.com/r/pictuga/morss/tags)
 
 From docker hub
 
