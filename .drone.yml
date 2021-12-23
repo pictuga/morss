@@ -85,7 +85,7 @@ steps:
       - sudo kill -s USR2 $$pid
       - sudo kill -s WINCH $$pid
       - sudo kill -s TERM $$pid
-  
+
 trigger:
   branch:
   - master
