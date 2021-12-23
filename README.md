@@ -481,7 +481,7 @@ environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
 - `CACHE=redis`: Redis cache. Connection can be defined with the following
 environment variables: `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`, `REDIS_PWD`
 - `CACHE=diskcache`: disk-based cache. Target directory canbe defined with
-`DISKCAHE_DIR`.
+`DISKCACHE_DIR`.
 
 To limit the size of the cache:
 

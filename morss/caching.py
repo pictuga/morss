@@ -205,7 +205,7 @@ if 'CACHE' in os.environ:
 
     elif os.environ['CACHE'] == 'diskcache':
         default_cache = DiskCacheHandler(
-            directory = os.getenv('DISKCAHE_DIR', '/tmp/morss-diskcache'),
+            directory = os.getenv('DISKCACHE_DIR', '/tmp/morss-diskcache'),
             size_limit = CACHE_SIZE # in Bytes
         )
 
