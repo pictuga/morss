@@ -167,7 +167,7 @@ write_files:
     permissions: 744
     content: |
       #!/bin/sh
-      gunicorn --bind 0.0.0.0:${PORT:-8000} ${GUNICORN} --preload --access-logfile - --daemon morss
+      gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - --daemon morss
 
 runcmd:
   - update-ca-certificates
@@ -490,6 +490,9 @@ be deleted but the cache might be temporarily bigger than that). Defaults to 1k
 entries. NB. When using `diskcache`, this is the cache max size in Bytes.
 - `CACHE_LIFESPAN` (seconds) sets how often the cache must be trimmed (i.e. cut
 down to the number of items set in `CACHE_SIZE`). Defaults to 1min.
+
+Gunicorn also accepts command line arguments via the `GUNICORN_CMD_ARGS`
+environment variable.
 
 ### Content matching
 
