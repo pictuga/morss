@@ -274,8 +274,30 @@ For this, you need to make sure your host allows python script execution. This
 method uses HTTP calls to fetch the RSS feeds, which will be handled through
 `mod_cgi` for example on Apache severs.
 
-Please pay attention to `main.py` permissions for it to be executable. Also
-ensure that the provided `/www/.htaccess` works well with your server.
+Please pay attention to `main.py` permissions for it to be executable. See below
+some tips for the `.htaccess` file.
+
+```htaccess
+Options -Indexes
+
+ErrorDocument 404 /cgi/main.py
+
+# Turn debug on for all requests
+SetEnv DEBUG 1
+
+# Turn debug on for requests with :debug in the url
+SetEnvIf Request_URI :debug DEBUG=1
+
+<Files ~ "\.(py|pyc|db|log)$">
+	deny from all
+</Files>
+
+<Files main.py>
+	allow from all
+	AddHandler cgi-script .py
+	Options +ExecCGI
+</Files>
+```
 
 ### As a CLI application
 

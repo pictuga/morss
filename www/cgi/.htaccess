@@ -1,9 +1,0 @@
-order allow,deny
-
-deny from all
-
-<Files main.py>
-	allow from all
-	AddHandler cgi-script .py
-	Options +ExecCGI
-</Files>
