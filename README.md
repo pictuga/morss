@@ -439,6 +439,7 @@ To pass environment variables:
 - docker-compose: add an `environment:` section in the .yml file
 - Gunicorn/uWSGI/CLI: prepend `KEY=value` before the command
 - Apache: via the `SetEnv` instruction (see sample `.htaccess` provided)
+- cloud-init: in the `/etc/environment` file
 
 Generic:
 
