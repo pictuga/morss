@@ -159,6 +159,7 @@ packages:
 
 write_files:
   - path: /etc/environment
+    append: true
     content: |
       DEBUG=1
       CACHE=diskcache
@@ -170,6 +171,7 @@ write_files:
       gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - --daemon morss
 
 runcmd:
+  - source /etc/environment
   - update-ca-certificates
   - iptables -I INPUT 6 -m state --state NEW -p tcp --dport ${PORT:-8000} -j ACCEPT
   - netfilter-persistent save
