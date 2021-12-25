@@ -23,6 +23,39 @@ steps:
       from_secret: pypi_user
     password:
       from_secret: pypi_pwd
+  commands:
+    - /bin/drone-pypi
+    - cp dist/morss-*.tar.gz dist/morss.tar.gz
+
+- name: push
+  image: appleboy/drone-scp
+  settings:
+    host:
+      from_secret: ssh_host
+    username:
+      from_secret: ssh_user
+    key:
+      from_secret: ssh_key
+    source:
+      - dist/morss.tar.gz
+      - morss-helper
+    target: /home/ubuntu
+
+- name: deploy
+  image: appleboy/drone-ssh
+  settings:
+    host:
+      from_secret: ssh_host
+    username:
+      from_secret: ssh_user
+    key:
+      from_secret: ssh_key
+    script_stop: true
+    script:
+      - sudo pip install --upgrade dist/morss.tar.gz[full]
+      - sudo mv morss-helper /usr/local/bin/morss-helper
+      - sudo rm -r dist
+      - sudo morss-helper reload
 
 trigger:
   branch:
@@ -60,37 +93,3 @@ trigger:
 
 depends_on:
 - test
-
----
-kind: pipeline
-name: ssh
-
-clone:
-  disable: true
-
-steps:
-- name: deploy
-  image: appleboy/drone-ssh
-  settings:
-    host:
-      from_secret: ssh_host
-    username:
-      from_secret: ssh_user
-    key:
-      from_secret: ssh_key
-    script_stop: true
-    script:
-      - sudo pip install --upgrade morss[full]
-      - "pid=$$(sudo pidof 'gunicorn: master [morss]')"
-      - sudo kill -s USR2 $$pid
-      - sudo kill -s WINCH $$pid
-      - sudo kill -s TERM $$pid
-
-trigger:
-  branch:
-  - master
-  event:
-  - push
-
-depends_on:
-- python

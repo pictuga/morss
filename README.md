@@ -163,12 +163,12 @@ write_files:
     content: |
       DEBUG=1
       CACHE=diskcache
-      CACHE_SIZE=1073741824
+      CACHE_SIZE=1073741824 # 1GiB
   - path: /var/lib/cloud/scripts/per-boot/morss.sh
     permissions: 744
     content: |
       #!/bin/sh
-      gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - --daemon morss
+      /usr/local/bin/morss-helper
 
 runcmd:
   - source /etc/environment
@@ -176,6 +176,8 @@ runcmd:
   - iptables -I INPUT 6 -m state --state NEW -p tcp --dport ${PORT:-8000} -j ACCEPT
   - netfilter-persistent save
   - pip install morss[full]
+  - python -m morss.crawler https://git.pictuga.com/pictuga/morss/raw/branch/master/morss-helper > /usr/local/bin/morss-helper
+  - chmod +x /usr/local/bin/morss-helper
 ```
 
 ## Run

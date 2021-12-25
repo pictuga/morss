@@ -10,5 +10,7 @@ RUN set -ex; \
 
 USER 1000:1000
 
-ENTRYPOINT ["/bin/sh", "/app/docker-entry.sh"]
+ENTRYPOINT ["/bin/sh", "/app/morss-helper"]
 CMD ["run"]
+
+HEALTHCHECK CMD python -m morss.crawler http://localhost:${PORT:-8000}/ > /dev/null 2>&1

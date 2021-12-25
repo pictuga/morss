@@ -6,6 +6,12 @@ if [ "$1" = "sh" ] || [ "$1" = "bash" ]; then
 elif [ -z "$1" ] || [ "$@" = "run" ]; then
 	gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - morss
 
+elif [ "$@" = "reload" ]; then
+	pid=$(sudo pidof 'gunicorn: master [morss]')
+	kill -s USR2 $pid
+	kill -s WINCH $pid
+	kill -s TERM $pid
+
 else
 	morss $@
 
