@@ -12,6 +12,9 @@ elif [ "$@" = "reload" ]; then
 	kill -s WINCH $pid
 	kill -s TERM $pid
 
+elif [ "$@" = "check" ]; then
+	python -m morss.crawler http://localhost:${PORT:-8000}/ > /dev/null 2>&1
+
 else
 	morss $@
 
