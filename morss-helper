@@ -1,21 +1,36 @@
 #! /bin/sh
-
-if [ "$1" = "sh" ] || [ "$1" = "bash" ]; then
-	exec $@
-
-elif [ -z "$1" ] || [ "$@" = "run" ]; then
+function run {
 	gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - morss
+}
 
-elif [ "$@" = "reload" ]; then
-	pid=$(pidof 'gunicorn: master [morss]')
-	kill -s USR2 $pid
-	kill -s WINCH $pid
-	kill -s TERM $pid
+function daemon {
+	gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - --daemon morss
+}
 
-elif [ "$@" = "check" ]; then
+function reload {
+	pid=$(pidof 'gunicorn: master [morss]') # NB. requires python-setproctitle
+
+	if [ -z "$pid" ]; then
+		# if gunicorn is not currently running
+		daemon
+
+	else
+		kill -s USR2 $pid
+		kill -s WINCH $pid
+		sleep 1 # give gunicorn some time to reload
+		kill -s TERM $pid
+
+	fi
+}
+
+function check {
 	python -m morss.crawler http://localhost:${PORT:-8000}/ > /dev/null 2>&1
+}
+
+if [ "$1" = "sh" ] || [ "$1" = "bash" ] || [ "$(type -t "$1")" = "function" ]; then
+	$@
 
 else
-	morss $@
+	python -m morss $@
 
 fi
