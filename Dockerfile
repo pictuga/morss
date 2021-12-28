@@ -13,4 +13,4 @@ USER 1000:1000
 ENTRYPOINT ["/bin/sh", "/app/morss-helper"]
 CMD ["run"]
 
-HEALTHCHECK CMD ["check"]
+HEALTHCHECK CMD /bin/sh /app/morss-helper check
