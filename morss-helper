@@ -1,4 +1,6 @@
 #! /bin/sh
+set -ex
+
 if ! command -v python && command -v python3 ; then
 	alias python='python3'
 fi
