@@ -33,7 +33,10 @@ check() {
 	python -m morss.crawler http://localhost:${PORT:-8000}/ > /dev/null 2>&1
 }
 
-if [ "$1" = "sh" ] || [ "$1" = "bash" ] || command -v "$1" ; then
+if [ -z "$1" ]; then
+	run
+
+elif [ "$1" = "sh" ] || [ "$1" = "bash" ] || command -v "$1" ; then
 	$@
 
 else
