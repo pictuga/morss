@@ -3,15 +3,15 @@ if ! command -v python && command -v python3 ; then
 	alias python='python3'
 fi
 
-function run {
+run() {
 	gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - morss
 }
 
-function daemon {
+daemon() {
 	gunicorn --bind 0.0.0.0:${PORT:-8000} --preload --access-logfile - --daemon morss
 }
 
-function reload {
+reload() {
 	pid=$(pidof 'gunicorn: master [morss]') # NB. requires python-setproctitle
 
 	if [ -z "$pid" ]; then
@@ -27,11 +27,11 @@ function reload {
 	fi
 }
 
-function check {
+check() {
 	python -m morss.crawler http://localhost:${PORT:-8000}/ > /dev/null 2>&1
 }
 
-if [ "$1" = "sh" ] || [ "$1" = "bash" ] || [ "$(type -t "$1")" = "function" ]; then
+if [ "$1" = "sh" ] || [ "$1" = "bash" ] || command -v "$1" ; then
 	$@
 
 else
