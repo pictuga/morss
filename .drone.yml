@@ -53,8 +53,8 @@ steps:
     script_stop: true
     script:
       - sudo pip install --upgrade dist/morss.tar.gz[full]
-      - sudo mv morss-helper /usr/local/bin/morss-helper
       - sudo rm -r dist
+      - sudo mv morss-helper /usr/local/bin/morss-helper
       - sudo morss-helper reload
 
 trigger:
