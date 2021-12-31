@@ -500,6 +500,8 @@ class CacheHandler(BaseHandler):
         self.cache[key] = pickle.dumps(data, 0)
 
     def cached_response(self, req, fallback=None):
+        req.from_morss_cache = True
+
         data = self.load(req.get_full_url())
 
         if data is not None:
@@ -512,6 +514,10 @@ class CacheHandler(BaseHandler):
             return fallback
 
     def save_response(self, req, resp):
+        if req.from_morss_cache:
+            # do not re-save (would reset the timing)
+            return resp
+
         data = resp.read()
 
         self.save(req.get_full_url(), {
@@ -530,6 +536,8 @@ class CacheHandler(BaseHandler):
         return resp
 
     def http_request(self, req):
+        req.from_morss_cache = False # to track whether it comes from cache
+
         data = self.load(req.get_full_url())
 
         if data is not None:
@@ -621,8 +629,7 @@ class CacheHandler(BaseHandler):
             return None
 
     def http_response(self, req, resp):
-        # code for after-fetch, to know whether to save to hard-drive (if stiking to http headers' will)
-        # NB. It might re-save requests pulled from cache, which will re-set the time() to the latest, i.e. lenghten its useful life
+        # code for after-fetch, to know whether to save to hard-drive (if sticking to http headers' will)
 
         if resp.code == 304 and resp.url in self.cache:
             # we are hopefully the first after the HTTP handler, so no need
