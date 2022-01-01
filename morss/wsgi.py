@@ -277,7 +277,7 @@ def cgi_handle_request():
 
 class WSGIRequestHandlerRequestUri(wsgiref.simple_server.WSGIRequestHandler):
     def get_environ(self):
-        env = super().get_environ()
+        env = wsgiref.simple_server.WSGIRequestHandler.get_environ(self)
         env['REQUEST_URI'] = self.path
         return env
 
