@@ -24,7 +24,7 @@ import lxml.html.soupparser
 
 def parse(data, encoding=None):
     kwargs = {'from_encoding': encoding} if encoding else {}
-    return lxml.html.soupparser.fromstring(data, **kwargs)
+    return lxml.html.soupparser.fromstring(data, features='lxml', **kwargs)
 
 
 def count_words(string):
