@@ -19,19 +19,12 @@ import re
 
 import lxml.etree
 import lxml.html
-from bs4 import BeautifulSoup
+import lxml.html.soupparser
 
 
 def parse(data, encoding=None):
-    if encoding:
-        data = BeautifulSoup(data, 'lxml', from_encoding=encoding).prettify('utf-8')
-
-    else:
-        data = BeautifulSoup(data, 'lxml').prettify('utf-8')
-
-    parser = lxml.html.HTMLParser(remove_comments=True, encoding='utf-8')
-
-    return lxml.html.fromstring(data, parser=parser)
+    kwargs = {'from_encoding': encoding} if encoding else {}
+    return lxml.html.soupparser.fromstring(data, **kwargs)
 
 
 def count_words(string):
