@@ -148,15 +148,20 @@ def score_all(node):
 
     for child in node:
         score = score_node(child)
-        child.attrib['morss_own_score'] = str(float(score))
+        set_score(child, score, 'morss_own_score')
 
         if score > 0 or len(list(child.iterancestors())) <= 2:
             spread_score(child, score)
             score_all(child)
 
 
-def set_score(node, value):
-    node.attrib['morss_score'] = str(float(value))
+def set_score(node, value, label='morss_score'):
+    try:
+        node.attrib[label] = str(float(value))
+
+    except KeyError:
+        # catch issues with e.g. html comments
+        pass
 
 
 def get_score(node):
@@ -195,6 +200,10 @@ def clean_root(root, keep_threshold=None):
 
 def clean_node(node, keep_threshold=None):
     parent = node.getparent()
+
+    if (isinstance(node, lxml.html.HtmlComment)
+            or isinstance(node, lxml.html.HtmlProcessingInstruction)):
+        return
 
     if parent is None:
         # this is <html/> (or a removed element waiting for GC)
