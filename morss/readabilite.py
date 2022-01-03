@@ -30,7 +30,7 @@ class CustomTreeBuilder(bs4.builder._lxml.LXMLTreeBuilder):
 
 def parse(data, encoding=None):
     kwargs = {'from_encoding': encoding} if encoding else {}
-    return lxml.html.soupparser.fromstring(data, features='lxml', builder=CustomTreeBuilder, **kwargs)
+    return lxml.html.soupparser.fromstring(data, builder=CustomTreeBuilder, **kwargs)
 
 
 def count_words(string):
