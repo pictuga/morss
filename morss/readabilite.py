@@ -17,14 +17,20 @@
 
 import re
 
+import bs4.builder._lxml
 import lxml.etree
 import lxml.html
 import lxml.html.soupparser
 
 
+class CustomTreeBuilder(bs4.builder._lxml.LXMLTreeBuilder):
+    def default_parser(self, encoding):
+        return lxml.html.HTMLParser(remove_comments=True, encoding=encoding)
+
+
 def parse(data, encoding=None):
     kwargs = {'from_encoding': encoding} if encoding else {}
-    return lxml.html.soupparser.fromstring(data, features='lxml', **kwargs)
+    return lxml.html.soupparser.fromstring(data, features='lxml', builder=CustomTreeBuilder, **kwargs)
 
 
 def count_words(string):
