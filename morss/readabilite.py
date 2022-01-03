@@ -25,7 +25,7 @@ import lxml.html.soupparser
 
 class CustomTreeBuilder(bs4.builder._lxml.LXMLTreeBuilder):
     def default_parser(self, encoding):
-        return lxml.html.HTMLParser(remove_comments=True, encoding=encoding)
+        return lxml.html.HTMLParser(target=self, remove_comments=True, remove_pis=True, encoding=encoding)
 
 
 def parse(data, encoding=None):
