@@ -168,7 +168,7 @@ write_files:
     permissions: 744
     content: |
       #!/bin/sh
-      /usr/local/bin/morss-helper
+      /usr/local/bin/morss-helper daemon
 
 runcmd:
   - source /etc/environment
@@ -176,8 +176,6 @@ runcmd:
   - iptables -I INPUT 6 -m state --state NEW -p tcp --dport ${PORT:-8000} -j ACCEPT
   - netfilter-persistent save
   - pip install morss[full]
-  - python -m morss.crawler https://git.pictuga.com/pictuga/morss/raw/branch/master/morss-helper > /usr/local/bin/morss-helper
-  - chmod +x /usr/local/bin/morss-helper
 ```
 
 ## Run

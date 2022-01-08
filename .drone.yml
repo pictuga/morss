@@ -38,7 +38,6 @@ steps:
       from_secret: ssh_key
     source:
       - dist/morss.tar.gz
-      - morss-helper
     target: /home/ubuntu
 
 - name: deploy
@@ -54,7 +53,6 @@ steps:
     script:
       - sudo pip install --upgrade dist/morss.tar.gz[full]
       - sudo rm -r dist
-      - sudo mv morss-helper /usr/local/bin/morss-helper
       - sudo morss-helper reload
 
 trigger:

@@ -32,5 +32,7 @@ setup(
         ('share/' + package_name + '/www', glob('www/*.*')),
     ],
     entry_points = {
-        'console_scripts': [package_name + '=' + package_name + '.__main__:main']
-    })
+        'console_scripts': [package_name + '=' + package_name + '.__main__:main'],
+    },
+    scripts = ['morss-helper'],
+)
