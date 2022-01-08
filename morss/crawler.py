@@ -111,8 +111,6 @@ def adv_get(url, post=None, timeout=None, *args, **kwargs):
 
 
 def custom_opener(follow=None, policy=None, force_min=None, force_max=None):
-    handlers = []
-
     # as per urllib2 source code, these Handelers are added first
     # *unless* one of the custom handlers inherits from one of them
     #
@@ -130,16 +128,18 @@ def custom_opener(follow=None, policy=None, force_min=None, force_max=None):
     # http_error_* are run until sth is returned (other than None). If they all
     # return nothing, a python error is raised
 
-    #handlers.append(DebugHandler())
-    handlers.append(SizeLimitHandler(500*1024)) # 500KiB
-    handlers.append(HTTPCookieProcessor())
-    handlers.append(GZIPHandler())
-    handlers.append(HTTPAllRedirectHandler())
-    handlers.append(HTTPEquivHandler())
-    handlers.append(HTTPRefreshHandler())
-    handlers.append(UAHandler(random.choice(DEFAULT_UAS)))
-    handlers.append(BrowserlyHeaderHandler())
-    handlers.append(EncodingFixHandler())
+    handlers = [
+        #DebugHandler(),
+        SizeLimitHandler(500*1024)) # 500KiB
+        HTTPCookieProcessor(),
+        GZIPHandler(),
+        HTTPAllRedirectHandler(),
+        HTTPEquivHandler(),
+        HTTPRefreshHandler(),
+        UAHandler(random.choice(DEFAULT_UAS)),
+        BrowserlyHeaderHandler(),
+        EncodingFixHandler(),
+    ]
 
     if follow:
         handlers.append(AlternateHandler(MIMETYPE[follow]))
