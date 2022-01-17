@@ -359,7 +359,13 @@ class ParserXML(ParserBase):
 
     def rule_search_all(self, rule):
         try:
-            return self.root.xpath(rule, namespaces=self.NSMAP)
+            match = self.root.xpath(rule, namespaces=self.NSMAP)
+            if isinstance(match, str):
+                # some xpath rules return a single string instead of an array (e.g. concatenate() )
+                return [match,]
+
+            else:
+                return match
 
         except etree.XPathEvalError:
             return []
