@@ -488,7 +488,14 @@ class ParserHTML(ParserXML):
             repl = r'[@class and contains(concat(" ", normalize-space(@class), " "), " \1 ")]'
             rule = re.sub(pattern, repl, rule)
 
-            return self.root.xpath(rule)
+            match = self.root.xpath(rule)
+
+            if isinstance(match, str):
+                # for some xpath rules, see XML parser
+                return [match,]
+
+            else:
+                return match
 
         except etree.XPathEvalError:
             return []
