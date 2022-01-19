@@ -130,7 +130,7 @@ def custom_opener(follow=None, policy=None, force_min=None, force_max=None):
 
     handlers = [
         #DebugHandler(),
-        SizeLimitHandler(500*1024)) # 500KiB
+        SizeLimitHandler(500*1024), # 500KiB
         HTTPCookieProcessor(),
         GZIPHandler(),
         HTTPAllRedirectHandler(),
