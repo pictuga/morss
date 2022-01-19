@@ -93,7 +93,7 @@ def parse(data, url=None, encoding=None, ruleset=None):
             if 'path' in ruleset:
                 for path in ruleset['path']:
                     if fnmatch(url, path):
-                        parser = [x for x in parsers if x.mode == ruleset['mode']][0]
+                        parser = [x for x in parsers if x.mode == ruleset.get('mode')][0] # FIXME what if no mode specified?
                         return parser(data, ruleset, encoding=encoding)
 
     # 2) Try each and every parser
@@ -113,7 +113,7 @@ def parse(data, url=None, encoding=None, ruleset=None):
         else:
             # parsing worked, now we try the rulesets
 
-            ruleset_candidates = [x for x in rulesets if x.get('mode', None) in (parser.mode, None) and 'path' not in x]
+            ruleset_candidates = [x for x in rulesets if x.get('mode') in (parser.mode, None) and 'path' not in x]
                 # 'path' as they should have been caught beforehands
                 # try anyway if no 'mode' specified
 
@@ -428,7 +428,7 @@ class ParserXML(ParserBase):
 
         match = self.rule_search(rrule)
 
-        html_rich = ('atom' in rule or self.rules['mode'] == 'html') \
+        html_rich = ('atom' in rule or self.rules.get('mode') == 'html') \
             and rule in [self.rules.get('item_desc'), self.rules.get('item_content')]
 
         if key is not None:
@@ -439,7 +439,7 @@ class ParserXML(ParserBase):
                 self._clean_node(match)
                 match.append(lxml.html.fragment_fromstring(value, create_parent='div'))
 
-                if self.rules['mode'] == 'html':
+                if self.rules.get('mode') == 'html':
                     match.find('div').drop_tag() # not supported by lxml.etree
 
                 else: # i.e. if atom
