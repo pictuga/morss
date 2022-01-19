@@ -14,7 +14,9 @@ daemon() {
 }
 
 reload() {
-	pid=$(pidof 'gunicorn: master [morss]') # NB. requires python-setproctitle
+	pid=$(pidof 'gunicorn: master [morss]' || true)
+		# NB. requires python-setproctitle
+		# `|| true` due to `set -e`
 
 	if [ -z "$pid" ]; then
 		# if gunicorn is not currently running
