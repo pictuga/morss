@@ -194,7 +194,7 @@ def cgi_get(environ, start_response):
     # get page
     req = crawler.adv_get(url=url, timeout=TIMEOUT)
 
-    if req['contenttype'] in ['text/html', 'application/xhtml+xml', 'application/xml']:
+    if req['contenttype'] in crawler.MIMETYPE['html']:
         if options['get'] == 'page':
             html = readabilite.parse(req['data'], encoding=req['encoding'])
             html.make_links_absolute(req['url'])
