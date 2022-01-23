@@ -33,11 +33,12 @@ def data_path(path=''):
         return os.path.join(data_path_base, path)
 
     bases = [
-        os.path.join(sys.prefix, 'share/morss/www'),
-        pkg_path('../../../share/morss/www'),
+        os.path.join(sys.prefix, 'share/morss/www'), # when installed as root
+        pkg_path('../../../share/morss/www'), 
         pkg_path('../../../../share/morss/www'),
-        pkg_path('../www'),
-        pkg_path('../..')
+        pkg_path('../share/morss/www'), # for `pip install --target=dir morss`
+        pkg_path('../www'), # when running from source tree
+        pkg_path('../..'), # when running on `.cgi` subdir on Apache
     ]
 
     for base in bases:
