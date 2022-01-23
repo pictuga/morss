@@ -392,10 +392,11 @@ The list of arguments can be obtained by running `morss --help`
 ```
 usage: morss [-h] [--post STRING] [--xpath XPATH]
              [--format {rss,json,html,csv}] [--search STRING] [--clip]
-             [--indent] [--cache] [--force] [--proxy] [--newest] [--firstlink]
-             [--resolve] [--items XPATH] [--item_link XPATH]
-             [--item_title XPATH] [--item_content XPATH] [--item_time XPATH]
-             [--nolink] [--noref] [--silent]
+             [--indent] [--cache] [--force] [--proxy]
+             [--order {first,last,newest,oldest}] [--firstlink] [--resolve]
+             [--items XPATH] [--item_link XPATH] [--item_title XPATH]
+             [--item_content XPATH] [--item_time XPATH] [--nolink] [--noref]
+             [--silent]
              url
 
 Get full-text RSS feeds
@@ -403,7 +404,7 @@ Get full-text RSS feeds
 positional arguments:
   url                   feed url
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --post STRING         POST request
   --xpath XPATH         xpath rule to manually detect the article
@@ -422,8 +423,9 @@ action:
                         articles' content), so as to save time
   --force               force refetch the rss feed and articles
   --proxy               doesn't fill the articles
-  --newest              return the feed items in chronological order (morss
-                        ohterwise shows the items by appearing order)
+  --order {first,last,newest,oldest}
+                        order in which to process items (which are however NOT
+                        sorted in the output)
   --firstlink           pull the first article mentioned in the description
                         instead of the default link
   --resolve             replace tracking links with direct links to articles

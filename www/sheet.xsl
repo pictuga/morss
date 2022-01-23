@@ -204,7 +204,9 @@
 					link of the 
 					<select>
 						<option value="">first</option>
-						<option value=":newest" title="Select feed items by publication date (instead of appearing order)">newest (?)</option>
+						<option value=":order=newest" title="Select feed items by publication date (instead of appearing order)">newest (?)</option>
+						<option value=":order=last">last</option>
+						<option value=":order=oldest">oldest</option>
 					</select>
 					items and 
 					<select>

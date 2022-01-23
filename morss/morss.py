@@ -328,14 +328,20 @@ def FeedGather(rss, url, options):
     if options.cache:
         max_time = 0
 
-    if options.newest:
-        # :newest take the newest items (instead of appearing order)
-        now = datetime.now(tz.tzutc())
-        sorted_items = sorted(rss.items, key=lambda x:x.updated or x.time or now, reverse=True)
+    # sort
+    sorted_items = list(rss.items)
 
-    else:
-        # default behavior, take the first items (in appearing order)
-        sorted_items = list(rss.items)
+    if options.order == 'last':
+    # `first` does nothing from a practical standpoint, so only `last` needs
+    # to be addressed
+        sorted_items = reversed(sorted_items)
+
+    elif options.order in ['newest', 'oldest']:
+        now = datetime.now(tz.tzutc())
+        sorted_items = sorted(sorted_items, key=lambda x:x.updated or x.time or now) # oldest to newest
+
+        if options.order == 'newest':
+            sorted_items = reversed(sorted_items)
 
     for i, item in enumerate(sorted_items):
         # hard cap
