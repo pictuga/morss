@@ -59,7 +59,9 @@ except NameError:
 MIMETYPE = {
     'xml': ['text/xml', 'application/xml', 'application/rss+xml', 'application/rdf+xml', 'application/atom+xml', 'application/xhtml+xml'],
     'rss': ['application/rss+xml', 'application/rdf+xml', 'application/atom+xml'],
-    'html': ['text/html', 'application/xhtml+xml', 'application/xml']}
+    'html': ['text/html', 'application/xhtml+xml', 'application/xml'],
+    'json': ['application/json'],
+    }
 
 
 DEFAULT_UAS = [

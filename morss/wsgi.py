@@ -192,32 +192,36 @@ def cgi_get(environ, start_response):
     url, options = cgi_parse_environ(environ)
 
     # get page
-    req = crawler.adv_get(url=url, timeout=TIMEOUT)
+    if options['get'] in ('page', 'article'):
+        req = crawler.adv_get(url=url, timeout=TIMEOUT)
 
-    if req['contenttype'] in crawler.MIMETYPE['html']:
-        if options['get'] == 'page':
-            html = readabilite.parse(req['data'], encoding=req['encoding'])
-            html.make_links_absolute(req['url'])
+        if req['contenttype'] in crawler.MIMETYPE['html']:
+            if options['get'] == 'page':
+                html = readabilite.parse(req['data'], encoding=req['encoding'])
+                html.make_links_absolute(req['url'])
 
-            kill_tags = ['script', 'iframe', 'noscript']
+                kill_tags = ['script', 'iframe', 'noscript']
 
-            for tag in kill_tags:
-                for elem in html.xpath('//'+tag):
-                    elem.getparent().remove(elem)
+                for tag in kill_tags:
+                    for elem in html.xpath('//'+tag):
+                        elem.getparent().remove(elem)
 
-            output = lxml.etree.tostring(html.getroottree(), encoding='utf-8', method='html')
+                output = lxml.etree.tostring(html.getroottree(), encoding='utf-8', method='html')
 
-        elif options['get'] == 'article':
-            output = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='utf-8', debug=options.debug)
+            else: # i.e. options['get'] == 'article'
+                output = readabilite.get_article(req['data'], url=req['url'], encoding_in=req['encoding'], encoding_out='utf-8', debug=options.debug)
+
+        elif req['contenttype'] in crawler.MIMETYPE['xml'] + crawler.MIMETYPE['rss'] + crawler.MIMETYPE['json']:
+            output = req['data']
 
         else:
-            raise MorssException('no :get option passed')
+            raise MorssException('unsupported mimetype')
 
     else:
-        output = req['data']
+        raise MorssException('no :get option passed')
 
     # return html page
-    headers = {'status': '200 OK', 'content-type': 'text/html; charset=utf-8', 'X-Frame-Options': 'SAMEORIGIN'} # SAMEORIGIN to avoid potential abuse
+    headers = {'status': '200 OK', 'content-type': req['contenttype'], 'X-Frame-Options': 'SAMEORIGIN'} # SAMEORIGIN to avoid potential abuse
     start_response(headers['status'], list(headers.items()))
     return [output]
 
