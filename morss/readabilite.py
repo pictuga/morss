@@ -207,8 +207,10 @@ def clean_root(root, keep_threshold=None):
 def clean_node(node, keep_threshold=None):
     parent = node.getparent()
 
+    # remove comments
     if (isinstance(node, lxml.html.HtmlComment)
             or isinstance(node, lxml.html.HtmlProcessingInstruction)):
+        parent.remove(node)
         return
 
     if parent is None:
@@ -239,11 +241,6 @@ def clean_node(node, keep_threshold=None):
 
     # remove shitty link
     if node.tag == 'a' and len(list(node.iter())) > 3:
-        parent.remove(node)
-        return
-
-    # remove comments
-    if isinstance(node, lxml.html.HtmlComment) or isinstance(node, lxml.html.HtmlProcessingInstruction):
         parent.remove(node)
         return
 
