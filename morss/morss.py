@@ -290,7 +290,7 @@ def FeedFetch(url, options):
         ruleset['desc'] = options.get('desc', '//head/meta[@name="description"]/@content')
 
         ruleset['item_title'] = options.get('item_title', '.')
-        ruleset['item_link'] = options.get('item_link', './@href|.//a/@href|ancestor::a/@href')
+        ruleset['item_link'] = options.get('item_link', '(.|.//a|ancestor::a)/@href')
 
         if options.item_content:
             ruleset['item_content'] = options.item_content
