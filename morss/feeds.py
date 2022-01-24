@@ -186,10 +186,11 @@ class ParserBase(object):
         return self.convert(FeedHTML).tostring(**k)
 
     def convert(self, TargetParser):
-        if type(self) == TargetParser:
-            return self
-
         target = TargetParser()
+
+        if type(self) == TargetParser and self.rules == target.rules:
+            # check both type *AND* rules (e.g. when going from freeform xml to rss)
+            return self
 
         for attr in target.dic:
             if attr == 'items':
