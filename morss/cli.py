@@ -44,7 +44,7 @@ def cli_app():
     group.add_argument('--cache', action='store_true', help='only take articles from the cache (ie. don\'t grab new articles\' content), so as to save time')
     group.add_argument('--force', action='store_true', help='force refetch the rss feed and articles')
     group.add_argument('--proxy', action='store_true', help='doesn\'t fill the articles')
-    group.add_argument('--newest', action='store_true', help='return the feed items in chronological order (morss ohterwise shows the items by appearing order)')
+    group.add_argument('--order', default='first', choices=('first', 'last', 'newest', 'oldest'), help='order in which to process items (which are however NOT sorted in the output)')
     group.add_argument('--firstlink', action='store_true', help='pull the first article mentioned in the description instead of the default link')
     group.add_argument('--resolve', action='store_true', help='replace tracking links with direct links to articles (not compatible with --proxy)')
 
