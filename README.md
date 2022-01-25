@@ -474,6 +474,7 @@ debugging.
 - `IGNORE_SSL=1`: to ignore SSL certs when fetch feeds and articles
 - `DELAY` (seconds) sets the browser cache delay, only for HTTP clients
 - `TIMEOUT` (seconds) sets the HTTP timeout when fetching rss feeds and articles
+- `DATA_PATH`: to set custom file location for the `www` folder
 
 When parsing long feeds, with a lot of items (100+), morss might take a lot of
 time to parse it, or might even run into a memory overflow on some shared

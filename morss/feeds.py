@@ -65,7 +65,8 @@ def parse_rules(filename=None):
             # for each rule
 
             if rules[section][arg].startswith('file:'):
-                file_raw = open(data_path(rules[section][arg][5:])).read()
+                path = data_path('www', rules[section][arg][5:])
+                file_raw = open(path).read()
                 file_clean = re.sub('<[/?]?(xsl|xml)[^>]+?>', '', file_raw)
                 rules[section][arg] = file_clean
 

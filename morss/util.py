@@ -15,31 +15,36 @@
 # You should have received a copy of the GNU Affero General Public License along
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import os.path
 import sys
 
 
-def pkg_path(path=''):
-    return os.path.join(os.path.dirname(__file__), path)
+def pkg_path(*path_elements):
+    return os.path.join(os.path.dirname(__file__), *path_elements)
 
 
 data_path_base = None
 
 
-def data_path(path=''):
+def data_path(*path_elements):
     global data_path_base
+
+    path = os.path.join(*path_elements)
 
     if data_path_base is not None:
         return os.path.join(data_path_base, path)
 
     bases = [
-        os.path.join(sys.prefix, 'share/morss/www'), # when installed as root
-        pkg_path('../../../share/morss/www'), 
-        pkg_path('../../../../share/morss/www'),
-        pkg_path('../share/morss/www'), # for `pip install --target=dir morss`
-        pkg_path('../www'), # when running from source tree
-        pkg_path('../..'), # when running on `.cgi` subdir on Apache
+        os.path.join(sys.prefix, 'share/morss'), # when installed as root
+        pkg_path('../../../share/morss'), 
+        pkg_path('../../../../share/morss'),
+        pkg_path('../share/morss'), # for `pip install --target=dir morss`
+        pkg_path('..'), # when running from source tree
     ]
+
+    if 'DATA_PATH' in os.environ:
+        bases.append(os.environ['DATA_PATH'])
 
     for base in bases:
         full_path = os.path.join(base, path)
