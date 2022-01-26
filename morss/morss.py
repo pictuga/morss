@@ -17,6 +17,7 @@
 
 import os
 import re
+import sys
 import time
 from datetime import datetime
 from fnmatch import fnmatch
@@ -59,7 +60,7 @@ def log(txt):
 
         else:
             # when using internal server or cli
-            print(repr(txt))
+            print(repr(txt), file=sys.stderr)
 
 
 def len_html(txt):
