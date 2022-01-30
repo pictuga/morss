@@ -32,18 +32,18 @@ from .caching import default_cache
 
 try:
     # python 2
-    from urllib import quote
+    from urllib import quote, unquote
 
     from httplib import HTTPMessage
     from urllib2 import (BaseHandler, HTTPCookieProcessor, HTTPRedirectHandler,
                          Request, addinfourl, build_opener, parse_http_list,
                          parse_keqv_list)
-    from urlparse import urlparse, urlunparse
+    from urlparse import urlsplit
 except ImportError:
     # python 3
     from email import message_from_string
     from http.client import HTTPMessage
-    from urllib.parse import quote, urlparse, urlunparse
+    from urllib.parse import quote, unquote, urlsplit
     from urllib.request import (BaseHandler, HTTPCookieProcessor,
                                 HTTPRedirectHandler, Request, addinfourl,
                                 build_opener, parse_http_list, parse_keqv_list)
@@ -151,22 +151,10 @@ def custom_opener(follow=None, policy=None, force_min=None, force_max=None):
     return build_opener(*handlers)
 
 
-def is_ascii(string):
-    # there's a native function in py3, but home-made fix for backward compatibility
-    try:
-        string.encode('ascii')
-
-    except UnicodeError:
-        return False
-
-    else:
-        return True
-
-
 def sanitize_url(url):
     # make sure the url is unicode, i.e. not bytes
     if isinstance(url, bytes):
-        url = url.decode()
+        url = url.decode('utf-8')
 
     # make sure there's a protocol (http://)
     if url.split(':', 1)[0] not in PROTOCOL:
@@ -175,22 +163,20 @@ def sanitize_url(url):
     # turns out some websites have really badly fomatted urls (fix http:/badurl)
     url = re.sub('^(https?):/([^/])', r'\1://\2', url)
 
-    # escape spaces
-    url = url.replace(' ', '%20')
+    # escape non-ascii unicode characters (also encode spaces as %20)
+    parts = urlsplit(url)
 
-    # escape non-ascii unicode characters
-    # https://stackoverflow.com/a/4391299
-    parts = list(urlparse(url))
+    parts = parts._replace(
+        netloc=parts.netloc.replace(
+            parts.hostname,
+            parts.hostname.encode('idna').decode('ascii')
+            ),
+        path=quote(unquote(parts.path).encode('utf-8')),
+        query=quote(unquote(parts.query).encode('utf-8')),
+        fragment=quote(unquote(parts.fragment).encode('utf-8')),
+    )
 
-    for i in range(len(parts)):
-        if not is_ascii(parts[i]):
-            if i == 1:
-                parts[i] = parts[i].encode('idna').decode('ascii')
-
-            else:
-                parts[i] = quote(parts[i].encode('utf-8'))
-
-    return urlunparse(parts)
+    return parts.geturl()
 
 
 class RespDataHandler(BaseHandler):
