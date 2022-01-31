@@ -1,0 +1,17 @@
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+  <channel>
+    <title>!TITLE!</title>
+    <description>!DESC!</description>
+    <item>
+      <title>!ITEM_TITLE!</title>
+      <pubDate>Mon, 01 Jan 2022 00:00:01 +0100</pubDate>
+      <link>!ITEM_LINK!</link>
+      <description>!ITEM_DESC!</description>
+      <content:encoded>!ITEM_CONTENT!</content:encoded>
+    </item>
+  </channel>
+</rss>

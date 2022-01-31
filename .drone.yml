@@ -10,6 +10,7 @@ steps:
   - pip3 install --no-cache-dir .[full] .[dev]
   - isort --check-only --diff .
   - pylint morss --rcfile=.pylintrc --disable=C,R,W --fail-under=8
+  - pytest --cov=morss tests
 
 ---
 kind: pipeline

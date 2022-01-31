@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+content-type: application/xml
+
+<?xml version='1.0' encoding='utf-8' ?>
+<feed version='0.3' xmlns='http://purl.org/atom/ns#'>
+	<title>!TITLE!</title>
+	<subtitle>!DESC!</subtitle>
+	<entry>
+		<title>!ITEM_TITLE!</title>
+		<link rel='alternate' type='text/html' href='!ITEM_LINK!' />
+		<summary>!ITEM_DESC!</summary>
+		<content>!ITEM_CONTENT!</content>
+		<issued>2022-01-01T00:00:01+01:00</issued> <!-- FIXME -->
+	</entry>
+</feed>

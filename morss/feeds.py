@@ -699,7 +699,7 @@ class Feed(object):
                 try:
                     setattr(item, attr, new[attr])
 
-                except (IndexError, TypeError):
+                except (KeyError, IndexError, TypeError):
                     pass
 
         return item

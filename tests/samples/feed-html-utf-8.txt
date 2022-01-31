@@ -1,0 +1,22 @@
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+
+<html>
+<head></head>
+
+<body>
+<div id="header">
+	<h1>!TITLE!</h1>
+	<p>!DESC!</p>
+</div>
+
+<div id="content">
+	<div class="item">
+		<a target="_blank" href="!ITEM_LINK!">!ITEM_TITLE!</a>
+		<div class="desc">!ITEM_DESC!</div>
+		<div class="content">!ITEM_CONTENT!</div>
+	</div>
+</div>
+
+</body>
+</html>

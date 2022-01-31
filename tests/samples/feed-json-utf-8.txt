@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+
+{
+	"title": "!TITLE!",
+	"desc": "!DESC!",
+	"items": [
+		{
+			"title": "!ITEM_TITLE!",
+			"time": "2022-01-01T00:00:01+0100",
+			"url": "!ITEM_LINK!",
+			"desc": "!ITEM_DESC!",
+			"content": "!ITEM_CONTENT!"
+		}
+	]
+}

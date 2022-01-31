@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset=utf-8
+
+<?xml version='1.0' encoding='utf-8'?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>!TITLE!</title>
+	<subtitle>!DESC!</subtitle>
+	<entry>
+		<title>!ITEM_TITLE!</title>
+		<summary>!ITEM_DESC!</summary>
+		<content type="html">!ITEM_CONTENT!</content>
+		<link href="!ITEM_LINK!"/>
+		<updated>2022-01-01T00:00:01+01:00</updated>
+		<published>2022-01-01T00:00:02+01:00</published>
+	</entry>
+</feed>
