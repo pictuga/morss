@@ -1,0 +1,4 @@
+HTTP/1.1 308 Permanent Redirect
+location: /200-ok.txt
+
+/200-ok.txt

@@ -1,0 +1,3 @@
+HTTP/1.1 301 Moved Permanently
+location: http://localhost:8888/200-ok.txt
+

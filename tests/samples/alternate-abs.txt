@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+content-type: text/html; charset=UTF-8
+
+<!DOCTYPE html>
+<html>
+<head><link rel="alternate" type="application/rss+xml" href="/200-ok.txt" /></head>
+<body>meta redirect</body>
+</html>

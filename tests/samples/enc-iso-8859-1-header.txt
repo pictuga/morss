@@ -1,0 +1,4 @@
+HTTP/1.1 200 OK
+content-type: text/plain; charset=iso-8859-1
+
+succès
