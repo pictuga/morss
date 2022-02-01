@@ -425,7 +425,7 @@ class HTTPRefreshHandler(BaseHandler):
     def http_response(self, req, resp):
         if 200 <= resp.code < 300:
             if resp.headers.get('refresh'):
-                regex = r'(?i)^(?P<delay>[0-9]+)\s*;\s*url=(["\']?)(?P<url>.+)\2$'
+                regex = r'(?i)^(?P<delay>[0-9]+)\s*;\s*url\s*=\s*(["\']?)(?P<url>.+)\2$'
                 match = re.search(regex, resp.headers.get('refresh'))
 
                 if match:
