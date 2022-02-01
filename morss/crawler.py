@@ -32,7 +32,7 @@ from .caching import default_cache
 
 try:
     # python 2
-    from urllib import quote, unquote
+    from urllib import quote
 
     from httplib import HTTPMessage
     from urllib2 import (BaseHandler, HTTPCookieProcessor, HTTPRedirectHandler,
@@ -43,7 +43,7 @@ except ImportError:
     # python 3
     from email import message_from_string
     from http.client import HTTPMessage
-    from urllib.parse import quote, unquote, urlsplit
+    from urllib.parse import quote, urlsplit
     from urllib.request import (BaseHandler, HTTPCookieProcessor,
                                 HTTPRedirectHandler, Request, addinfourl,
                                 build_opener, parse_http_list, parse_keqv_list)
@@ -151,6 +151,28 @@ def custom_opener(follow=None, policy=None, force_min=None, force_max=None):
     return build_opener(*handlers)
 
 
+def is_ascii(string):
+    # there's a native function in py3, but home-made fix for backward compatibility
+    try:
+        string.encode('ascii')
+
+    except UnicodeError:
+        return False
+
+    else:
+        return True
+
+
+def soft_quote(string):
+    " url-quote only when not a valid ascii string "
+
+    if is_ascii(string):
+        return string
+
+    else:
+        return quote(string.encode('utf-8'))
+
+
 def sanitize_url(url):
     # make sure the url is unicode, i.e. not bytes
     if isinstance(url, bytes):
@@ -163,7 +185,10 @@ def sanitize_url(url):
     # turns out some websites have really badly fomatted urls (fix http:/badurl)
     url = re.sub('^(https?):/([^/])', r'\1://\2', url)
 
-    # escape non-ascii unicode characters (also encode spaces as %20)
+    # escape spaces
+    url = url.replace(' ', '%20')
+
+    # escape non-ascii unicode characters
     parts = urlsplit(url)
 
     parts = parts._replace(
@@ -171,9 +196,9 @@ def sanitize_url(url):
             parts.hostname,
             parts.hostname.encode('idna').decode('ascii')
             ),
-        path=quote(unquote(parts.path).encode('utf-8')),
-        query=quote(unquote(parts.query).encode('utf-8')),
-        fragment=quote(unquote(parts.fragment).encode('utf-8')),
+        path=soft_quote(parts.path),
+        query=soft_quote(parts.query),
+        fragment=soft_quote(parts.fragment),
     )
 
     return parts.geturl()
