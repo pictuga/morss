@@ -103,7 +103,7 @@ With cli
 docker pull pictuga/morss
 ```
 
-With docker-compose
+With docker-compose **(recommended)**
 
 ```yml
 services:
@@ -215,7 +215,7 @@ From source
 docker run -p 8000:8000 morss
 ```
 
-With docker-compose
+With docker-compose **(recommended)**
 
 ```shell
 docker-compose up
