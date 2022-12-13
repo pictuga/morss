@@ -16,7 +16,6 @@
 # with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import pickle
 import threading
 import time
 from collections import OrderedDict
@@ -49,83 +48,6 @@ class BaseCache:
 
         else:
             return True
-
-
-try:
-    import sqlite3 # isort:skip
-except ImportError:
-    pass
-
-
-class SQLiteCache(BaseCache):
-    def __init__(self, path=':memory:'):
-        self.con = sqlite3.connect(path, detect_types=sqlite3.PARSE_DECLTYPES, check_same_thread=False)
-
-        with self.con:
-            self.con.execute('CREATE TABLE IF NOT EXISTS data (ky UNICODE PRIMARY KEY, data BLOB, timestamp INT)')
-            self.con.execute('pragma journal_mode=WAL')
-
-        self.trim()
-
-    def __del__(self):
-        self.con.close()
-
-    def trim(self):
-        with self.con:
-            self.con.execute('DELETE FROM data WHERE timestamp <= ( SELECT timestamp FROM ( SELECT timestamp FROM data ORDER BY timestamp DESC LIMIT 1 OFFSET ? ) foo )', (CACHE_SIZE,))
-
-    def __getitem__(self, key):
-        row = self.con.execute('SELECT * FROM data WHERE ky=?', (key,)).fetchone()
-
-        if not row:
-            raise KeyError
-
-        return row[1]
-
-    def __setitem__(self, key, data):
-        with self.con:
-            self.con.execute('INSERT INTO data VALUES (?,?,?) ON CONFLICT(ky) DO UPDATE SET data=?, timestamp=?', (key, data, time.time(), data, time.time()))
-
-
-try:
-    import pymysql.cursors # isort:skip
-except ImportError:
-    pass
-
-
-class MySQLCacheHandler(BaseCache):
-    def __init__(self, user, password, database, host='localhost'):
-        self.user = user
-        self.password = password
-        self.database = database
-        self.host = host
-
-        with self.cursor() as cursor:
-            cursor.execute('CREATE TABLE IF NOT EXISTS data (ky VARCHAR(255) NOT NULL PRIMARY KEY, data MEDIUMBLOB, timestamp INT)')
-
-        self.trim()
-
-    def cursor(self):
-        return pymysql.connect(host=self.host, user=self.user, password=self.password, database=self.database, charset='utf8', autocommit=True).cursor()
-
-    def trim(self):
-        with self.cursor() as cursor:
-            cursor.execute('DELETE FROM data WHERE timestamp <= ( SELECT timestamp FROM ( SELECT timestamp FROM data ORDER BY timestamp DESC LIMIT 1 OFFSET %s ) foo )', (CACHE_SIZE,))
-
-    def __getitem__(self, key):
-        cursor = self.cursor()
-        cursor.execute('SELECT * FROM data WHERE ky=%s', (key,))
-        row = cursor.fetchone()
-
-        if not row:
-            raise KeyError
-
-        return row[1]
-
-    def __setitem__(self, key, data):
-        with self.cursor() as cursor:
-            cursor.execute('INSERT INTO data VALUES (%s,%s,%s) ON DUPLICATE KEY UPDATE data=%s, timestamp=%s',
-                (key, data, time.time(), data, time.time()))
 
 
 class CappedDict(OrderedDict, BaseCache):

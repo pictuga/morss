@@ -41,7 +41,7 @@ Some features of morss:
 - Follow 301/meta redirects
 - Recover xml feeds with corrupt encoding
 - Supports gzip-compressed http content
-- HTTP caching with different backends (in-memory/sqlite/mysql/redis/diskcache)
+- HTTP caching with different backends (in-memory/redis/diskcache)
 - Works as server/cli tool
 - Deobfuscate various tracking links
 
@@ -501,11 +501,6 @@ be dropped from the feed, even if they're cached. `-1` for unlimited.
 morss uses caching to make loading faster. There are 3 possible cache backends:
 
 - `(nothing/default)`: a simple python in-memory dict-like object.
-- `CACHE=sqlite`: sqlite3 cache. Default file location is in-memory (i.e. it
-will be cleared every time the program is run). Path can be defined with
-`SQLITE_PATH`.
-- `CACHE=mysql`: MySQL cache. Connection can be defined with the following
-environment variables: `MYSQL_USER`, `MYSQL_PWD`, `MYSQL_DB`, `MYSQL_HOST`
 - `CACHE=redis`: Redis cache. Connection can be defined with the following
 environment variables: `REDIS_HOST`, `REDIS_PORT`, `REDIS_DB`, `REDIS_PWD`
 - `CACHE=diskcache`: disk-based cache. Target directory canbe defined with
