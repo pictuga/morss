@@ -1,0 +1,13 @@
+[Unit]
+Description=morss server (gunicorn)
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/morss-helper run
+ExecReload=/usr/local/bin/morss-helper reload
+KillMode=process
+Restart=always
+User=http
+
+[Install]
+WantedBy=multi-user.target
