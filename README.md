@@ -395,8 +395,8 @@ usage: morss [-h] [--post STRING] [--xpath XPATH]
              [--indent] [--cache] [--force] [--proxy]
              [--order {first,last,newest,oldest}] [--firstlink] [--resolve]
              [--items XPATH] [--item_link XPATH] [--item_title XPATH]
-             [--item_content XPATH] [--item_time XPATH] [--nolink] [--noref]
-             [--silent]
+             [--item_content XPATH] [--item_time XPATH]
+             [--mode {xml,html,json}] [--nolink] [--noref] [--silent]
              url
 
 Get full-text RSS feeds
@@ -440,6 +440,8 @@ custom feeds:
   --item_content XPATH  entry's content
   --item_time XPATH     entry's date & time (accepts a wide range of time
                         formats)
+  --mode {xml,html,json}
+                        parser to use for the custom feeds
 
 misc:
   --nolink              drop links, but keeps links' inner text

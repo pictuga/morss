@@ -287,6 +287,9 @@ def FeedFetch(url, options):
 
         ruleset['items'] = options.items
 
+        if options.mode:
+            ruleset['mode'] = options.mode
+
         ruleset['title'] = options.get('title', '//head/title')
         ruleset['desc'] = options.get('desc', '//head/meta[@name="description"]/@content')
 

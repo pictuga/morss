@@ -54,6 +54,7 @@ def cli_app():
     group.add_argument('--item_title', action='store', type=str, metavar='XPATH', help='entry\'s title')
     group.add_argument('--item_content', action='store', type=str, metavar='XPATH', help='entry\'s content')
     group.add_argument('--item_time', action='store', type=str, metavar='XPATH', help='entry\'s date & time (accepts a wide range of time formats)')
+    group.add_argument('--mode', default=None, choices=('xml', 'html', 'json'), help='parser to use for the custom feeds')
 
     group = parser.add_argument_group('misc')
     group.add_argument('--nolink', action='store_true', help='drop links, but keeps links\' inner text')
