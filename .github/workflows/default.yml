@@ -54,6 +54,8 @@ jobs:
 
     docker-publish:
         runs-on: ubuntu-latest
+        container:
+            image: catthehacker/ubuntu:act-latest
         steps:
             - name: Checkout
               uses: actions/checkout@v3
