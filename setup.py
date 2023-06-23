@@ -23,7 +23,7 @@ setup(
     install_requires = ['lxml', 'bs4', 'python-dateutil', 'chardet'],
     extras_require = {
         'full': ['redis', 'diskcache', 'gunicorn', 'setproctitle'],
-        'dev': ['pylint', 'pytest', 'pytest-cov'],
+        'dev': ['pylint', 'pyenchant', 'pytest', 'pytest-cov'],
     },
     python_requires = '>=2.7',
     package_data = {package_name: ['feedify.ini']},
