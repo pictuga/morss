@@ -40,24 +40,6 @@ jobs:
               uses: https://github.com/pypa/gh-action-pypi-publish@release/v1
               with:
                   password: ${{ secrets.pypi_api_token }}
-            - name: Push python package to the server
-              uses: https://github.com/appleboy/scp-action@v0.1.4
-              with:
-                host: ${{ secrets.ssh_host }}
-                username: ${{ secrets.ssh_user }}
-                key: ${{ secrets.ssh_key }}
-                source: dist/morss-*.tar.gz
-                target: /home/ubuntu
-            - name: Install & reload the server
-              uses: https://github.com/appleboy/ssh-action@v0.1.10
-              with:
-                host: ${{ secrets.ssh_host }}
-                username: ${{ secrets.ssh_user }}
-                key: ${{ secrets.ssh_key }}
-                script: |
-                    sudo pip install --upgrade dist/morss*-.tar.gz[full]
-                    sudo rm -r dist
-                    sudo morss-helper reload
 
     docker-publish-deploy:
         runs-on: ubuntu-latest
@@ -86,3 +68,11 @@ jobs:
                   platforms: linux/amd64,linux/arm64,linux/arm/v7
                   push: true
                   tags: ${{ secrets.docker_repo }}
+
+            - name: Deploy on server
+              uses: https://github.com/appleboy/ssh-action@v0.1.10
+              with:
+                  host: ${{ secrets.ssh_host }}
+                  username: ${{ secrets.ssh_user }}
+                  key: ${{ secrets.ssh_key }}
+                  script: morss-update
