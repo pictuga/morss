@@ -81,9 +81,9 @@ From git
 pip install git+https://git.pictuga.com/pictuga/morss.git#egg=morss[full]
 ```
 
-The full install includes all the cache backends. Otherwise, only in-memory and
-sqlite3 caches are available. The full install also includes gunicorn (for more
-efficient HTTP handling).
+The full install includes all the cache backends. Otherwise, only in-memory
+cache is available. The full install also includes gunicorn (for more efficient
+HTTP handling).
 
 The dependency `lxml` is fairly long to install (especially on Raspberry Pi, as
 C code needs to be compiled). If possible on your distribution, try installing
@@ -353,7 +353,7 @@ Using cache and passing arguments:
 ```python
 >>> import morss
 >>> url = 'http://feeds.bbci.co.uk/news/rss.xml'
->>> cache = '/tmp/morss-cache.db' # sqlite cache location
+>>> cache = '/tmp/morss-cache' # diskcache cache location
 >>> options = {'csv':True}
 >>> xml_string = morss.process(url, cache, options)
 >>> xml_string[:50]
@@ -367,11 +367,10 @@ under the hood.
 Doing it step-by-step:
 
 ```python
-import morss, morss.crawler
+import morss
 
 url = 'http://newspaper.example/feed.xml'
 options = morss.Options(csv=True) # arguments
-morss.crawler.sqlite_default = '/tmp/morss-cache.db' # sqlite cache location
 
 url, rss = morss.FeedFetch(url, options) # this only grabs the RSS feed
 rss = morss.FeedGather(rss, url, options) # this fills the feed and cleans it up

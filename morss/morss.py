@@ -428,7 +428,7 @@ def process(url, cache=None, options=None):
     options = Options(options)
 
     if cache:
-        caching.default_cache = caching.SQLiteCache(cache)
+        caching.default_cache = caching.DiskCacheHandler(cache)
 
     url, rss = FeedFetch(url, options)
     rss = FeedGather(rss, url, options)

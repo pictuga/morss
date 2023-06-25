@@ -104,20 +104,7 @@ class DiskCacheHandler(BaseCache):
 
 
 if 'CACHE' in os.environ:
-    if os.environ['CACHE'] == 'mysql':
-        default_cache = MySQLCacheHandler(
-            user = os.getenv('MYSQL_USER'),
-            password = os.getenv('MYSQL_PWD'),
-            database = os.getenv('MYSQL_DB'),
-            host = os.getenv('MYSQL_HOST', 'localhost')
-        )
-
-    elif os.environ['CACHE'] == 'sqlite':
-        default_cache = SQLiteCache(
-            os.getenv('SQLITE_PATH', ':memory:')
-        )
-
-    elif os.environ['CACHE'] == 'redis':
+    if os.environ['CACHE'] == 'redis':
         default_cache = RedisCacheHandler(
             host = os.getenv('REDIS_HOST', 'localhost'),
             port = int(os.getenv('REDIS_PORT', 6379)),
