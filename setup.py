@@ -3,11 +3,33 @@ from glob import glob
 
 from setuptools import setup
 
+
+def get_version():
+    with open('morss/__init__.py', 'r+') as file:
+        lines = file.readlines()
+
+        # look for hard coded version number
+        for i in range(len(lines)):
+            if lines[i].startswith('__version__'):
+                version = lines[i].split('"')[1]
+                break
+
+        # create (& save) one if none found
+        if version == '':
+            version = datetime.now().strftime('%Y%m%d.%H%M')
+            lines[i] = '__version__ = "' + version + '"\n'
+
+            file.seek(0)
+            file.writelines(lines)
+
+        # return version number
+        return version
+
 package_name = 'morss'
 
 setup(
     name = package_name,
-    version = datetime.now().strftime('%Y%m%d.%H%M'),
+    version = get_version(),
     description = 'Get full-text RSS feeds',
     long_description = open('README.md').read(),
     long_description_content_type = 'text/markdown',
